@@ -1,0 +1,11 @@
+{
+  "name": "healthops-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HealthOps Cloud-Native Healthcare Management Platform",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint"
+  }
+}
