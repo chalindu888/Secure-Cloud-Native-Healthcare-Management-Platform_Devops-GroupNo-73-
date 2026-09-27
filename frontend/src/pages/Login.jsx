@@ -24,25 +24,22 @@ const Login = () => {
     else navigate('/patient');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
-    if (!email) {
-      setError('Please enter your email address.');
-      return;
-    }
+    const res = await login(email, password);
 
-    setIsLoading(true);
-    setTimeout(() => {
-      const res = login(email, password);
-      setIsLoading(false);
-      if (res.success) {
-        redirectAfterLogin(res.user.role);
+    if (res.success) {
+      if (res.user.role === 'doctor') {
+        navigate('/doctor');
+      } else if (res.user.role === 'admin') {
+        navigate('/admin');
       } else {
-        setError('Invalid credentials.');
+        navigate('/patient');
       }
-    }, 300);
+    } else {
+      console.log(res.message);
+    }
   };
 
   const handleQuickDemo = (role) => {

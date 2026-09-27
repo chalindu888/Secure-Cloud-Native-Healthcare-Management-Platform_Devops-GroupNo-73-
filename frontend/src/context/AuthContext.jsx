@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
+const API_URL = 'http://localhost:5000';
+
 export const DEMO_USERS = {
   patient: {
     id: 'usr_pat_1',
@@ -16,6 +18,7 @@ export const DEMO_USERS = {
     dateOfBirth: '1990-05-14',
     address: '42 Health St, Boston, MA'
   },
+
   doctor: {
     id: 'usr_doc_1',
     name: 'Dr. Sarah Alistair',
@@ -29,6 +32,7 @@ export const DEMO_USERS = {
     consultationFee: 120,
     phone: '+1 (555) 789-0123'
   },
+
   admin: {
     id: 'usr_adm_1',
     name: 'Alex Rivera (DevSecOps Lead)',
@@ -41,8 +45,11 @@ export const DEMO_USERS = {
 };
 
 export const AuthProvider = ({ children }) => {
+
+  // Start logged out unless a real login was previously saved
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('healthops_user');
+
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -50,14 +57,15 @@ export const AuthProvider = ({ children }) => {
         return null;
       }
     }
-    // Default to demo patient for smooth out-of-the-box experience
-    return DEMO_USERS.patient;
+
+    return null;
   });
 
   const [token, setToken] = useState(() => {
-    return localStorage.getItem('healthops_token') || 'jwt_mock_token_patient_123';
+    return localStorage.getItem('healthops_token') || null;
   });
 
+  // Save user in localStorage
   useEffect(() => {
     if (user) {
       localStorage.setItem('healthops_user', JSON.stringify(user));
@@ -66,6 +74,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
+  // Save token in localStorage
   useEffect(() => {
     if (token) {
       localStorage.setItem('healthops_token', token);
@@ -74,57 +83,117 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  const login = (email, _password) => {
-    // Check demo credentials
-    if (email === 'doctor@healthops.io' || email.includes('doc')) {
-      const u = DEMO_USERS.doctor;
-      setUser(u);
-      setToken(u.token);
-      return { success: true, user: u };
+
+  // REAL LOGIN
+  const login = async (email, password) => {
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          message: data.message || 'Login failed'
+        };
+      }
+
+      // Convert backend field names to the names
+      // your existing frontend uses
+      const loggedInUser = {
+        ...data.user,
+        bloodGroup: data.user.blood_group,
+        specialty: data.user.specialty,
+        license: data.user.license
+      };
+
+      setUser(loggedInUser);
+      setToken(data.token);
+
+      return {
+        success: true,
+        user: loggedInUser,
+        token: data.token
+      };
+
+    } catch (error) {
+      console.error('Login error:', error);
+
+      return {
+        success: false,
+        message: 'Cannot connect to the backend server'
+      };
     }
-    if (email === 'admin@healthops.io' || email.includes('adm')) {
-      const u = DEMO_USERS.admin;
-      setUser(u);
-      setToken(u.token);
-      return { success: true, user: u };
-    }
-    // Default to patient
-    const u = {
-      ...DEMO_USERS.patient,
-      email: email || 'patient@healthops.io',
-      name: email ? email.split('@')[0] : 'Johnathan Doe'
-    };
-    setUser(u);
-    setToken(u.token);
-    return { success: true, user: u };
   };
 
+
+  // Temporary demo login
+  // We can remove this later when the real accounts are ready
   const loginAs = (role) => {
     if (DEMO_USERS[role]) {
       const u = DEMO_USERS[role];
+
       setUser(u);
       setToken(u.token);
+
       return u;
     }
   };
 
-  const register = (data) => {
-    const newUser = {
-      id: `usr_${Date.now()}`,
-      name: data.name,
-      email: data.email,
-      role: data.role || 'patient',
-      token: `jwt_mock_${Date.now()}`,
-      phone: data.phone || '',
-      bloodGroup: data.bloodGroup || 'A+',
-      allergies: data.allergies || 'None',
-      specialty: data.specialty || 'General Practice',
-      department: data.department || 'General Medicine'
-    };
-    setUser(newUser);
-    setToken(newUser.token);
-    return { success: true, user: newUser };
+
+  // Registration will be connected to the backend next
+  const register = async (data) => {
+    try {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          phone: data.phone,
+          role: data.role,
+          blood_group: data.bloodGroup,
+          specialty: data.specialty,
+          license: data.license
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          message: result.message || 'Registration failed'
+        };
+      }
+
+      return {
+        success: true,
+        user: result.user
+      };
+
+    } catch (error) {
+      console.error('Registration error:', error);
+
+      return {
+        success: false,
+        message: 'Cannot connect to the backend server'
+      };
+    }
   };
+
 
   const updateProfile = (updatedData) => {
     setUser((prev) => {
@@ -133,12 +202,15 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+
   const logout = () => {
     setUser(null);
     setToken(null);
+
     localStorage.removeItem('healthops_user');
     localStorage.removeItem('healthops_token');
   };
+
 
   return (
     <AuthContext.Provider
@@ -159,10 +231,13 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
+
   return context;
 };

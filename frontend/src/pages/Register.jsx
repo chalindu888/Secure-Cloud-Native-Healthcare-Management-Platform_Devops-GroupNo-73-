@@ -25,7 +25,7 @@ const Register = () => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -35,16 +35,23 @@ const Register = () => {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      const res = register({ ...formData, role });
-      setIsLoading(false);
-      if (res.success) {
-        if (role === 'doctor') navigate('/doctor');
-        else navigate('/patient');
+
+    const res = await register({
+      ...formData,
+      role
+    });
+
+    setIsLoading(false);
+
+    if (res.success) {
+      if (role === 'doctor') {
+        navigate('/doctor');
       } else {
-        setError('Failed to create account.');
+        navigate('/patient');
       }
-    }, 300);
+    } else {
+      setError(res.message || 'Failed to create account.');
+    }
   };
 
   return (
