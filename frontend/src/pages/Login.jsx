@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Activity, Lock, Mail, ArrowRight, UserCheck, Stethoscope, ShieldAlert } from 'lucide-react';
+import { Activity, Lock, Mail, ArrowRight, UserCheck, Stethoscope, ShieldAlert, Eye, EyeOff, Zap } from 'lucide-react';
 
 const Login = () => {
   const { login, loginAs } = useAuth();
@@ -10,15 +10,13 @@ const Login = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const redirectAfterLogin = (role) => {
     const from = location.state?.from?.pathname;
-    if (from && from !== '/login') {
-      navigate(from, { replace: true });
-      return;
-    }
+    if (from && from !== '/login') { navigate(from, { replace: true }); return; }
     if (role === 'doctor') navigate('/doctor');
     else if (role === 'admin') navigate('/admin');
     else navigate('/patient');
@@ -27,22 +25,14 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
-
-    if (!email) {
-      setError('Please enter your email address.');
-      return;
-    }
-
+    if (!email) { setError('Please enter your email address.'); return; }
     setIsLoading(true);
     setTimeout(() => {
       const res = login(email, password);
       setIsLoading(false);
-      if (res.success) {
-        redirectAfterLogin(res.user.role);
-      } else {
-        setError('Invalid credentials.');
-      }
-    }, 300);
+      if (res.success) redirectAfterLogin(res.user.role);
+      else setError('Invalid credentials. Use the demo buttons below to try the app!');
+    }, 400);
   };
 
   const handleQuickDemo = (role) => {
@@ -50,130 +40,223 @@ const Login = () => {
     redirectAfterLogin(user.role);
   };
 
+  const demoButtons = [
+    { role: 'patient', label: 'Patient', icon: UserCheck, color: '#a5b4fc', bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.35)', hoverBg: 'rgba(99,102,241,0.28)' },
+    { role: 'doctor', label: 'Doctor', icon: Stethoscope, color: '#67e8f9', bg: 'rgba(6,182,212,0.15)', border: 'rgba(6,182,212,0.35)', hoverBg: 'rgba(6,182,212,0.28)' },
+    { role: 'admin', label: 'Admin', icon: ShieldAlert, color: '#6ee7b7', bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.35)', hoverBg: 'rgba(16,185,129,0.28)' },
+  ];
+
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full space-y-6">
+    <div
+      style={{
+        minHeight: '90vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '3rem 1rem',
+        position: 'relative',
+      }}
+    >
+      {/* Background Orbs */}
+      <div style={{ position: 'absolute', top: '10%', right: '15%', width: '350px', height: '350px', background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '10%', left: '10%', width: '280px', height: '280px', background: 'radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+
+      <div className="animate-fade-up w-full" style={{ maxWidth: '420px' }}>
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30">
-            <Activity size={26} />
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: '56px', height: '56px', borderRadius: '1rem',
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              boxShadow: '0 8px 30px rgba(99,102,241,0.45)',
+              marginBottom: '1.25rem',
+            }}
+          >
+            <Activity size={28} color="white" strokeWidth={2.5} />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Sign in to HealthOps</h2>
-          <p className="text-xs text-slate-500">
-            Secure cloud portal for patients, doctors, and system administrators
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: '#f1f5f9', marginBottom: '0.5rem' }}>
+            Welcome Back
+          </h1>
+          <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
+            Sign in to your HealthOps account to continue
           </p>
         </div>
 
-        {/* Demo Fast Login Launcher */}
-        <div className="bg-blue-50/70 border border-blue-200 rounded-2xl p-4 space-y-2.5">
-          <p className="text-[11px] font-bold text-blue-900 uppercase tracking-wider text-center">
+        {/* Demo Quick Login */}
+        <div
+          className="animate-fade-up-1"
+          style={{
+            padding: '1.25rem',
+            borderRadius: '1rem',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            marginBottom: '1.25rem',
+          }}
+        >
+          <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#475569', marginBottom: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Zap size={12} style={{ color: '#fbbf24' }} />
             ⚡ 1-Click Evaluator Demo Login
           </p>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('patient')}
-              className="py-2 px-2 bg-white border border-blue-200 rounded-xl text-blue-700 text-xs font-bold hover:bg-blue-600 hover:text-white transition shadow-2xs flex flex-col items-center gap-1"
-            >
-              <UserCheck size={16} />
-              <span>Patient</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('doctor')}
-              className="py-2 px-2 bg-white border border-blue-200 rounded-xl text-indigo-700 text-xs font-bold hover:bg-indigo-600 hover:text-white transition shadow-2xs flex flex-col items-center gap-1"
-            >
-              <Stethoscope size={16} />
-              <span>Doctor</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('admin')}
-              className="py-2 px-2 bg-white border border-blue-200 rounded-xl text-emerald-700 text-xs font-bold hover:bg-emerald-600 hover:text-white transition shadow-2xs flex flex-col items-center gap-1"
-            >
-              <ShieldAlert size={16} />
-              <span>Admin</span>
-            </button>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.625rem' }}>
+            {demoButtons.map(({ role, label, icon: Icon, color, bg, border, hoverBg }) => (
+              <button
+                key={role}
+                type="button"
+                onClick={() => handleQuickDemo(role)}
+                className="btn"
+                style={{
+                  flexDirection: 'column', gap: '0.375rem',
+                  padding: '0.75rem 0.5rem',
+                  background: bg, color, border: `1px solid ${border}`,
+                  minHeight: 'auto', borderRadius: '0.75rem',
+                  fontSize: '0.75rem', fontWeight: 700,
+                  transition: 'all 200ms ease',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = hoverBg; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = bg; e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <Icon size={18} />
+                {label}
+              </button>
+            ))}
           </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+          <span style={{ fontSize: '0.7rem', color: '#475569', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>or sign in with credentials</span>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
         </div>
 
         {/* Login Card */}
-        <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xl space-y-6">
+        <div
+          className="animate-fade-up-2 glass-card-strong"
+          style={{ padding: '2rem' }}
+        >
+          {/* Error Alert */}
           {error && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
-              {error}
+            <div style={{
+              padding: '0.875rem 1rem', borderRadius: '0.75rem', marginBottom: '1.25rem',
+              background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
+              color: '#fca5a5', fontSize: '0.8rem', fontWeight: 600,
+            }}>
+              ⚠️ {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Email */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: '0.5rem' }}>
                 Email Address
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Mail size={16} />
-                </div>
+              <div style={{ position: 'relative' }}>
+                <Mail size={16} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#475569', pointerEvents: 'none' }} />
                 <input
+                  id="login-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="patient@healthops.io"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="input-field"
+                  style={{ paddingLeft: '2.75rem' }}
                   required
                 />
               </div>
             </div>
 
+            {/* Password */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8' }}>
                   Password
                 </label>
-                <span className="text-xs text-blue-600 hover:underline cursor-pointer">Forgot?</span>
+                <span style={{ fontSize: '0.75rem', color: '#818cf8', cursor: 'pointer', fontWeight: 600 }}>Forgot?</span>
               </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock size={16} />
-                </div>
+              <div style={{ position: 'relative' }}>
+                <Lock size={16} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#475569', pointerEvents: 'none' }} />
                 <input
-                  type="password"
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="input-field"
+                  style={{ paddingLeft: '2.75rem', paddingRight: '2.75rem' }}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: '0' }}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-600 pt-1">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                <span>Remember me</span>
+            {/* Remember + JWT badge */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.8rem', color: '#94a3b8' }}>
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  style={{ accentColor: '#6366f1', width: '14px', height: '14px' }}
+                />
+                Remember me
               </label>
-              <span className="text-[11px] text-slate-400">Protected by JWT</span>
+              <span
+                style={{
+                  fontSize: '0.65rem', fontWeight: 700, padding: '0.25rem 0.625rem',
+                  borderRadius: '999px', background: 'rgba(16,185,129,0.12)',
+                  color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.25)',
+                  textTransform: 'uppercase', letterSpacing: '0.05em',
+                }}
+              >
+                🔒 Protected by JWT
+              </span>
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
+              id="login-submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-md shadow-blue-500/25 transition flex items-center justify-center gap-2 disabled:opacity-50"
+              className="btn btn-primary w-full"
+              style={{ fontSize: '0.95rem', padding: '0.875rem' }}
             >
-              <span>{isLoading ? 'Authenticating...' : 'Sign In'}</span>
-              <ArrowRight size={16} />
+              {isLoading ? (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
+                  Authenticating...
+                </span>
+              ) : (
+                <>
+                  Sign In to HealthOps
+                  <ArrowRight size={17} />
+                </>
+              )}
             </button>
           </form>
 
-          <div className="text-center pt-2 border-t border-slate-100">
-            <p className="text-xs text-slate-500">
+          {/* Footer */}
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.07)', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
               Don't have an account?{' '}
-              <Link to="/register" className="font-bold text-blue-600 hover:underline">
-                Create an account
+              <Link to="/register" style={{ color: '#818cf8', fontWeight: 700 }}>
+                Create an account →
               </Link>
             </p>
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

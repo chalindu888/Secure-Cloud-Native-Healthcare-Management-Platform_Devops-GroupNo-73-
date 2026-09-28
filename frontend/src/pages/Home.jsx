@@ -2,18 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { 
-  ShieldCheck, 
-  Calendar, 
-  Users, 
-  Activity, 
-  CheckCircle2, 
-  ArrowRight, 
-  HeartPulse, 
-  Server, 
-  Stethoscope, 
-  Sparkles
-} from 'lucide-react';
+import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, HeartPulse, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp } from 'lucide-react';
 
 const Home = () => {
   const { loginAs, isAuthenticated, role } = useAuth();
@@ -27,284 +16,260 @@ const Home = () => {
     if (demoRole === 'admin') navigate('/admin');
   };
 
+  const stats = [
+    { value: '5+', label: 'Board Specialists', sub: 'Cardiology, Neuro, Derm', color: 'var(--c-primary)' },
+    { value: '100%', label: 'RBAC Protected', sub: 'JWT zero-trust auth', color: 'var(--c-cyan)' },
+    { value: '< 8 min', label: 'MTTR Recovery', sub: 'Automated GitOps healing', color: 'var(--c-emerald)' },
+    { value: '0 CVEs', label: 'Security Hardened', sub: 'Trivy container scanning', color: 'var(--c-amber)' },
+  ];
+
+  const features = [
+    {
+      icon: Calendar,
+      title: 'For Patients',
+      desc: 'Explore specialists, filter by specialty, book convenient appointment slots, track consultation status, and manage your health journey.',
+      items: ['Real-time appointment scheduling', 'Digital medical history & profile', 'Consultation notes & prescriptions'],
+      color: 'var(--c-primary-light)',
+      bg: 'var(--c-primary-pale)',
+      border: 'var(--c-primary-border)',
+      glow: 'rgba(99,102,241,0.15)',
+    },
+    {
+      icon: Stethoscope,
+      title: 'For Doctors',
+      desc: 'Organize daily consultation schedules, review incoming patient requests, write clinical diagnoses, and manage your availability.',
+      items: ['Daily consultation queue', 'Accept, reject, or complete requests', 'Flexible weekly schedule planner'],
+      color: 'var(--c-cyan)',
+      bg: 'var(--c-cyan-pale)',
+      border: 'rgba(8,145,178,0.2)',
+      glow: 'rgba(8,145,178,0.15)',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'For Administrators',
+      desc: 'Comprehensive role management, user account control, security audit trails, and live Cloud-Native DevSecOps observability dashboards.',
+      items: ['User and role administration', 'Immutable audit trail logs', 'Kubernetes & CI/CD telemetry'],
+      color: 'var(--c-emerald)',
+      bg: 'var(--c-emerald-pale)',
+      border: 'var(--c-emerald-border)',
+      glow: 'rgba(5,150,105,0.15)',
+    },
+  ];
+
+  const techPillars = [
+    { icon: Server, label: 'Kubernetes', sub: 'High Availability' },
+    { icon: Lock, label: 'Zero Trust', sub: 'JWT RBAC' },
+    { icon: Globe, label: 'CI/CD', sub: 'GitHub Actions' },
+    { icon: Activity, label: 'Monitoring', sub: 'Prometheus' },
+  ];
+
   return (
-    <div className="space-y-16 pb-16">
-      {/* Hero Section */}
-      <section className="healthops-grid relative overflow-hidden bg-gradient-to-br from-cyan-50 via-white to-slate-50 pt-16 pb-20 border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+    <div style={{ position: 'relative' }}>
+      {/* ================================================================
+          HERO SECTION
+      ================================================================ */}
+      <section style={{ minHeight: '92vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden', paddingTop: '4rem', paddingBottom: '6rem' }}>
+        <div className="page-wrapper" style={{ padding: 0 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
             
-            <div className="rise-in lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-blue-800 text-xs font-semibold">
-                <Sparkles size={14} className="text-blue-600" />
-                <span>Next-Gen Healthcare Management & DevSecOps Platform</span>
+            {/* Left: Text Content */}
+            <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                <span className="badge badge-primary">
+                  <Sparkles size={12} />
+                  Next-Gen Healthcare DevSecOps Platform
+                </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
-                Intelligent Care Delivery, <br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700">
-                  Cloud-Native Security.
-                </span>
-              </h1>
+              <div>
+                <h1 className="page-title" style={{ fontSize: 'clamp(3rem, 5vw, 4.5rem)', lineHeight: 1.1, marginBottom: '1.5rem' }}>
+                  Intelligent Care<br />
+                  Delivery, <span style={{ color: 'var(--c-primary)' }}>Cloud-Native</span><br />
+                  Security.
+                </h1>
 
-              <p className="text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                HealthOps bridges patients, clinical specialists, and hospital administration on a containerized, 
-                audited microservice architecture with automated CI/CD and zero-trust RBAC.
-              </p>
+                <p className="page-subtitle" style={{ fontSize: '1.1rem', maxWidth: '520px' }}>
+                  HealthOps bridges patients, clinical specialists, and hospital administration on a
+                  containerized, audited microservice architecture with automated CI/CD and zero-trust RBAC.
+                </p>
+              </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                <Link
-                  to={isAuthenticated ? (role === 'doctor' ? '/doctor' : role === 'admin' ? '/admin' : '/patient/book') : '/register'}
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-blue-600 text-white font-semibold shadow-lg shadow-blue-500/25 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-500/30 transition flex items-center justify-center gap-2"
-                >
-                  <span>Book an Appointment</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <Link to={isAuthenticated ? (role === 'doctor' ? '/doctor' : role === 'admin' ? '/admin' : '/patient/book') : '/register'} className="btn btn-primary btn-lg">
+                  Book an Appointment
                   <ArrowRight size={18} />
                 </Link>
-
-                <Link
-                  to="/doctors"
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-white text-slate-700 font-semibold border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-xs transition flex items-center justify-center gap-2"
-                >
-                  <Stethoscope size={18} className="text-blue-600" />
-                  <span>Browse Specialists</span>
+                <Link to="/doctors" className="btn btn-secondary btn-lg">
+                  <Stethoscope size={18} />
+                  Browse Specialists
                 </Link>
               </div>
 
-              {/* Quick Persona Demo Launcher Banner */}
-              <div className="pt-6 border-t border-slate-200/80">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2.5">
-                  Instant Evaluator Demo Access (1-Click Login):
+              {/* Demo Launch Banner */}
+              <div style={{ padding: '1.25rem', borderRadius: '1rem', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)', boxShadow: 'var(--shdw-sm)' }}>
+                <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-secondary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Zap size={14} style={{ color: 'var(--c-amber)' }} />
+                  ⚡ Instant Demo Access — 1-Click Role Login
                 </p>
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
-                  <button
-                    onClick={() => handleDemoAccess('patient')}
-                    className="px-4 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 font-semibold text-xs hover:bg-blue-100 transition flex items-center gap-1.5"
-                  >
-                    <Users size={14} />
-                    Launch as Patient
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <button onClick={() => handleDemoAccess('patient')} className="btn btn-sm" style={{ background: 'var(--c-primary-pale)', color: 'var(--c-primary)' }}>
+                    <Users size={14} /> Launch as Patient
                   </button>
-                  <button
-                    onClick={() => handleDemoAccess('doctor')}
-                    className="px-4 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold text-xs hover:bg-indigo-100 transition flex items-center gap-1.5"
-                  >
-                    <Stethoscope size={14} />
-                    Launch as Doctor
+                  <button onClick={() => handleDemoAccess('doctor')} className="btn btn-sm" style={{ background: 'var(--c-cyan-pale)', color: 'var(--c-cyan)' }}>
+                    <Stethoscope size={14} /> Launch as Doctor
                   </button>
-                  <button
-                    onClick={() => handleDemoAccess('admin')}
-                    className="px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold text-xs hover:bg-emerald-100 transition flex items-center gap-1.5"
-                  >
-                    <Server size={14} />
-                    Launch as Admin
+                  <button onClick={() => handleDemoAccess('admin')} className="btn btn-sm" style={{ background: 'var(--c-emerald-pale)', color: 'var(--c-emerald)' }}>
+                    <Server size={14} /> Launch as Admin
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Right Card Mockup */}
-            <div className="rise-in rise-in-delay-2 lg:col-span-5">
-              <div className="relative mx-auto max-w-md lg:max-w-none">
-                <div className="relative rounded-2xl bg-white/95 p-6 shadow-2xl shadow-cyan-900/10 border border-white space-y-5 backdrop-blur-sm">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
-                        <Activity size={20} />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-slate-900 text-sm">HealthOps Telehealth</h4>
-                        <p className="text-xs text-slate-400">Live Consultation Gateway</p>
-                      </div>
+            {/* Right: Dashboard Mockup Card */}
+            <div className="animate-fade-up-2 animate-float" style={{ maxWidth: '480px', margin: '0 auto' }}>
+              <div className="card-strong" style={{ padding: '1.75rem', position: 'relative' }}>
+                
+                {/* Card Header */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', paddingBottom: '1rem', borderBottom: '1px solid var(--bdr-subtle)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ width: '42px', height: '42px', borderRadius: '0.75rem', background: 'var(--c-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shdw-sm)' }}>
+                      <Activity size={20} color="white" />
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      Verified Secure
-                    </span>
-                  </div>
-
-                  {/* Active Patient Card */}
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
-                    <div className="flex justify-between text-xs text-slate-500">
-                      <span>Confirmed Appointment</span>
-                      <span className="font-semibold text-blue-600">Today, 10:30 AM</span>
-                    </div>
-                    <div className="font-bold text-slate-800 text-sm">Cardiology Clinical Review</div>
-                    <div className="text-xs text-slate-600 flex items-center gap-2">
-                      <span>Doctor: Dr. Sarah Alistair, MD</span>
-                      <span>•</span>
-                      <span>Suite 302</span>
+                    <div>
+                      <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--txt-primary)' }}>HealthOps Telehealth</h4>
+                      <p style={{ fontSize: '0.7rem', color: 'var(--txt-muted)' }}>Live Consultation Gateway</p>
                     </div>
                   </div>
+                  <span className="badge badge-success">
+                    <span className="badge-dot animate-pulse"></span> Verified Secure
+                  </span>
+                </div>
 
-                  {/* DevOps Metrics Mini-Widget */}
-                  <div className="grid grid-cols-2 gap-3 pt-1">
-                    <div className="p-3 rounded-xl bg-slate-900 text-white">
-                      <p className="text-[11px] text-slate-400 font-medium">Uptime Guarantee</p>
-                      <p className="text-lg font-bold text-emerald-400 mt-0.5">99.98%</p>
-                      <p className="text-[10px] text-slate-400">Kubernetes High-Availability</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-slate-900 text-white">
-                      <p className="text-[11px] text-slate-400 font-medium">Security Scan</p>
-                      <p className="text-lg font-bold text-blue-400 mt-0.5">0 CVEs</p>
-                      <p className="text-[10px] text-slate-400">Trivy Container Hardening</p>
-                    </div>
+                {/* Appointment Card */}
+                <div style={{ background: 'var(--bg-surface)', borderRadius: '0.875rem', padding: '1rem', border: '1px solid var(--bdr-subtle)', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--txt-muted)', fontWeight: 600 }}>Confirmed Appointment</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--c-primary)', fontWeight: 700 }}>Today, 10:30 AM</span>
                   </div>
+                  <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--txt-primary)', marginBottom: '0.375rem' }}>Cardiology Clinical Review</p>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--txt-secondary)' }}>Dr. Sarah Alistair, MD — Suite 302</p>
+                </div>
 
-                  <div className="pt-2">
-                    <button
-                      onClick={() => handleDemoAccess('patient')}
-                      className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center justify-center gap-2 transition"
-                    >
-                      <HeartPulse size={15} className="text-rose-400" />
-                      Test Patient Booking Flow
-                    </button>
+                {/* Metrics */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+                  <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'var(--c-primary-pale)', border: '1px solid var(--c-primary-border)' }}>
+                    <p style={{ fontSize: '0.65rem', color: 'var(--txt-secondary)', fontWeight: 600, marginBottom: '0.25rem' }}>Uptime Guarantee</p>
+                    <p style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--c-primary)' }}>99.98%</p>
+                    <p style={{ fontSize: '0.6rem', color: 'var(--txt-muted)' }}>Kubernetes HA</p>
+                  </div>
+                  <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'var(--c-cyan-pale)', border: '1px solid rgba(8,145,178,0.2)' }}>
+                    <p style={{ fontSize: '0.65rem', color: 'var(--txt-secondary)', fontWeight: 600, marginBottom: '0.25rem' }}>Security Scan</p>
+                    <p style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--c-cyan)' }}>0 CVEs</p>
+                    <p style={{ fontSize: '0.6rem', color: 'var(--txt-muted)' }}>Trivy Hardening</p>
                   </div>
                 </div>
+
+                <button onClick={() => handleDemoAccess('patient')} className="btn btn-primary w-full" style={{ fontSize: '0.8rem' }}>
+                  <HeartPulse size={15} style={{ color: '#fca5a5' }} /> Test Patient Booking Flow <ArrowRight size={15} />
+                </button>
               </div>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* KPI Stats Counter */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rise-in rise-in-delay-1 grid grid-cols-2 md:grid-cols-4 gap-6 bg-white p-8 rounded-2xl border border-slate-100 shadow-md">
-          <div className="text-center md:text-left space-y-1">
-            <p className="text-3xl font-extrabold text-blue-600">5+</p>
-            <p className="text-sm font-bold text-slate-800">Board Specialists</p>
-            <p className="text-xs text-slate-500">Cardiology, Neuro, Derm, Ped</p>
-          </div>
-          <div className="text-center md:text-left space-y-1">
-            <p className="text-3xl font-extrabold text-indigo-600">100%</p>
-            <p className="text-sm font-bold text-slate-800">RBAC Protected</p>
-            <p className="text-xs text-slate-500">JWT and strict authorization</p>
-          </div>
-          <div className="text-center md:text-left space-y-1">
-            <p className="text-3xl font-extrabold text-emerald-600">&lt; 8 min</p>
-            <p className="text-sm font-bold text-slate-800">MTTR Recovery</p>
-            <p className="text-xs text-slate-500">Automated GitOps healing</p>
-          </div>
-          <div className="text-center md:text-left space-y-1">
-            <p className="text-3xl font-extrabold text-slate-900">Zero Trust</p>
-            <p className="text-sm font-bold text-slate-800">Continuous Auditing</p>
-            <p className="text-xs text-slate-500">Real-time immutable log trail</p>
-          </div>
+      {/* ================================================================
+          STATS SECTION
+      ================================================================ */}
+      <section className="page-wrapper" style={{ paddingBottom: '3rem' }}>
+        <div className="animate-fade-up-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
+          {stats.map((stat, i) => (
+            <div key={i} className="stat-card" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1.5rem' }}>
+              <p style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 900, color: stat.color, marginBottom: '0.25rem' }}>{stat.value}</p>
+              <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--txt-primary)', marginBottom: '0.25rem' }}>{stat.label}</p>
+              <p style={{ fontSize: '0.7rem', color: 'var(--txt-secondary)' }}>{stat.sub}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Core Platform Pillars */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-blue-600">Architected for Reliability</h2>
-          <h3 className="text-3xl font-extrabold text-slate-900">Complete Care Lifecycle in One Platform</h3>
-          <p className="text-slate-600 text-sm leading-relaxed">
-            Engineered with modern engineering principles to ensure zero downtime, clinical accuracy, and patient privacy.
+      {/* ================================================================
+          CORE PLATFORM PILLARS
+      ================================================================ */}
+      <section className="page-wrapper" style={{ paddingTop: '0' }}>
+        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+          <span className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>Architected for Reliability</span>
+          <h2 className="page-title" style={{ marginBottom: '1rem' }}>Complete Care Lifecycle</h2>
+          <p className="page-subtitle" style={{ maxWidth: '560px', margin: '0 auto' }}>
+            Engineered with modern DevSecOps principles to ensure zero downtime, clinical accuracy, and patient privacy at scale.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Patient Card */}
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-900/5 transition space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-              <Calendar size={24} />
-            </div>
-            <h4 className="text-xl font-bold text-slate-900">For Patients</h4>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Explore medical specialists, filter by specialty, book convenient appointment slots, track consultation status, and download digital prescriptions.
-            </p>
-            <ul className="space-y-2 text-xs text-slate-600 pt-2">
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Real-time appointment scheduling</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Digital medical history & profile</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Consultation notes & prescriptions</li>
-            </ul>
-          </div>
-
-          {/* Doctor Card */}
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-900/5 transition space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
-              <Stethoscope size={24} />
-            </div>
-            <h4 className="text-xl font-bold text-slate-900">For Doctors</h4>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Organize daily consultation schedules, review incoming patient requests, write clinical diagnoses, and manage personal availability slots.
-            </p>
-            <ul className="space-y-2 text-xs text-slate-600 pt-2">
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Daily consultation queue</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Accept, reject, or complete requests</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Flexible weekly schedule planner</li>
-            </ul>
-          </div>
-
-          {/* Admin & DevOps Card */}
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-900/5 transition space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
-              <ShieldCheck size={24} />
-            </div>
-            <h4 className="text-xl font-bold text-slate-900">For Administrators</h4>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Comprehensive role management, user account status toggling, security audit trails, and live Cloud-Native DevSecOps observability dashboards.
-            </p>
-            <ul className="space-y-2 text-xs text-slate-600 pt-2">
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> User and role administration</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Comprehensive immutable audit trail</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Kubernetes & CI/CD telemetry</li>
-            </ul>
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+          {features.map((f, i) => {
+            const Icon = f.icon;
+            return (
+              <div key={i} className="card animate-fade-up" style={{ padding: '2rem', animationDelay: `${i * 100}ms` }}>
+                <div style={{ width: '52px', height: '52px', borderRadius: 'var(--r-md)', background: f.bg, border: `1px solid ${f.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+                  <Icon size={24} style={{ color: f.color }} />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--txt-primary)', marginBottom: '0.75rem' }}>{f.title}</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--txt-secondary)', lineHeight: 1.7, marginBottom: '1.25rem' }}>{f.desc}</p>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {f.items.map((item, j) => (
+                    <li key={j} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--txt-muted)' }}>
+                      <CheckCircle2 size={15} style={{ color: f.color, flexShrink: 0 }} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* Featured Doctors Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-blue-600">Our Medical Specialists</h2>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Featured Consulting Physicians</h3>
-          </div>
-          <Link
-            to="/doctors"
-            className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1.5"
-          >
-            <span>View All Doctors ({doctors.length})</span>
-            <ArrowRight size={16} />
-          </Link>
+      {/* ================================================================
+          TECH PILLARS STRIP
+      ================================================================ */}
+      <section className="page-wrapper" style={{ paddingTop: '0' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', padding: '1.75rem 2rem', borderRadius: 'var(--r-xl)', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)' }}>
+          <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-muted)', marginRight: '0.5rem' }}>Powered by:</p>
+          {techPillars.map((tp, i) => {
+            const TIcon = tp.icon;
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: 'var(--r-md)', background: 'var(--bg-surface)', border: '1px solid var(--bdr-subtle)' }}>
+                <TIcon size={16} style={{ color: 'var(--c-primary)' }} />
+                <div>
+                  <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--txt-primary)' }}>{tp.label}</p>
+                  <p style={{ fontSize: '0.65rem', color: 'var(--txt-muted)' }}>{tp.sub}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {doctors.slice(0, 3).map((doctor) => (
-            <div key={doctor.id} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:shadow-md transition flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-base">
-                    {doctor.name.split(' ')[1]?.slice(0, 2) || 'DR'}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900">{doctor.name}</h4>
-                    <p className="text-xs font-medium text-blue-600">{doctor.specialty}</p>
-                  </div>
-                </div>
-
-                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{doctor.bio}</p>
-                
-                <div className="pt-2 border-t border-slate-100 text-xs text-slate-500 flex justify-between items-center">
-                  <span>Fee: <strong className="text-slate-800">${doctor.consultationFee}</strong></span>
-                  <span className="flex items-center gap-1 text-amber-600 font-semibold">
-                    ★ {doctor.rating} ({doctor.reviewsCount})
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-5">
-                <Link
-                  to={`/patient/book?doctor=${doctor.id}`}
-                  className="w-full py-2.5 rounded-xl bg-blue-50 text-blue-700 font-semibold text-xs hover:bg-blue-600 hover:text-white transition flex items-center justify-center gap-1.5"
-                >
-                  <Calendar size={14} />
-                  Book Consultation
-                </Link>
-              </div>
-            </div>
-          ))}
+      {/* ================================================================
+          CTA SECTION
+      ================================================================ */}
+      <section className="page-wrapper" style={{ paddingTop: '0' }}>
+        <div style={{ padding: '4rem 2rem', borderRadius: 'var(--r-2xl)', textAlign: 'center', background: 'var(--c-primary-pale)', border: '1px solid var(--c-primary-border)', boxShadow: 'var(--shdw-md)' }}>
+          <span className="section-label" style={{ display: 'block', marginBottom: '1rem' }}>Ready to Transform Healthcare?</span>
+          <h2 className="page-title" style={{ marginBottom: '1.25rem' }}>Start Your Journey Today</h2>
+          <p className="page-subtitle" style={{ maxWidth: '500px', margin: '0 auto 2.5rem' }}>
+            Join HealthOps and experience the future of healthcare management — secure, intelligent, and cloud-native.
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/register" className="btn btn-primary btn-lg">
+              Create Free Account
+              <ArrowRight size={18} />
+            </Link>
+            <Link to="/doctors" className="btn btn-secondary btn-lg">
+              View Our Doctors
+            </Link>
+          </div>
         </div>
       </section>
     </div>

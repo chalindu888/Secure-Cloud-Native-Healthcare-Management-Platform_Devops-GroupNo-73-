@@ -36,7 +36,7 @@ function App() {
   return (
     <AuthProvider>
       <DataProvider>
-        <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-blue-500 selection:text-white">
+        <div className="min-h-screen flex flex-col" style={{ color: '#f1f5f9' }}>
           <Navbar />
           
           <main className="flex-1">
