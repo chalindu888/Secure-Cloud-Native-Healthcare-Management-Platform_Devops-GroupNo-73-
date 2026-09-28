@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -30,6 +30,17 @@ const Navbar = () => {
   };
 
   const isActive = (path) => location.pathname === path;
+
+  useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+    };
+
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, []);
+
+  const profilePath = role === 'patient' ? '/patient/profile' : role === 'doctor' ? '/doctor' : '/admin';
 
   return (
     <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
@@ -216,7 +227,7 @@ const Navbar = () => {
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <Link
-                  to={role === 'patient' ? '/patient/profile' : '#'}
+                  to={profilePath}
                   className="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-slate-100 transition"
                   title="View Profile"
                 >
@@ -259,6 +270,10 @@ const Navbar = () => {
           {/* Mobile menu button */}
           <div className="flex items-center lg:hidden">
             <button
+              type="button"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             >
@@ -270,7 +285,7 @@ const Navbar = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-3">
+        <div id="mobile-navigation" className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-3" role="dialog" aria-label="Mobile navigation">
           {/* Mobile Role Switcher */}
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Switch Active Persona</p>
@@ -309,14 +324,16 @@ const Navbar = () => {
             <Link
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-100"
+              aria-current={isActive('/') ? 'page' : undefined}
+              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/') ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-100'}`}
             >
               Home
             </Link>
             <Link
               to="/doctors"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-100"
+              aria-current={isActive('/doctors') ? 'page' : undefined}
+              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/doctors') ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-100'}`}
             >
               Find Doctors
             </Link>
@@ -416,13 +433,29 @@ const Navbar = () => {
 
           <div className="pt-4 border-t border-slate-200">
             {isAuthenticated ? (
-              <button
+              <div className="space-y-2">
+                <Link
+                  to={profilePath}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200"
+                >
+                  <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs border border-blue-200">
+                    {user?.name ? user.name.slice(0, 2).toUpperCase() : 'US'}
+                  </div>
+                  <div className="text-left leading-tight">
+                    <p className="text-sm font-bold text-slate-800">{user?.name || 'Account'}</p>
+                    <p className="text-xs text-slate-500 capitalize">Open {role} dashboard</p>
+                  </div>
+                </Link>
+                <button
+                  type="button"
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-rose-50 text-rose-700 font-semibold"
-              >
-                <LogOut size={18} />
-                Sign Out ({user?.name})
-              </button>
+                >
+                  <LogOut size={18} />
+                  Sign Out
+                </button>
+              </div>
             ) : (
               <div className="space-y-2">
                 <Link

@@ -30,11 +30,11 @@ const Home = () => {
   return (
     <div className="space-y-16 pb-16">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/80 via-white to-slate-50 pt-16 pb-20 border-b border-slate-100">
+      <section className="healthops-grid relative overflow-hidden bg-gradient-to-br from-cyan-50 via-white to-slate-50 pt-16 pb-20 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+            <div className="rise-in lg:col-span-7 space-y-6 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-blue-800 text-xs font-semibold">
                 <Sparkles size={14} className="text-blue-600" />
                 <span>Next-Gen Healthcare Management & DevSecOps Platform</span>
@@ -103,9 +103,9 @@ const Home = () => {
             </div>
 
             {/* Right Card Mockup */}
-            <div className="lg:col-span-5">
+            <div className="rise-in rise-in-delay-2 lg:col-span-5">
               <div className="relative mx-auto max-w-md lg:max-w-none">
-                <div className="relative rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 space-y-5">
+                <div className="relative rounded-2xl bg-white/95 p-6 shadow-2xl shadow-cyan-900/10 border border-white space-y-5 backdrop-blur-sm">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
@@ -169,7 +169,7 @@ const Home = () => {
 
       {/* KPI Stats Counter */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-white p-8 rounded-2xl border border-slate-100 shadow-md">
+        <div className="rise-in rise-in-delay-1 grid grid-cols-2 md:grid-cols-4 gap-6 bg-white p-8 rounded-2xl border border-slate-100 shadow-md">
           <div className="text-center md:text-left space-y-1">
             <p className="text-3xl font-extrabold text-blue-600">5+</p>
             <p className="text-sm font-bold text-slate-800">Board Specialists</p>
@@ -205,7 +205,7 @@ const Home = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Patient Card */}
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition space-y-4">
+          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-900/5 transition space-y-4">
             <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
               <Calendar size={24} />
             </div>
@@ -221,7 +221,7 @@ const Home = () => {
           </div>
 
           {/* Doctor Card */}
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition space-y-4">
+          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-900/5 transition space-y-4">
             <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
               <Stethoscope size={24} />
             </div>
@@ -237,7 +237,7 @@ const Home = () => {
           </div>
 
           {/* Admin & DevOps Card */}
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition space-y-4">
+          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-900/5 transition space-y-4">
             <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <ShieldCheck size={24} />
             </div>

@@ -1,5 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
+:root {
+  --healthops-ink: #17324d;
+  --healthops-muted: #60758a;
+  --healthops-surface: #ffffff;
+  --healthops-canvas: #f5faf9;
+  --healthops-teal: #0f766e;
+  --healthops-teal-soft: #e7f7f4;
+  --healthops-border: #dce9e7;
+}
 
 * {
   box-sizing: border-box;
@@ -7,21 +17,104 @@
 
 
 body {
-
-  margin:0;
-
-  font-family:
-  Arial,
-  Helvetica,
-  sans-serif;
-
-  background:#f8fafc;
-
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--healthops-ink);
+  background-color: var(--healthops-canvas);
+  background-image: linear-gradient(rgba(15, 118, 110, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 118, 110, 0.045) 1px, transparent 1px);
+  background-size: 36px 36px;
+  -webkit-font-smoothing: antialiased;
 }
 
 
 button {
+  cursor: pointer;
+  font: inherit;
+}
 
- cursor:pointer;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Space Grotesk', sans-serif;
+}
 
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.4);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--healthops-teal);
+  color: white;
+}
+
+input,
+select,
+textarea {
+  color: var(--healthops-ink);
+  background-color: var(--healthops-surface);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #91a3b2;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--healthops-teal) !important;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise-in {
+  animation: rise-in 650ms ease-out both;
+}
+
+.rise-in-delay-1 {
+  animation-delay: 100ms;
+}
+
+.rise-in-delay-2 {
+  animation-delay: 200ms;
+}
+
+.rise-in-delay-3 {
+  animation-delay: 300ms;
+}
+
+.healthops-grid {
+  background-image: linear-gradient(rgba(15, 118, 110, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 118, 110, 0.09) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
