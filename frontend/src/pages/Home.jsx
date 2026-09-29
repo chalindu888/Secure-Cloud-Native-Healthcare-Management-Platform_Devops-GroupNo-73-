@@ -2,7 +2,8 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, HeartPulse, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp } from 'lucide-react';
+import hospitalImage from '../assets/hospital.png';
+import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp } from 'lucide-react';
 
 const Home = () => {
   const { loginAs, isAuthenticated, role } = useAuth();
@@ -83,7 +84,7 @@ const Home = () => {
               </div>
 
               <div>
-                <h1 className="page-title" style={{ fontSize: 'clamp(3rem, 5vw, 4.5rem)', lineHeight: 1.1, marginBottom: '1.5rem' }}>
+                <h1 className="page-title" style={{ fontSize: 'clamp(2.25rem, 4vw, 3.5rem)', lineHeight: 1.1, marginBottom: '1.5rem' }}>
                   Intelligent Care<br />
                   Delivery, <span style={{ color: 'var(--c-primary)' }}>Cloud-Native</span><br />
                   Security.
@@ -126,53 +127,14 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Right: Dashboard Mockup Card */}
-            <div className="animate-fade-up-2 animate-float" style={{ maxWidth: '480px', margin: '0 auto' }}>
-              <div className="card-strong" style={{ padding: '1.75rem', position: 'relative' }}>
-                
-                {/* Card Header */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', paddingBottom: '1rem', borderBottom: '1px solid var(--bdr-subtle)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: '42px', height: '42px', borderRadius: '0.75rem', background: 'var(--c-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shdw-sm)' }}>
-                      <Activity size={20} color="white" />
-                    </div>
-                    <div>
-                      <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--txt-primary)' }}>HealthOps Telehealth</h4>
-                      <p style={{ fontSize: '0.7rem', color: 'var(--txt-muted)' }}>Live Consultation Gateway</p>
-                    </div>
-                  </div>
-                  <span className="badge badge-success">
-                    <span className="badge-dot animate-pulse"></span> Verified Secure
-                  </span>
-                </div>
-
-                {/* Appointment Card */}
-                <div style={{ background: 'var(--bg-surface)', borderRadius: '0.875rem', padding: '1rem', border: '1px solid var(--bdr-subtle)', marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--txt-muted)', fontWeight: 600 }}>Confirmed Appointment</span>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--c-primary)', fontWeight: 700 }}>Today, 10:30 AM</span>
-                  </div>
-                  <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--txt-primary)', marginBottom: '0.375rem' }}>Cardiology Clinical Review</p>
-                  <p style={{ fontSize: '0.7rem', color: 'var(--txt-secondary)' }}>Dr. Sarah Alistair, MD — Suite 302</p>
-                </div>
-
-                {/* Metrics */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'var(--c-primary-pale)', border: '1px solid var(--c-primary-border)' }}>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--txt-secondary)', fontWeight: 600, marginBottom: '0.25rem' }}>Uptime Guarantee</p>
-                    <p style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--c-primary)' }}>99.98%</p>
-                    <p style={{ fontSize: '0.6rem', color: 'var(--txt-muted)' }}>Kubernetes HA</p>
-                  </div>
-                  <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'var(--c-cyan-pale)', border: '1px solid rgba(8,145,178,0.2)' }}>
-                    <p style={{ fontSize: '0.65rem', color: 'var(--txt-secondary)', fontWeight: 600, marginBottom: '0.25rem' }}>Security Scan</p>
-                    <p style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--c-cyan)' }}>0 CVEs</p>
-                    <p style={{ fontSize: '0.6rem', color: 'var(--txt-muted)' }}>Trivy Hardening</p>
-                  </div>
-                </div>
-
-                <button onClick={() => handleDemoAccess('patient')} className="btn btn-primary w-full" style={{ fontSize: '0.8rem' }}>
-                  <HeartPulse size={15} style={{ color: '#fca5a5' }} /> Test Patient Booking Flow <ArrowRight size={15} />
-                </button>
+            {/* Right: Hospital Photo */}
+            <div className="animate-fade-up-2" style={{ maxWidth: '640px', width: '100%', margin: '0 auto' }}>
+              <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '16 / 9', borderRadius: '1rem', border: '1px solid var(--bdr-default)', boxShadow: 'var(--shdw-lg)' }}>
+                <img
+                  src={hospitalImage}
+                  alt="HealthOps Hospital exterior"
+                  style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+                />
               </div>
             </div>
           </div>
