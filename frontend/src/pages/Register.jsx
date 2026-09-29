@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Activity, User, Mail, Lock, Phone, Stethoscope, ArrowRight } from 'lucide-react';
+import { Activity, User, Mail, Lock, Phone, Stethoscope, ArrowRight, Eye, EyeOff, Droplets } from 'lucide-react';
 
 const Register = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const [role, setRole] = useState('patient');
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,12 +29,10 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
     if (!formData.name || !formData.email || !formData.password) {
       setError('Please fill in all required fields.');
       return;
     }
-
     setIsLoading(true);
 
     const res = await register({
@@ -54,221 +53,336 @@ const Register = () => {
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '0.75rem 1rem 0.75rem 2.75rem',
+    background: 'rgba(255,255,255,0.07)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: '0.75rem',
+    color: '#f1f5f9',
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '0.875rem',
+    outline: 'none',
+    transition: 'all 200ms ease',
+  };
+
+  const labelStyle = {
+    display: 'block',
+    fontSize: '0.7rem',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    color: '#94a3b8',
+    marginBottom: '0.5rem',
+  };
+
+  const iconWrapStyle = {
+    position: 'absolute',
+    left: '0.875rem',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: '#475569',
+    pointerEvents: 'none',
+  };
+  };
+
   return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
-      <div className="max-w-xl w-full space-y-6">
+    <div
+      style={{
+        minHeight: '90vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '3rem 1rem',
+        position: 'relative',
+      }}
+    >
+      {/* Background Orbs */}
+      <div style={{ position: 'absolute', top: '5%', left: '5%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '5%', right: '5%', width: '320px', height: '320px', background: 'radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+
+      <div className="animate-fade-up w-full" style={{ maxWidth: '560px' }}>
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30">
-            <Activity size={26} />
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: '56px', height: '56px', borderRadius: '1rem',
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              boxShadow: '0 8px 30px rgba(99,102,241,0.45)',
+              marginBottom: '1.25rem',
+            }}
+          >
+            <Activity size={28} color="white" strokeWidth={2.5} />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Create your HealthOps Account</h2>
-          <p className="text-xs text-slate-500">
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 900, color: '#f1f5f9', marginBottom: '0.5rem' }}>
+            Create Your Account
+          </h1>
+          <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
             Join the secure platform connecting patients, medical staff, and care operations
           </p>
         </div>
 
-        {/* Role Toggle Selector */}
-        <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-1 border border-slate-200">
-          <button
-            type="button"
-            onClick={() => setRole('patient')}
-            className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
-              role === 'patient'
-                ? 'bg-white text-blue-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <User size={16} />
-            <span>I am a Patient</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setRole('doctor')}
-            className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
-              role === 'doctor'
-                ? 'bg-white text-indigo-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Stethoscope size={16} />
-            <span>I am a Medical Doctor</span>
-          </button>
+        {/* Role Toggle */}
+        <div
+          className="animate-fade-up-1"
+          style={{
+            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem',
+            padding: '0.375rem',
+            borderRadius: '1rem',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            marginBottom: '1.25rem',
+          }}
+        >
+          {[
+            { r: 'patient', label: 'I am a Patient', icon: User, color: '#818cf8', activeBg: 'rgba(99,102,241,0.25)', activeBorder: 'rgba(99,102,241,0.5)' },
+            { r: 'doctor', label: 'I am a Doctor', icon: Stethoscope, color: '#67e8f9', activeBg: 'rgba(6,182,212,0.25)', activeBorder: 'rgba(6,182,212,0.5)' },
+          ].map(({ r, label, icon: Icon, color, activeBg, activeBorder }) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRole(r)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                padding: '0.875rem 1rem',
+                borderRadius: '0.75rem',
+                fontWeight: 700, fontSize: '0.85rem',
+                cursor: 'pointer', border: 'none',
+                background: role === r ? activeBg : 'transparent',
+                color: role === r ? color : '#64748b',
+                border: `1px solid ${role === r ? activeBorder : 'transparent'}`,
+                boxShadow: role === r ? `0 4px 20px ${color}25` : 'none',
+                transition: 'all 250ms ease',
+              }}
+            >
+              <Icon size={17} />
+              {label}
+            </button>
+          ))}
         </div>
 
         {/* Register Card */}
-        <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xl space-y-6">
+        <div className="animate-fade-up-2 glass-card-strong" style={{ padding: '2rem' }}>
           {error && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
-              {error}
+            <div style={{
+              padding: '0.875rem 1rem', borderRadius: '0.75rem', marginBottom: '1.25rem',
+              background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
+              color: '#fca5a5', fontSize: '0.8rem', fontWeight: 600,
+            }}>
+              ⚠️ {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Row: Name & Email */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+              {/* Full Name */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Full Name *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <User size={16} />
-                  </div>
+                <label style={labelStyle}>Full Name *</label>
+                <div style={{ position: 'relative' }}>
+                  <User size={15} style={iconWrapStyle} />
                   <input
                     type="text"
                     name="name"
+                    id="reg-name"
                     value={formData.name}
                     onChange={handleChange}
                     placeholder={role === 'doctor' ? 'Dr. Jane Smith' : 'John Doe'}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    style={inputStyle}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.6)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)'; e.target.style.boxShadow = 'none'; }}
                     required
                   />
                 </div>
               </div>
 
+              {/* Email */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Email Address *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Mail size={16} />
-                  </div>
+                <label style={labelStyle}>Email Address *</label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={15} style={iconWrapStyle} />
                   <input
                     type="email"
                     name="email"
+                    id="reg-email"
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="name@example.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    style={inputStyle}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.6)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)'; e.target.style.boxShadow = 'none'; }}
                     required
                   />
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Row: Password & Phone */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+              {/* Password */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Password *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Lock size={16} />
-                  </div>
+                <label style={labelStyle}>Password *</label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={15} style={iconWrapStyle} />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     name="password"
+                    id="reg-password"
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    style={{ ...inputStyle, paddingRight: '2.75rem' }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.6)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)'; e.target.style.boxShadow = 'none'; }}
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#475569', cursor: 'pointer' }}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
                 </div>
               </div>
 
+              {/* Phone */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Phone size={16} />
-                  </div>
+                <label style={labelStyle}>Phone Number</label>
+                <div style={{ position: 'relative' }}>
+                  <Phone size={15} style={iconWrapStyle} />
                   <input
                     type="tel"
                     name="phone"
+                    id="reg-phone"
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="+1 (555) 000-0000"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    style={inputStyle}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.6)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)'; e.target.style.boxShadow = 'none'; }}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Role specific fields */}
+            {/* Role-Specific Fields */}
             {role === 'patient' ? (
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Blood Group
-                </label>
-                <select
-                  name="bloodGroup"
-                  value={formData.bloodGroup}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                >
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                </select>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Medical Specialty
-                  </label>
+                <label style={labelStyle}>Blood Group</label>
+                <div style={{ position: 'relative' }}>
+                  <Droplets size={15} style={iconWrapStyle} />
                   <select
-                    name="specialty"
-                    value={formData.specialty}
+                    name="bloodGroup"
+                    id="reg-bloodGroup"
+                    value={formData.bloodGroup}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.6)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)'; e.target.style.boxShadow = 'none'; }}
                   >
-                    <option value="Cardiology">Cardiology</option>
-                    <option value="Neurology">Neurology</option>
-                    <option value="Dermatology">Dermatology</option>
-                    <option value="Pediatrics">Pediatrics</option>
-                    <option value="General Medicine">General Medicine</option>
-                    <option value="Orthopedics">Orthopedics</option>
+                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
+                      <option key={bg} value={bg}>{bg}</option>
+                    ))}
                   </select>
                 </div>
-
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    License / Credential ID
-                  </label>
+                  <label style={labelStyle}>Medical Specialty</label>
+                  <select
+                    name="specialty"
+                    id="reg-specialty"
+                    value={formData.specialty}
+                    onChange={handleChange}
+                    style={{ ...inputStyle, paddingLeft: '1rem', appearance: 'none', cursor: 'pointer' }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(6,182,212,0.6)'; e.target.style.boxShadow = '0 0 0 3px rgba(6,182,212,0.12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)'; e.target.style.boxShadow = 'none'; }}
+                  >
+                    {['Cardiology', 'Neurology', 'Dermatology', 'Pediatrics', 'General Medicine', 'Orthopedics'].map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>License / Credential ID</label>
                   <input
                     type="text"
                     name="license"
+                    id="reg-license"
                     value={formData.license}
                     onChange={handleChange}
                     placeholder="MED-12345"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ ...inputStyle, paddingLeft: '1rem' }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(6,182,212,0.6)'; e.target.style.boxShadow = '0 0 0 3px rgba(6,182,212,0.12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)'; e.target.style.boxShadow = 'none'; }}
                   />
                 </div>
               </div>
             )}
 
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-md shadow-blue-500/25 transition flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <span>{isLoading ? 'Creating Account...' : `Register as ${role === 'doctor' ? 'Doctor' : 'Patient'}`}</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
+            {/* Terms */}
+            <p style={{ fontSize: '0.72rem', color: '#475569', lineHeight: 1.6 }}>
+              By registering, you agree to our{' '}
+              <span style={{ color: '#818cf8', fontWeight: 600, cursor: 'pointer' }}>Terms of Service</span>{' '}
+              and{' '}
+              <span style={{ color: '#818cf8', fontWeight: 600, cursor: 'pointer' }}>Privacy Policy</span>.
+              Your data is protected with enterprise-grade encryption.
+            </p>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              id="register-submit"
+              disabled={isLoading}
+              className="btn"
+              style={{
+                background: role === 'doctor'
+                  ? 'linear-gradient(135deg, #0891b2, #06b6d4)'
+                  : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                color: 'white',
+                border: 'none',
+                fontSize: '0.95rem',
+                padding: '0.9rem',
+                boxShadow: role === 'doctor'
+                  ? '0 4px 20px rgba(6,182,212,0.4)'
+                  : '0 4px 20px rgba(99,102,241,0.4)',
+                width: '100%',
+              }}
+            >
+              {isLoading ? (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+                  <span style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
+                  Creating Account...
+                </span>
+              ) : (
+                <>
+                  {role === 'doctor' ? <Stethoscope size={17} /> : <User size={17} />}
+                  Register as {role === 'doctor' ? 'Doctor' : 'Patient'}
+                  <ArrowRight size={17} />
+                </>
+              )}
+            </button>
           </form>
 
-          <div className="text-center pt-2 border-t border-slate-100">
-            <p className="text-xs text-slate-500">
+          {/* Footer */}
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.07)', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
               Already have an account?{' '}
-              <Link to="/login" className="font-bold text-blue-600 hover:underline">
-                Sign In
+              <Link to="/login" style={{ color: '#818cf8', fontWeight: 700 }}>
+                Sign In →
               </Link>
             </p>
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        select option { background: #1e293b; color: #f1f5f9; }
+      `}</style>
     </div>
   );
 };

@@ -4,236 +4,261 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import StatusBadge from '../../components/StatusBadge';
 import { 
-  Calendar, 
-  Clock, 
-  User, 
-  PlusCircle, 
-  AlertCircle, 
-  CheckCircle2, 
-  ArrowRight, 
-  Activity,
-  Heart
+  Calendar, Clock, User, PlusCircle, AlertCircle,
+  CheckCircle2, ArrowRight, Activity, Heart, ChevronRight
 } from 'lucide-react';
 
 const PatientDashboard = () => {
   const { user } = useAuth();
   const { appointments, cancelAppointment } = useData();
 
-  // Filter appointments for this patient
   const patientAppointments = appointments.filter(
     (apt) => apt.patientId === user?.id || apt.patientEmail === user?.email
   );
-
   const upcomingAppointments = patientAppointments.filter(
     (apt) => apt.status === 'confirmed' || apt.status === 'pending'
   );
-
   const completedAppointments = patientAppointments.filter(
     (apt) => apt.status === 'completed'
   );
 
+  const stats = [
+    {
+      label: 'Total Appointments',
+      value: patientAppointments.length,
+      icon: Calendar,
+      color: '#818cf8',
+      bg: 'rgba(99,102,241,0.15)',
+      border: 'rgba(99,102,241,0.25)',
+    },
+    {
+      label: 'Upcoming / Pending',
+      value: upcomingAppointments.length,
+      icon: Clock,
+      color: '#fbbf24',
+      bg: 'rgba(251,191,36,0.15)',
+      border: 'rgba(251,191,36,0.25)',
+    },
+    {
+      label: 'Completed Visits',
+      value: completedAppointments.length,
+      icon: CheckCircle2,
+      color: '#34d399',
+      bg: 'rgba(52,211,153,0.15)',
+      border: 'rgba(52,211,153,0.25)',
+    },
+    {
+      label: 'Blood Group',
+      value: user?.bloodGroup || 'O+',
+      icon: Activity,
+      color: '#fb7185',
+      bg: 'rgba(251,113,133,0.15)',
+      border: 'rgba(251,113,133,0.25)',
+    },
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Welcome Hero Banner */}
-      <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/40 border border-blue-400/40 text-blue-100 text-xs font-semibold">
-            <Heart size={14} className="text-rose-300 fill-rose-300" />
-            <span>Patient Health Portal</span>
+    <div className="page-wrapper">
+      {/* ── Welcome Banner ── */}
+      <div className="hero-banner hero-patient animate-fade-up" style={{ marginBottom: '2rem' }}>
+        {/* Decorative glow */}
+        <div style={{
+          position: 'absolute', top: '-60px', right: '-60px',
+          width: '250px', height: '250px',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%)',
+          borderRadius: '50%', pointerEvents: 'none',
+        }} />
+
+        <div style={{ position: 'relative' }}>
+          <div className="badge badge-primary" style={{ marginBottom: '0.75rem', display: 'inline-flex' }}>
+            <Heart size={11} style={{ fill: '#fb7185', color: '#fb7185' }} />
+            Patient Health Portal
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Welcome back, {user?.name}!</h1>
-          <p className="text-blue-100 text-sm max-w-xl">
-            Track your consultations, view medical prescriptions, and schedule your next doctor appointment seamlessly.
+          <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 900, color: '#fff', marginBottom: '0.5rem' }}>
+            Welcome back, {user?.name}! 👋
+          </h1>
+          <p style={{ color: 'rgba(199,210,254,0.8)', fontSize: '0.9rem', maxWidth: '480px' }}>
+            Track your consultations, view prescriptions, and schedule your next appointment.
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <Link
-            to="/patient/book"
-            className="px-5 py-3 rounded-xl bg-white text-blue-700 font-bold text-sm shadow-md hover:bg-blue-50 transition flex items-center justify-center gap-2"
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', position: 'relative' }}>
+          <Link to="/patient/book" className="btn btn-primary btn-lg" style={{ background: 'white', color: '#4f46e5', border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#f0f0ff'}
+            onMouseLeave={e => e.currentTarget.style.background = 'white'}
           >
             <PlusCircle size={18} />
-            <span>Book New Appointment</span>
+            Book Appointment
           </Link>
-          <Link
-            to="/patient/profile"
-            className="px-5 py-3 rounded-xl bg-blue-800/60 hover:bg-blue-800 text-white font-semibold text-sm border border-blue-400/40 transition flex items-center justify-center gap-2"
-          >
-            <User size={18} />
-            <span>My Profile</span>
+          <Link to="/patient/profile" className="btn btn-secondary">
+            <User size={17} />
+            My Profile
           </Link>
         </div>
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <Calendar size={22} />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">Total Appointments</p>
-            <h3 className="text-2xl font-extrabold text-slate-800">{patientAppointments.length}</h3>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-            <Clock size={22} />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">Upcoming / Pending</p>
-            <h3 className="text-2xl font-extrabold text-slate-800">{upcomingAppointments.length}</h3>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <CheckCircle2 size={22} />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">Completed Visits</p>
-            <h3 className="text-2xl font-extrabold text-slate-800">{completedAppointments.length}</h3>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-            <Activity size={22} />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">Blood Group</p>
-            <h3 className="text-2xl font-extrabold text-slate-800">{user?.bloodGroup || 'O+'}</h3>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Upcoming Appointments */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">Upcoming Appointments</h2>
-              <p className="text-xs text-slate-500">Your scheduled and pending consultations</p>
+      {/* ── Stats Row ── */}
+      <div
+        className="animate-fade-up-1"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '1rem',
+          marginBottom: '2rem',
+        }}
+      >
+        {stats.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div key={i} className="stat-card">
+              <div className="stat-icon" style={{ background: s.bg, border: `1px solid ${s.border}` }}>
+                <Icon size={22} style={{ color: s.color }} />
+              </div>
+              <div>
+                <p className="stat-label">{s.label}</p>
+                <p className="stat-value" style={{ color: s.color }}>{s.value}</p>
+              </div>
             </div>
-            <Link
-              to="/patient/appointments"
-              className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
-            >
-              <span>View All</span>
-              <ArrowRight size={14} />
+          );
+        })}
+      </div>
+
+      {/* ── Main Content ── */}
+      <div
+        className="animate-fade-up-2"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '1.5rem',
+          alignItems: 'start',
+        }}
+      >
+        {/* Left: Upcoming Appointments */}
+        <div style={{ gridColumn: 'span 2', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f0f6fc', marginBottom: '0.2rem' }}>
+                Upcoming Appointments
+              </h2>
+              <p style={{ fontSize: '0.78rem', color: 'var(--txt-muted)' }}>Your scheduled and pending consultations</p>
+            </div>
+            <Link to="/patient/appointments" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: 700, color: '#818cf8' }}>
+              View All <ChevronRight size={14} />
             </Link>
           </div>
 
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
             {upcomingAppointments.length > 0 ? (
               upcomingAppointments.map((apt) => (
                 <div
                   key={apt.id}
-                  className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs hover:border-blue-200 transition space-y-3"
+                  className="card"
+                  style={{ padding: '1.25rem' }}
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-sm">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{
+                        width: '44px', height: '44px', borderRadius: '0.75rem',
+                        background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontWeight: 800, fontSize: '0.75rem', color: '#818cf8',
+                      }}>
                         {apt.doctorSpecialty?.slice(0, 2).toUpperCase() || 'DR'}
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-900 text-sm">{apt.doctorName}</h4>
-                        <p className="text-xs text-blue-600 font-medium">{apt.doctorSpecialty}</p>
+                        <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f0f6fc' }}>{apt.doctorName}</h4>
+                        <p style={{ fontSize: '0.75rem', color: '#818cf8', fontWeight: 600 }}>{apt.doctorSpecialty}</p>
                       </div>
                     </div>
                     <StatusBadge status={apt.status} />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} className="text-slate-400" />
-                      <span>Date: <strong className="text-slate-800">{apt.date}</strong></span>
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem',
+                    padding: '0.75rem', borderRadius: '0.625rem',
+                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+                    marginBottom: '0.875rem',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--txt-secondary)' }}>
+                      <Calendar size={14} style={{ color: 'var(--txt-muted)' }} />
+                      <span><strong style={{ color: '#f0f6fc' }}>{apt.date}</strong></span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock size={14} className="text-slate-400" />
-                      <span>Time: <strong className="text-slate-800">{apt.timeSlot}</strong></span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--txt-secondary)' }}>
+                      <Clock size={14} style={{ color: 'var(--txt-muted)' }} />
+                      <span><strong style={{ color: '#f0f6fc' }}>{apt.timeSlot}</strong></span>
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600">
-                    <strong className="text-slate-700">Reason:</strong> {apt.reason}
+                  <p style={{ fontSize: '0.78rem', color: 'var(--txt-secondary)', marginBottom: '0.875rem' }}>
+                    <span style={{ fontWeight: 600, color: '#8b949e' }}>Reason:</span> {apt.reason}
                   </p>
 
-                  <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                    {apt.status === 'pending' || apt.status === 'confirmed' ? (
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid var(--bdr-subtle)' }}>
+                    {(apt.status === 'pending' || apt.status === 'confirmed') && (
                       <button
                         onClick={() => cancelAppointment(apt.id, user?.email)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 transition"
+                        className="btn btn-sm"
+                        style={{ background: 'rgba(251,113,133,0.12)', color: '#fb7185', border: '1px solid rgba(251,113,133,0.3)' }}
                       >
-                        Cancel Appointment
+                        Cancel
                       </button>
-                    ) : null}
-                    <Link
-                      to="/patient/appointments"
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
-                    >
+                    )}
+                    <Link to="/patient/appointments" className="btn btn-secondary btn-sm">
                       View Details
                     </Link>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-3">
-                <Calendar size={36} className="text-slate-300 mx-auto" />
-                <h3 className="font-bold text-slate-700 text-sm">No upcoming appointments</h3>
-                <p className="text-xs text-slate-500">You don't have any appointments scheduled currently.</p>
-                <Link
-                  to="/patient/book"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition shadow-xs"
-                >
-                  <PlusCircle size={14} />
-                  <span>Book Consultation Now</span>
+              <div className="card empty-state">
+                <div className="empty-state-icon">
+                  <Calendar size={24} />
+                </div>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#f0f6fc' }}>No upcoming appointments</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--txt-muted)', maxWidth: '300px' }}>
+                  You don't have any consultations scheduled. Book one now!
+                </p>
+                <Link to="/patient/book" className="btn btn-primary btn-sm" style={{ marginTop: '0.5rem' }}>
+                  <PlusCircle size={15} />
+                  Book Consultation
                 </Link>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Column: Health Profile Snapshot */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900 text-sm">Medical Profile</h3>
-              <Link to="/patient/profile" className="text-xs font-bold text-blue-600 hover:underline">
-                Edit
-              </Link>
+        {/* Right: Profile Sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* Medical Profile Card */}
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--bdr-subtle)' }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#f0f6fc' }}>Medical Profile</h3>
+              <Link to="/patient/profile" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#818cf8' }}>Edit →</Link>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div>
-                <span className="text-slate-400 font-medium">Allergies & Sensitivities</span>
-                <p className="font-semibold text-slate-800 mt-0.5">{user?.allergies || 'None specified'}</p>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium">Emergency Contact</span>
-                <p className="font-semibold text-slate-800 mt-0.5">{user?.emergencyContact || 'Not recorded'}</p>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium">Phone</span>
-                <p className="font-semibold text-slate-800 mt-0.5">{user?.phone || '+1 (555) 000-0000'}</p>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium">Primary Email</span>
-                <p className="font-semibold text-slate-800 mt-0.5">{user?.email}</p>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+              {[
+                { label: 'Allergies', value: user?.allergies || 'None specified' },
+                { label: 'Emergency Contact', value: user?.emergencyContact || 'Not recorded' },
+                { label: 'Phone', value: user?.phone || '+1 (555) 000-0000' },
+                { label: 'Email', value: user?.email },
+              ].map(({ label, value }) => (
+                <div key={label}>
+                  <p style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--txt-muted)', marginBottom: '0.25rem' }}>{label}</p>
+                  <p style={{ fontSize: '0.82rem', fontWeight: 600, color: '#e6edf3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Quick Help / Instructions */}
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 space-y-3">
-            <div className="flex items-center gap-2 text-blue-800 font-bold text-xs">
-              <AlertCircle size={16} />
-              <span>DevSecOps Patient Privacy</span>
+          {/* Privacy Notice */}
+          <div className="alert alert-info" style={{ flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.8rem' }}>
+              <AlertCircle size={15} />
+              Privacy Protected
             </div>
-            <p className="text-xs text-blue-900/80 leading-relaxed">
-              All appointments and personal health information (PHI) are transmitted over TLS with JWT RBAC isolation.
+            <p style={{ fontSize: '0.75rem', lineHeight: 1.6, color: 'rgba(165,180,252,0.8)' }}>
+              All PHI is transmitted over TLS with JWT RBAC isolation — your health data is safe.
             </p>
           </div>
         </div>

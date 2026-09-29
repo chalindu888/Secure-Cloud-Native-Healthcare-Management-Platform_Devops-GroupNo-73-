@@ -32,90 +32,101 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Identity & Access Management</h1>
-          <p className="text-sm text-slate-600">
-            Control Role-Based Access (RBAC), provision medical credentials, and govern active accounts.
-          </p>
-        </div>
+    <div className="page-wrapper">
+      <div className="animate-fade-up" style={{ marginBottom: '2rem' }}>
+        <h1 className="page-title">Identity & Access Management</h1>
+        <p className="page-subtitle" style={{ maxWidth: '600px' }}>
+          Control Role-Based Access (RBAC), provision medical credentials, and govern active accounts securely.
+        </p>
       </div>
 
       {notification && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
-          <CheckCircle2 size={18} className="text-emerald-600" />
-          <span>{notification}</span>
+        <div className="alert alert-success animate-fade-in" style={{ marginBottom: '1.5rem' }}>
+          <CheckCircle2 size={18} />
+          {notification}
         </div>
       )}
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full md:w-auto overflow-x-auto text-xs">
+      <div className="card animate-fade-up-1" style={{ padding: '1rem 1.25rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
+          
+          {/* Role Filter */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.04)', padding: '0.35rem', borderRadius: 'var(--r-md)' }}>
             {['all', 'patient', 'doctor', 'admin'].map((role) => (
               <button
                 key={role}
                 onClick={() => setRoleFilter(role)}
-                className={`px-3 py-1.5 rounded-lg font-semibold capitalize whitespace-nowrap transition ${
-                  roleFilter === role
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+                style={{
+                  padding: '0.4rem 0.875rem', borderRadius: 'var(--r-sm)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'capitalize',
+                  background: roleFilter === role ? 'var(--c-primary-pale)' : 'transparent',
+                  color: roleFilter === role ? 'var(--c-primary-light)' : 'var(--txt-secondary)',
+                  border: `1px solid ${roleFilter === role ? 'var(--c-primary-border)' : 'transparent'}`,
+                  transition: 'all 200ms ease',
+                }}
               >
                 {role === 'all' ? 'All Roles' : `${role}s`}
               </button>
             ))}
           </div>
 
-          <div className="w-full md:w-80 relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-              <Search size={16} />
-            </div>
+          {/* Search */}
+          <div style={{ position: 'relative', flex: '1', minWidth: '250px', maxWidth: '350px' }}>
+            <Search size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--txt-muted)', pointerEvents: 'none' }} />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search user by name or email..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-field"
+              style={{ paddingLeft: '2.5rem' }}
             />
           </div>
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold">
+      <div className="card animate-fade-up-2" style={{ overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="data-table">
+            <thead style={{ background: 'rgba(255,255,255,0.02)' }}>
               <tr>
-                <th className="px-6 py-4">User</th>
-                <th className="px-6 py-4">Assigned Role (RBAC)</th>
-                <th className="px-6 py-4">Account Status</th>
-                <th className="px-6 py-4">Joined Date</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th>User</th>
+                <th>Assigned Role (RBAC)</th>
+                <th>Account Status</th>
+                <th>Joined Date</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {filteredUsers.map((u) => (
-                <tr key={u.id} className="hover:bg-slate-50/70 transition">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs uppercase border border-slate-200">
+                <tr key={u.id}>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                      <div style={{
+                        width: '36px', height: '36px', borderRadius: '50%',
+                        background: 'rgba(255,255,255,0.06)', border: '1px solid var(--bdr-subtle)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontWeight: 700, fontSize: '0.75rem', color: '#f0f6fc', textTransform: 'uppercase'
+                      }}>
                         {u.name.slice(0, 2)}
                       </div>
                       <div>
-                        <div className="font-bold text-slate-900 text-xs">{u.name}</div>
-                        <div className="text-slate-400 text-[11px]">{u.email}</div>
+                        <div style={{ fontWeight: 700, color: '#f0f6fc', fontSize: '0.85rem' }}>{u.name}</div>
+                        <div style={{ color: 'var(--txt-muted)', fontSize: '0.7rem' }}>{u.email}</div>
                       </div>
                     </div>
                   </td>
-
-                  <td className="px-6 py-4">
+                  
+                  <td>
                     <select
                       value={u.role}
                       onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 font-semibold text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 capitalize"
+                      style={{
+                        padding: '0.35rem 0.75rem', borderRadius: 'var(--r-sm)', fontSize: '0.75rem', fontWeight: 600,
+                        background: 'rgba(255,255,255,0.06)', border: '1px solid var(--bdr-default)', color: 'var(--txt-primary)',
+                        textTransform: 'capitalize', cursor: 'pointer', outline: 'none'
+                      }}
                     >
                       <option value="patient">Patient</option>
                       <option value="doctor">Doctor</option>
@@ -123,28 +134,33 @@ const UserManagement = () => {
                     </select>
                   </td>
 
-                  <td className="px-6 py-4">
+                  <td>
                     <StatusBadge status={u.status} />
                   </td>
 
-                  <td className="px-6 py-4 text-slate-500">
+                  <td style={{ fontSize: '0.8rem' }}>
                     {u.joinedDate || '2026-01-01'}
                   </td>
 
-                  <td className="px-6 py-4 text-right">
+                  <td style={{ textAlign: 'right' }}>
                     <button
                       onClick={() => handleToggleStatus(u.id, u.status)}
-                      className={`px-3 py-1.5 rounded-lg font-semibold text-xs transition ${
-                        u.status === 'active'
-                          ? 'text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200'
-                          : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200'
-                      }`}
+                      className={u.status === 'active' ? 'btn btn-sm btn-danger' : 'btn btn-sm btn-success'}
+                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.7rem' }}
                     >
                       {u.status === 'active' ? 'Suspend' : 'Reactivate'}
                     </button>
                   </td>
                 </tr>
               ))}
+              
+              {filteredUsers.length === 0 && (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>
+                    <p style={{ color: 'var(--txt-muted)', fontSize: '0.85rem' }}>No users found matching your search.</p>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
