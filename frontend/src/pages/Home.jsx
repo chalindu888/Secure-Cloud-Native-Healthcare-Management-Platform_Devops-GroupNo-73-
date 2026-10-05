@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import hospitalImage from '../assets/hospital.png';
-import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp } from 'lucide-react';
+import dialogLogo from '../assets/dialog-logo.png';
+import { ShieldCheck, Calendar, Users, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Star, TrendingUp } from 'lucide-react';
 
 const Home = () => {
   const { loginAs, isAuthenticated, role } = useAuth();
@@ -57,13 +58,6 @@ const Home = () => {
     },
   ];
 
-  const techPillars = [
-    { icon: Server, label: 'Kubernetes', sub: 'High Availability' },
-    { icon: Lock, label: 'Zero Trust', sub: 'JWT RBAC' },
-    { icon: Globe, label: 'CI/CD', sub: 'GitHub Actions' },
-    { icon: Activity, label: 'Monitoring', sub: 'Prometheus' },
-  ];
-
   return (
     <div style={{ position: 'relative' }}>
       {/* ================================================================
@@ -85,14 +79,14 @@ const Home = () => {
 
               <div>
                 <h1 className="page-title" style={{ fontSize: 'clamp(2.25rem, 4vw, 3.5rem)', lineHeight: 1.1, marginBottom: '1.5rem' }}>
-                  Intelligent Care<br />
-                  Delivery, <span style={{ color: 'var(--c-primary)' }}>Cloud-Native</span><br />
-                  Security.
+                  Welcome to <span style={{ color: 'var(--c-primary)' }}>HealthOps</span><br />
+                  Hospital, Your Partner<br />
+                  in Better Care.
                 </h1>
 
                 <p className="page-subtitle" style={{ fontSize: '1.1rem', maxWidth: '520px' }}>
-                  HealthOps bridges patients, clinical specialists, and hospital administration on a
-                  containerized, audited microservice architecture with automated CI/CD and zero-trust RBAC.
+                  HealthOps Hospital connects patients, doctors, and hospital teams through convenient
+                  appointments, specialist care, trusted medical support, and coordinated health services.
                 </p>
               </div>
 
@@ -193,23 +187,14 @@ const Home = () => {
       </section>
 
       {/* ================================================================
-          TECH PILLARS STRIP
+          PARTNER CREDIT
       ================================================================ */}
       <section className="page-wrapper" style={{ paddingTop: '0' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', padding: '1.75rem 2rem', borderRadius: 'var(--r-xl)', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)' }}>
-          <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-muted)', marginRight: '0.5rem' }}>Powered by:</p>
-          {techPillars.map((tp, i) => {
-            const TIcon = tp.icon;
-            return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: 'var(--r-md)', background: 'var(--bg-surface)', border: '1px solid var(--bdr-subtle)' }}>
-                <TIcon size={16} style={{ color: 'var(--c-primary)' }} />
-                <div>
-                  <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--txt-primary)' }}>{tp.label}</p>
-                  <p style={{ fontSize: '0.65rem', color: 'var(--txt-muted)' }}>{tp.sub}</p>
-                </div>
-              </div>
-            );
-          })}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '1.75rem 2rem', borderRadius: 'var(--r-xl)', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)' }}>
+          <p style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-muted)' }}>
+            Powered by
+          </p>
+          <img src={dialogLogo} alt="Dialog" style={{ display: 'block', width: '88px', height: '52px', objectFit: 'contain' }} />
         </div>
       </section>
 
