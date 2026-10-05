@@ -83,22 +83,12 @@ const Footer = () => {
                 </div>
                 <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#f9fafb' }}>HealthOps</span>
               </div>
+              <h4 style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#e5e7eb', marginBottom: '1rem' }}>
+                HealthOps Hospital
+              </h4>
               <p style={{ fontSize: '0.78rem', color: '#d1d5db', lineHeight: 1.8, maxWidth: '240px' }}>
-                Secure Cloud-Native Healthcare Management Platform with Automated DevSecOps, Role-Based Access Control, and Continuous Observability.
+                Compassionate, patient-centered care from experienced doctors and dedicated hospital staff.
               </p>
-              {/* Tech Badges */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginTop: '1rem' }}>
-                {['React', 'Docker', 'K8s', 'ArgoCD'].map(tech => (
-                  <span key={tech} style={{
-                    fontSize: '0.6rem', fontWeight: 700, padding: '0.2rem 0.5rem',
-                    borderRadius: '0.375rem', background: 'rgba(99,102,241,0.15)',
-                    color: '#c7d2fe', border: '1px solid rgba(165,180,252,0.35)',
-                    textTransform: 'uppercase', letterSpacing: '0.05em',
-                  }}>
-                    {tech}
-                  </span>
-                ))}
-              </div>
             </div>
 
             {/* Hospital Contact Details */}
