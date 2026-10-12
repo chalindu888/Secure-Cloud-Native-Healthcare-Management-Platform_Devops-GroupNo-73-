@@ -37,25 +37,37 @@ const DoctorsDirectory = () => {
 
       {/* Header */}
       <div className="animate-fade-up" style={{ marginBottom: '2.5rem' }}>
-        <span className="section-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Our Specialists</span>
-        <h1 style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 900, color: '#f1f5f9', marginBottom: '0.75rem' }}>
+        <span className="section-label" style={{ display: 'block', marginBottom: '0.5rem', color: '#000000', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', fontSize: '0.75rem' }}>
+          Our Specialists
+        </span>
+        <h1 style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 900, color: '#000000', marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>
           Clinical Specialists Directory
         </h1>
-        <p style={{ fontSize: '0.95rem', color: '#64748b', maxWidth: '560px', lineHeight: 1.7 }}>
+        <p style={{ fontSize: '0.95rem', color: '#334155', maxWidth: '560px', lineHeight: 1.7 }}>
           Search and schedule consultations with board-certified physicians across specialized departments.
         </p>
       </div>
 
       {/* Filter Bar */}
       <div
-        className="animate-fade-up-1 glass-card"
-        style={{ padding: '1.25rem', marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+        className="animate-fade-up-1"
+        style={{
+          background: '#ffffff',
+          borderRadius: '1.25rem',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+          padding: '1.25rem',
+          marginBottom: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
       >
         {/* Search Input */}
         <div style={{ position: 'relative' }}>
           <Search size={18} style={{
             position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)',
-            color: searchFocused ? '#818cf8' : '#475569', transition: 'color 200ms ease', pointerEvents: 'none',
+            color: searchFocused ? '#4f46e5' : '#64748b', transition: 'color 200ms ease', pointerEvents: 'none',
           }} />
           <input
             type="text"
@@ -70,11 +82,11 @@ const DoctorsDirectory = () => {
               paddingRight: '1rem',
               paddingTop: '0.75rem',
               paddingBottom: '0.75rem',
-              background: 'rgba(255,255,255,0.07)',
-              border: `1px solid ${searchFocused ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.12)'}`,
-              boxShadow: searchFocused ? '0 0 0 3px rgba(99,102,241,0.12)' : 'none',
+              background: '#f8fafc',
+              border: `1.5px solid ${searchFocused ? '#4f46e5' : '#cbd5e1'}`,
+              boxShadow: searchFocused ? '0 0 0 3px rgba(99,102,241,0.15)' : 'none',
               borderRadius: '0.75rem',
-              color: '#f1f5f9',
+              color: '#000000',
               fontFamily: 'Inter, sans-serif',
               fontSize: '0.875rem',
               outline: 'none',
@@ -85,7 +97,7 @@ const DoctorsDirectory = () => {
 
         {/* Specialty Pills */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#475569' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#475569' }}>
             <Filter size={13} /> Filter:
           </span>
           {SPECIALTIES.map((spec) => (
@@ -93,22 +105,33 @@ const DoctorsDirectory = () => {
               key={spec}
               onClick={() => setSelectedSpecialty(spec)}
               style={{
-                padding: '0.375rem 0.875rem',
+                padding: '0.45rem 1rem',
                 borderRadius: '999px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
+                fontSize: '0.8rem',
+                fontWeight: 700,
                 cursor: 'pointer',
-                border: 'none',
                 transition: 'all 200ms ease',
                 background: selectedSpecialty === spec
-                  ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
-                  : 'rgba(255,255,255,0.06)',
-                color: selectedSpecialty === spec ? '#ffffff' : '#94a3b8',
-                boxShadow: selectedSpecialty === spec ? '0 4px 15px rgba(99,102,241,0.35)' : 'none',
-                border: selectedSpecialty === spec ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                  ? 'linear-gradient(135deg, #4f46e5, #6366f1)'
+                  : '#ffffff',
+                color: selectedSpecialty === spec ? '#ffffff' : '#1e293b',
+                boxShadow: selectedSpecialty === spec ? '0 4px 14px rgba(79,70,229,0.3)' : '0 1px 3px rgba(0,0,0,0.05)',
+                border: selectedSpecialty === spec ? '1.5px solid #4338ca' : '1.5px solid #cbd5e1',
               }}
-              onMouseEnter={e => { if (selectedSpecialty !== spec) { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#f1f5f9'; }}}
-              onMouseLeave={e => { if (selectedSpecialty !== spec) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#94a3b8'; }}}
+              onMouseEnter={e => {
+                if (selectedSpecialty !== spec) {
+                  e.currentTarget.style.background = '#f1f5f9';
+                  e.currentTarget.style.borderColor = '#94a3b8';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
+              }}
+              onMouseLeave={e => {
+                if (selectedSpecialty !== spec) {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }
+              }}
             >
               {spec}
             </button>
@@ -116,12 +139,12 @@ const DoctorsDirectory = () => {
         </div>
 
         {/* Result Count */}
-        <p style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600 }}>
+        <p style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 700 }}>
           Showing{' '}
-          <span style={{ color: '#818cf8' }}>{filteredDoctors.length}</span>
+          <span style={{ color: '#4f46e5', fontWeight: 800 }}>{filteredDoctors.length}</span>
           {' '}of {doctors.length} specialists
           {selectedSpecialty !== 'All' && (
-            <> in <span style={{ color: '#818cf8' }}>{selectedSpecialty}</span></>
+            <> in <span style={{ color: '#4f46e5', fontWeight: 800 }}>{selectedSpecialty}</span></>
           )}
         </p>
       </div>
@@ -136,8 +159,11 @@ const DoctorsDirectory = () => {
           return (
             <div
               key={doc.id}
-              className="glass-card"
               style={{
+                background: '#ffffff',
+                borderRadius: '1.25rem',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 4px 16px -2px rgba(0, 0, 0, 0.05)',
                 padding: '1.5rem',
                 display: 'flex',
                 flexDirection: 'column',
@@ -150,7 +176,7 @@ const DoctorsDirectory = () => {
             >
               {/* Top accent line */}
               <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+                position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
                 background: `linear-gradient(90deg, transparent, ${specStyle.color}, transparent)`,
               }} />
 
@@ -165,44 +191,44 @@ const DoctorsDirectory = () => {
                     <Stethoscope size={22} style={{ color: specStyle.color }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f1f5f9', marginBottom: '0.25rem' }}>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#000000', marginBottom: '0.25rem' }}>
                       {doc.name}
                     </h3>
                     <span style={{
-                      display: 'inline-block', fontSize: '0.68rem', fontWeight: 700,
-                      padding: '0.2rem 0.625rem', borderRadius: '999px',
+                      display: 'inline-block', fontSize: '0.72rem', fontWeight: 700,
+                      padding: '0.25rem 0.65rem', borderRadius: '999px',
                       background: specStyle.bg, color: specStyle.color, border: `1px solid ${specStyle.border}`,
                     }}>
                       {doc.specialty}
                     </span>
-                    <p style={{ fontSize: '0.72rem', color: '#475569', marginTop: '0.25rem' }}>{doc.department}</p>
+                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem', fontWeight: 600 }}>{doc.department}</p>
                   </div>
                 </div>
 
                 {/* Bio */}
-                <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.7, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {doc.bio}
                 </p>
 
                 {/* Qualification & Location */}
                 <div style={{
                   padding: '0.875rem', borderRadius: '0.75rem',
-                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
+                  background: '#f8fafc', border: '1px solid #f1f5f9',
                   display: 'flex', flexDirection: 'column', gap: '0.5rem',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.76rem', color: '#94a3b8' }}>
-                    <Award size={14} style={{ color: specStyle.color, flexShrink: 0 }} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>{doc.qualification}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#1e293b' }}>
+                    <Award size={15} style={{ color: specStyle.color, flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 700 }}>{doc.qualification}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.76rem', color: '#64748b' }}>
-                    <MapPin size={14} style={{ color: '#475569', flexShrink: 0 }} />
-                    {doc.location}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#64748b' }}>
+                    <MapPin size={15} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                    <span style={{ fontWeight: 500 }}>{doc.location}</span>
                   </div>
                 </div>
 
                 {/* Available Days */}
                 <div>
-                  <p style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#475569', marginBottom: '0.5rem' }}>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#64748b', marginBottom: '0.5rem' }}>
                     Available Days
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
@@ -210,10 +236,10 @@ const DoctorsDirectory = () => {
                       <span
                         key={day}
                         style={{
-                          padding: '0.2rem 0.5rem', borderRadius: '0.375rem',
-                          fontSize: '0.65rem', fontWeight: 700,
-                          background: 'rgba(255,255,255,0.06)', color: '#94a3b8',
-                          border: '1px solid rgba(255,255,255,0.08)',
+                          padding: '0.25rem 0.55rem', borderRadius: '0.5rem',
+                          fontSize: '0.7rem', fontWeight: 700,
+                          background: '#f1f5f9', color: '#334155',
+                          border: '1px solid #e2e8f0',
                         }}
                       >
                         {day.slice(0, 3)}
@@ -224,27 +250,27 @@ const DoctorsDirectory = () => {
               </div>
 
               {/* Footer: Fee, Rating, Book */}
-              <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #f1f5f9' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
                   <div>
-                    <p style={{ fontSize: '0.65rem', color: '#475569', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Consultation Fee</p>
-                    <p style={{ fontSize: '1.15rem', fontWeight: 900, color: '#f1f5f9' }}>${doc.consultationFee}</p>
+                    <p style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Consultation Fee</p>
+                    <p style={{ fontSize: '1.25rem', fontWeight: 900, color: '#000000', margin: 0 }}>${doc.consultationFee}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', justifyContent: 'flex-end' }}>
-                      <Star size={14} style={{ color: '#fbbf24', fill: '#fbbf24' }} />
-                      <span style={{ fontSize: '0.875rem', fontWeight: 800, color: '#fbbf24' }}>{doc.rating}</span>
+                      <Star size={15} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
+                      <span style={{ fontSize: '0.9rem', fontWeight: 900, color: '#b45309' }}>{doc.rating}</span>
                     </div>
-                    <p style={{ fontSize: '0.65rem', color: '#475569' }}>{doc.reviewsCount} reviews</p>
+                    <p style={{ fontSize: '0.7rem', color: '#64748b', margin: 0 }}>{doc.reviewsCount} reviews</p>
                   </div>
                 </div>
 
                 <Link
                   to={`/patient/book?doctor=${doc.id}`}
                   className="btn btn-primary w-full"
-                  style={{ fontSize: '0.8rem', justifyContent: 'center' }}
+                  style={{ fontSize: '0.85rem', fontWeight: 700, justifyContent: 'center' }}
                 >
-                  <Calendar size={14} />
+                  <Calendar size={15} />
                   Book Appointment
                 </Link>
               </div>
@@ -256,19 +282,24 @@ const DoctorsDirectory = () => {
       {/* Empty State */}
       {filteredDoctors.length === 0 && (
         <div
-          className="glass-card"
-          style={{ padding: '4rem 2rem', textAlign: 'center' }}
+          style={{
+            background: '#ffffff',
+            borderRadius: '1.25rem',
+            border: '1px solid #e2e8f0',
+            padding: '4rem 2rem',
+            textAlign: 'center',
+          }}
         >
-          <Stethoscope size={40} style={{ color: '#334155', margin: '0 auto 1rem' }} />
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.5rem' }}>
+          <Stethoscope size={40} style={{ color: '#cbd5e1', margin: '0 auto 1rem' }} />
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#000000', marginBottom: '0.5rem' }}>
             No doctors match your search
           </h3>
-          <p style={{ fontSize: '0.85rem', color: '#475569' }}>
+          <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
             Try adjusting your specialty filter or keyword search query.
           </p>
           <button
             onClick={() => { setSearch(''); setSelectedSpecialty('All'); }}
-            className="btn btn-soft"
+            className="btn btn-secondary"
             style={{ margin: '1.5rem auto 0', display: 'inline-flex' }}
           >
             Clear Filters
