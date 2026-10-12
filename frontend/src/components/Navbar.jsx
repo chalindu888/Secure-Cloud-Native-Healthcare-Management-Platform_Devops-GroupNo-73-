@@ -161,34 +161,36 @@ const Navbar = () => {
           {/* Right Section */}
           <div className="hidden lg:flex items-center gap-3">
             {/* Demo Role Switcher */}
-            <div
-              className="flex items-center gap-1 p-1 rounded-xl"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
-            >
-              <span className="px-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#475569' }}>
-                Demo:
-              </span>
-              {[
-                { r: 'patient', label: 'Patient', active: 'rgba(99,102,241,0.85)' },
-                { r: 'doctor', label: 'Doctor', active: 'rgba(6,182,212,0.85)' },
-                { r: 'admin', label: 'Admin', active: 'rgba(16,185,129,0.85)' },
-              ].map(({ r, label, active }) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => handleRoleSwitch(r)}
-                  className="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all"
-                  style={{
-                    background: role === r ? active : 'transparent',
-                    color: role === r ? '#fff' : '#94a3b8',
-                    boxShadow: role === r ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
-                    transition: 'all 200ms ease',
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            {!isAuthenticated && (
+              <div
+                className="flex items-center gap-1 p-1 rounded-xl"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                <span className="px-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#475569' }}>
+                  Demo:
+                </span>
+                {[
+                  { r: 'patient', label: 'Patient', active: 'rgba(99,102,241,0.85)' },
+                  { r: 'doctor', label: 'Doctor', active: 'rgba(6,182,212,0.85)' },
+                  { r: 'admin', label: 'Admin', active: 'rgba(16,185,129,0.85)' },
+                ].map(({ r, label, active }) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => handleRoleSwitch(r)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all"
+                    style={{
+                      background: role === r ? active : 'transparent',
+                      color: role === r ? '#fff' : '#94a3b8',
+                      boxShadow: role === r ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
+                      transition: 'all 200ms ease',
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* User Profile / Auth */}
             {isAuthenticated ? (
@@ -281,30 +283,32 @@ const Navbar = () => {
           }}
         >
           {/* Role Switcher */}
-          <div className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#475569' }}>Switch Demo Role</p>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { r: 'patient', label: 'Patient', color: '#818cf8', bg: 'rgba(99,102,241,0.25)' },
-                { r: 'doctor', label: 'Doctor', color: '#67e8f9', bg: 'rgba(6,182,212,0.25)' },
-                { r: 'admin', label: 'Admin', color: '#6ee7b7', bg: 'rgba(16,185,129,0.25)' },
-              ].map(({ r, label, color, bg }) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => handleRoleSwitch(r)}
-                  className="py-2 rounded-lg text-xs font-bold transition-all"
-                  style={{
-                    background: role === r ? bg : 'rgba(255,255,255,0.04)',
-                    color: role === r ? color : '#64748b',
-                    border: `1px solid ${role === r ? color + '60' : 'rgba(255,255,255,0.08)'}`,
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
+          {!isAuthenticated && (
+            <div className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#475569' }}>Switch Demo Role</p>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { r: 'patient', label: 'Patient', color: '#818cf8', bg: 'rgba(99,102,241,0.25)' },
+                  { r: 'doctor', label: 'Doctor', color: '#67e8f9', bg: 'rgba(6,182,212,0.25)' },
+                  { r: 'admin', label: 'Admin', color: '#6ee7b7', bg: 'rgba(16,185,129,0.25)' },
+                ].map(({ r, label, color, bg }) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => handleRoleSwitch(r)}
+                    className="py-2 rounded-lg text-xs font-bold transition-all"
+                    style={{
+                      background: role === r ? bg : 'rgba(255,255,255,0.04)',
+                      color: role === r ? color : '#64748b',
+                      border: `1px solid ${role === r ? color + '60' : 'rgba(255,255,255,0.08)'}`,
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Nav Links */}
           <div className="space-y-1">

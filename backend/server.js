@@ -18,6 +18,27 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD
 });
 
+const ensureConfiguredAdmin = async () => {
+  const { ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    return;
+  }
+
+  const email = ADMIN_EMAIL.trim().toLowerCase();
+  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+
+  await pool.query(
+    `INSERT INTO users (name, email, password, role)
+     VALUES ($1, $2, $3, 'admin')
+     ON CONFLICT (email) DO UPDATE
+     SET password = EXCLUDED.password, role = 'admin'`,
+    ['System Administrator', email, passwordHash]
+  );
+
+  console.log(`Configured administrator account ready: ${email}`);
+};
+
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -58,6 +79,7 @@ app.post('/api/auth/register', async (req, res) => {
       password,
       phone,
       role,
+      admin_signup_secret,
       blood_group,
       specialty,
       license
@@ -71,6 +93,44 @@ app.post('/api/auth/register', async (req, res) => {
       });
     }
 
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters'
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const requestedRole = role || 'patient';
+
+    const existingUser = await pool.query(
+      'SELECT 1 FROM users WHERE LOWER(email) = $1 LIMIT 1',
+      [normalizedEmail]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email already exists'
+      });
+    }
+
+    if (!['patient', 'doctor', 'admin'].includes(requestedRole)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid account role'
+      });
+    }
+
+    if (requestedRole === 'admin') {
+      if (!process.env.ADMIN_SIGNUP_SECRET || admin_signup_secret !== process.env.ADMIN_SIGNUP_SECRET) {
+        return res.status(403).json({
+          success: false,
+          message: 'A valid administrator invite secret is required'
+        });
+      }
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -81,11 +141,11 @@ app.post('/api/auth/register', async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id, name, email, phone, role, blood_group, specialty, license, created_at`,
       [
-        name,
-        email,
+        name.trim(),
+        normalizedEmail,
         hashedPassword,
         phone || null,
-        role || 'patient',
+        requestedRole,
         blood_group || null,
         specialty || null,
         license || null
@@ -132,8 +192,8 @@ app.post('/api/auth/login', async (req, res) => {
 
     // Find user by email
     const result = await pool.query(
-      'SELECT * FROM users WHERE email = $1',
-      [email]
+      'SELECT * FROM users WHERE LOWER(email) = $1',
+      [email.trim().toLowerCase()]
     );
 
     if (result.rows.length === 0) {
@@ -200,6 +260,16 @@ app.post('/api/auth/login', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`HealthOps Backend running on port ${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await ensureConfiguredAdmin();
+    app.listen(PORT, () => {
+      console.log(`HealthOps Backend running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Unable to initialize configured administrator account:', error);
+    process.exitCode = 1;
+  }
+};
+
+startServer();

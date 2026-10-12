@@ -203,7 +203,7 @@ const Home = () => {
       ================================================================ */}
       <section className="page-wrapper" style={{ paddingTop: '0' }}>
         <div style={{ padding: '4rem 2rem', borderRadius: 'var(--r-2xl)', textAlign: 'center', background: 'var(--c-primary-pale)', border: '1px solid var(--c-primary-border)', boxShadow: 'var(--shdw-md)' }}>
-          <span className="section-label" style={{ display: 'block', marginBottom: '1rem' }}>Ready to Transform Healthcare?</span>
+          <span className="section-label" style={{ display: 'block', marginBottom: '1rem', color: '#000' }}>Ready to Transform Healthcare?</span>
           <h2 className="page-title" style={{ marginBottom: '1.25rem' }}>Start Your Journey Today</h2>
           <p className="page-subtitle" style={{ maxWidth: '500px', margin: '0 auto 2.5rem' }}>
             Join HealthOps and experience the future of healthcare management — secure, intelligent, and cloud-native.

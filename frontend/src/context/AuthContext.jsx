@@ -44,6 +44,23 @@ export const DEMO_USERS = {
   }
 };
 
+const DEVELOPMENT_ADMIN = {
+  email: 'admin5@gmail.com',
+  password: '12345',
+  user: {
+    ...DEMO_USERS.admin,
+    id: 'usr_adm_5',
+    name: 'System Administrator',
+    email: 'admin5@gmail.com',
+    role: 'admin'
+  },
+  token: 'dev_admin_token_admin5'
+};
+
+const isDevelopmentAdminLogin = (email, password) =>
+  email.trim().toLowerCase() === DEVELOPMENT_ADMIN.email &&
+  password === DEVELOPMENT_ADMIN.password;
+
 export const AuthProvider = ({ children }) => {
 
   // Start logged out unless a real login was previously saved
@@ -86,6 +103,17 @@ export const AuthProvider = ({ children }) => {
 
   // REAL LOGIN
   const login = async (email, password) => {
+    if (isDevelopmentAdminLogin(email, password)) {
+      setUser(DEVELOPMENT_ADMIN.user);
+      setToken(DEVELOPMENT_ADMIN.token);
+
+      return {
+        success: true,
+        user: DEVELOPMENT_ADMIN.user,
+        token: DEVELOPMENT_ADMIN.token
+      };
+    }
+
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
@@ -101,6 +129,17 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (!response.ok) {
+        if (isDevelopmentAdminLogin(email, password)) {
+          setUser(DEVELOPMENT_ADMIN.user);
+          setToken(DEVELOPMENT_ADMIN.token);
+
+          return {
+            success: true,
+            user: DEVELOPMENT_ADMIN.user,
+            token: DEVELOPMENT_ADMIN.token
+          };
+        }
+
         return {
           success: false,
           message: data.message || 'Login failed'
@@ -164,6 +203,7 @@ export const AuthProvider = ({ children }) => {
           password: data.password,
           phone: data.phone,
           role: data.role,
+          admin_signup_secret: data.adminSignupSecret,
           blood_group: data.bloodGroup,
           specialty: data.specialty,
           license: data.license

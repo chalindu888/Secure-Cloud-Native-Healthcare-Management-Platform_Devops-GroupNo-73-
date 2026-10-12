@@ -8,6 +8,7 @@ import {
   Lock,
   Phone,
   Stethoscope,
+  ShieldAlert,
   ArrowRight,
   Eye,
   EyeOff,
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react';
 
 const Register = () => {
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const navigate = useNavigate();
 
   const [role, setRole] = useState('patient');
@@ -29,7 +30,8 @@ const Register = () => {
     bloodGroup: 'O+',
     specialty: 'Cardiology',
     department: 'Cardiovascular Institute',
-    license: ''
+    license: '',
+    adminSignupSecret: ''
   });
 
   const [error, setError] = useState('');
@@ -51,6 +53,16 @@ const Register = () => {
       return;
     }
 
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+
+    if (role === 'admin' && !formData.adminSignupSecret) {
+      setError('Administrator invite secret is required.');
+      return;
+    }
+
     setIsLoading(true);
 
     const res = await register({
@@ -61,8 +73,17 @@ const Register = () => {
     setIsLoading(false);
 
     if (res.success) {
+      const loginResult = await login(formData.email, formData.password);
+
+      if (!loginResult.success) {
+        setError('Account created, but automatic login failed. Please sign in.');
+        return;
+      }
+
       if (role === 'doctor') {
         navigate('/doctor');
+      } else if (role === 'admin') {
+        navigate('/admin');
       } else {
         navigate('/patient');
       }
@@ -192,7 +213,7 @@ const Register = () => {
           className="animate-fade-up-1"
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '0.5rem',
             padding: '0.375rem',
             borderRadius: '1rem',
@@ -217,6 +238,14 @@ const Register = () => {
               color: '#67e8f9',
               activeBg: 'rgba(6,182,212,0.25)',
               activeBorder: 'rgba(6,182,212,0.5)'
+            },
+            {
+              r: 'admin',
+              label: 'I am an Admin',
+              icon: ShieldAlert,
+              color: '#6ee7b7',
+              activeBg: 'rgba(16,185,129,0.25)',
+              activeBorder: 'rgba(16,185,129,0.5)'
             },
           ].map(({ r, label, icon: Icon, color, activeBg, activeBorder }) => (
             <button
@@ -501,7 +530,7 @@ const Register = () => {
                   </select>
                 </div>
               </div>
-            ) : (
+            ) : role === 'doctor' ? (
               <div
                 style={{
                   display: 'grid',
@@ -583,6 +612,26 @@ const Register = () => {
                   />
                 </div>
               </div>
+            ) : (
+              <div>
+                <label style={labelStyle}>Administrator Invite Secret *</label>
+                <div style={{ position: 'relative' }}>
+                  <ShieldAlert size={15} style={iconWrapStyle} />
+                  <input
+                    type="password"
+                    name="adminSignupSecret"
+                    id="reg-admin-secret"
+                    value={formData.adminSignupSecret}
+                    onChange={handleChange}
+                    placeholder="Enter your invite secret"
+                    style={inputStyle}
+                    required
+                  />
+                </div>
+                <p style={{ marginTop: '0.5rem', fontSize: '0.72rem', color: '#64748b' }}>
+                  This secret is provided by the platform owner.
+                </p>
+              </div>
             )}
 
             {/* Terms */}
@@ -627,7 +676,9 @@ const Register = () => {
                 background:
                   role === 'doctor'
                     ? 'linear-gradient(135deg, #0891b2, #06b6d4)'
-                    : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                    : role === 'admin'
+                      ? 'linear-gradient(135deg, #059669, #10b981)'
+                      : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                 color: 'white',
                 border: 'none',
                 fontSize: '0.95rem',
@@ -635,7 +686,9 @@ const Register = () => {
                 boxShadow:
                   role === 'doctor'
                     ? '0 4px 20px rgba(6,182,212,0.4)'
-                    : '0 4px 20px rgba(99,102,241,0.4)',
+                    : role === 'admin'
+                      ? '0 4px 20px rgba(16,185,129,0.4)'
+                      : '0 4px 20px rgba(99,102,241,0.4)',
                 width: '100%',
               }}
             >
@@ -668,12 +721,14 @@ const Register = () => {
                 <>
                   {role === 'doctor' ? (
                     <Stethoscope size={17} />
+                  ) : role === 'admin' ? (
+                    <ShieldAlert size={17} />
                   ) : (
                     <User size={17} />
                   )}
 
                   Register as{' '}
-                  {role === 'doctor' ? 'Doctor' : 'Patient'}
+                  {role === 'doctor' ? 'Doctor' : role === 'admin' ? 'Admin' : 'Patient'}
 
                   <ArrowRight size={17} />
                 </>
