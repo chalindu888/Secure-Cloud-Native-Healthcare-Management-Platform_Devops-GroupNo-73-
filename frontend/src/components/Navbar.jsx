@@ -145,14 +145,6 @@ const Navbar = () => {
                   <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>Admin Hub</Link>
                   <Link to="/admin/users" className={`nav-link ${isActive('/admin/users') ? 'active' : ''}`}>Users</Link>
                   <Link to="/admin/audit-logs" className={`nav-link ${isActive('/admin/audit-logs') ? 'active' : ''}`}>Audit</Link>
-                  <Link
-                    to="/admin/devops"
-                    className={`nav-link flex items-center gap-1.5 ${isActive('/admin/devops') ? 'active' : ''}`}
-                    style={{ color: isActive('/admin/devops') ? '#6ee7b7' : undefined }}
-                  >
-                    <Server size={13} />
-                    DevOps
-                  </Link>
                 </>
               )}
             </div>
@@ -347,7 +339,6 @@ const Navbar = () => {
               { to: '/admin', label: 'Admin Hub' },
               { to: '/admin/users', label: 'User Management' },
               { to: '/admin/audit-logs', label: 'Audit Logs' },
-              { to: '/admin/devops', label: 'DevOps Observability' },
             ].map(({ to, label }) => (
               <Link key={to} to={to} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl text-sm font-medium nav-link">{label}</Link>
             ))}

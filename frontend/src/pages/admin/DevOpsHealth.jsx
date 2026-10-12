@@ -68,7 +68,7 @@ const DevOpsHealth = () => {
             <span>Uptime</span>
             <span style={{ color: 'var(--c-emerald)' }}>99.98%</span>
           </div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#f0f6fc' }}>SLA Met</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#000000' }}>SLA Met</div>
           <p style={{ fontSize: '0.65rem', color: 'var(--txt-muted)' }}>High-Availability Probe</p>
         </div>
 
@@ -77,7 +77,7 @@ const DevOpsHealth = () => {
             <span>MTTR</span>
             <span style={{ color: 'var(--c-primary-light)' }}>&lt; 8 mins</span>
           </div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#f0f6fc' }}>7.8 min</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#000000' }}>7.8 min</div>
           <p style={{ fontSize: '0.65rem', color: 'var(--txt-muted)' }}>Automated Rollbacks</p>
         </div>
 
@@ -86,7 +86,7 @@ const DevOpsHealth = () => {
             <span>Deployment</span>
             <span style={{ color: 'var(--c-cyan)' }}>4.2 / day</span>
           </div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#f0f6fc' }}>Elite Cadence</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#000000' }}>Elite Cadence</div>
           <p style={{ fontSize: '0.65rem', color: 'var(--txt-muted)' }}>Continuous GitOps</p>
         </div>
 
@@ -95,7 +95,7 @@ const DevOpsHealth = () => {
             <span>Security</span>
             <span style={{ color: 'var(--c-emerald)' }}>0 CVEs</span>
           </div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#f0f6fc', color: 'var(--c-emerald)' }}>Zero Critical</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--c-emerald)' }}>Zero Critical</div>
           <p style={{ fontSize: '0.65rem', color: 'var(--txt-muted)' }}>Trivy Gates Passed</p>
         </div>
       </div>
@@ -108,8 +108,8 @@ const DevOpsHealth = () => {
               <GitBranch size={20} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1rem', fontWeight: 800, color: '#f0f6fc' }}>CI/CD Pipeline Stages</h2>
-              <p style={{ fontSize: '0.75rem', color: 'var(--txt-muted)' }}>Commit: <code style={{ color: 'var(--txt-secondary)', background: 'rgba(255,255,255,0.05)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>main#8f9c1b4</code></p>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#000000' }}>CI/CD Pipeline Stages</h2>
+              <p style={{ fontSize: '0.75rem', color: 'var(--txt-muted)' }}>Commit: <code style={{ color: 'var(--txt-secondary)', background: 'rgba(0,0,0,0.05)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>main#8f9c1b4</code></p>
             </div>
           </div>
           <span className="badge badge-success"><CheckCircle2 size={13} /> Pipeline Succeeded</span>
@@ -117,12 +117,12 @@ const DevOpsHealth = () => {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
           {PIPELINE_STEPS.map((step, idx) => (
-            <div key={idx} style={{ padding: '1rem', borderRadius: 'var(--r-md)', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--bdr-subtle)' }}>
+            <div key={idx} style={{ padding: '1rem', borderRadius: 'var(--r-md)', background: '#ffffff', border: '1px solid var(--bdr-default)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--txt-muted)' }}>STAGE {idx + 1}</span>
-                <span style={{ fontSize: '0.65rem', fontFamily: 'monospace', padding: '0.15rem 0.4rem', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', color: 'var(--txt-secondary)' }}>{step.duration}</span>
+                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--txt-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>STAGE {idx + 1}</span>
+                <span style={{ fontSize: '0.65rem', fontFamily: 'monospace', padding: '0.15rem 0.4rem', borderRadius: '4px', background: 'rgba(0,0,0,0.05)', color: 'var(--txt-secondary)', fontWeight: 600 }}>{step.duration}</span>
               </div>
-              <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f0f6fc', marginBottom: '0.25rem' }}>{step.stage}</h4>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#000000', marginBottom: '0.25rem' }}>{step.stage}</h4>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
                 <span style={{ color: 'var(--txt-muted)' }}>{step.tool}</span>
                 <span style={{ fontWeight: 700, color: 'var(--c-emerald)' }}>{step.status}</span>
@@ -136,9 +136,9 @@ const DevOpsHealth = () => {
       <div className="card animate-fade-up-3" style={{ overflow: 'hidden' }}>
         <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--bdr-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Layers size={20} style={{ color: 'var(--c-primary-light)' }} />
+            <Layers size={20} style={{ color: 'var(--c-primary)' }} />
             <div>
-              <h2 style={{ fontSize: '1rem', fontWeight: 800, color: '#f0f6fc' }}>Kubernetes Pod Status</h2>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#000000' }}>Kubernetes Pod Status</h2>
               <p style={{ fontSize: '0.75rem', color: 'var(--txt-muted)' }}>Namespace: production</p>
             </div>
           </div>
@@ -147,7 +147,7 @@ const DevOpsHealth = () => {
 
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table">
-            <thead style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <thead style={{ background: 'rgba(0,0,0,0.02)' }}>
               <tr>
                 <th>Pod Name</th>
                 <th>Status</th>
@@ -160,7 +160,7 @@ const DevOpsHealth = () => {
             <tbody style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
               {pods.map((pod, idx) => (
                 <tr key={idx}>
-                  <td style={{ fontWeight: 700, color: '#e6edf3' }}>{pod.name}</td>
+                  <td style={{ fontWeight: 800, color: '#000000' }}>{pod.name}</td>
                   <td>
                     <span className={`badge ${pod.status === 'Running' ? 'badge-success' : 'badge-danger'}`} style={{ fontFamily: 'sans-serif' }}>
                       <span className={`badge-dot ${pod.status === 'Running' ? '' : 'animate-pulse'}`}></span>

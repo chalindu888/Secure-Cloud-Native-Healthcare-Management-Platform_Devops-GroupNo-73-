@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 
@@ -30,7 +30,6 @@ import DoctorSchedule from './pages/doctor/DoctorSchedule';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
 import AuditLogs from './pages/admin/AuditLogs';
-import DevOpsHealth from './pages/admin/DevOpsHealth';
 
 function App() {
   return (
@@ -134,11 +133,7 @@ function App() {
               />
               <Route
                 path="/admin/devops"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <DevOpsHealth />
-                  </ProtectedRoute>
-                }
+                element={<Navigate to="/admin" replace />}
               />
 
               {/* 404 Catch-All */}

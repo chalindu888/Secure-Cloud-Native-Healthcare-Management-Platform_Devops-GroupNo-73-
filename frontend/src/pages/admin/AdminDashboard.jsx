@@ -29,27 +29,27 @@ const AdminDashboard = () => {
         <div style={{ position: 'relative' }}>
           <div className="badge badge-success" style={{ marginBottom: '0.75rem', display: 'inline-flex' }}>
             <span className="badge-dot animate-pulse"></span>
-            Cloud Infrastructure & Security Admin
+            Healthcare System Administration
           </div>
           <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 900, color: '#fff', marginBottom: '0.5rem' }}>
             HealthOps Operations Command
           </h1>
           <p style={{ color: 'rgba(209,250,229,0.8)', fontSize: '0.9rem', maxWidth: '480px' }}>
-            Real-time control plane for user access governance, healthcare appointment metrics, and DevSecOps observability.
+            Real-time control plane for user access governance, security audit trails, and healthcare appointment metrics.
           </p>
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', position: 'relative' }}>
-          <Link to="/admin/devops" className="btn btn-primary btn-lg" style={{ background: '#10b981', color: '#022c22', border: 'none', boxShadow: '0 4px 16px rgba(16,185,129,0.3)' }}
+          <Link to="/admin/users" className="btn btn-primary btn-lg" style={{ background: '#10b981', color: '#022c22', border: 'none', boxShadow: '0 4px 16px rgba(16,185,129,0.3)' }}
             onMouseEnter={e => e.currentTarget.style.background = '#34d399'}
             onMouseLeave={e => e.currentTarget.style.background = '#10b981'}
           >
-            <Server size={18} />
-            DevSecOps Telemetry
-          </Link>
-          <Link to="/admin/users" className="btn btn-secondary">
-            <Users size={17} />
+            <Users size={18} />
             Manage Users
+          </Link>
+          <Link to="/admin/audit-logs" className="btn btn-secondary">
+            <ShieldCheck size={17} />
+            Security Audit Logs
           </Link>
         </div>
       </div>
@@ -163,28 +163,28 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="card-strong" style={{ padding: '1.5rem' }}>
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f0f6fc', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
-              <ShieldCheck size={18} style={{ color: '#34d399' }} />
-              DevSecOps Compliance Baseline
+          <div className="card-strong" style={{ padding: '1.5rem', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '1.25rem' }}>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#000000', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
+              <ShieldCheck size={18} style={{ color: '#059669' }} />
+              Security & Healthcare Compliance Baseline
             </h4>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--bdr-subtle)' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--txt-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Vulnerability Scan</span>
-                <strong style={{ fontSize: '0.85rem', color: '#34d399' }}>0 Critical (Trivy)</strong>
+              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Access Governance</span>
+                <strong style={{ fontSize: '0.85rem', color: '#059669' }}>RBAC Enforced</strong>
               </div>
-              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--bdr-subtle)' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--txt-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>SonarQube Gate</span>
-                <strong style={{ fontSize: '0.85rem', color: '#34d399' }}>Passed (A)</strong>
+              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Audit Trail</span>
+                <strong style={{ fontSize: '0.85rem', color: '#059669' }}>Immutable Logs</strong>
               </div>
-              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--bdr-subtle)' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--txt-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Deployment Engine</span>
-                <strong style={{ fontSize: '0.85rem', color: '#818cf8' }}>Argo CD GitOps</strong>
+              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Session Security</span>
+                <strong style={{ fontSize: '0.85rem', color: '#4f46e5' }}>JWT Auth Active</strong>
               </div>
-              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--bdr-subtle)' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--txt-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Cluster Resilience</span>
-                <strong style={{ fontSize: '0.85rem', color: '#67e8f9' }}>Multi-Replica Pods</strong>
+              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Clinical Data</span>
+                <strong style={{ fontSize: '0.85rem', color: '#0284c7' }}>HIPAA Compliant</strong>
               </div>
             </div>
           </div>
