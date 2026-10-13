@@ -1,9 +1,7 @@
 import React from 'react';
-import { Activity, ShieldCheck, GitBranch, CheckCircle2, Server, Globe, Lock } from 'lucide-react';
+import { Activity, ShieldCheck, GitBranch, CheckCircle2, MapPin, Phone, Mail, MessageCircle, Globe, Camera, Music2, AtSign } from 'lucide-react';
 
 const Footer = () => {
-  const year = new Date().getFullYear();
-
   return (
     <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginTop: 'auto', position: 'relative' }}>
       {/* DevSecOps Status Bar */}
@@ -103,77 +101,48 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* DevOps Pipeline */}
+            {/* Hospital Contact Details */}
             <div>
               <h4 style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#e5e7eb', marginBottom: '1rem' }}>
-                DevOps Pipeline
+                Contact HealthOps
               </h4>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-                {[
-                  'Continuous Integration (GitHub Actions)',
-                  'Dockerized Container Images',
-                  'Kubernetes Orchestration',
-                  'Infrastructure as Code (Terraform)',
-                ].map(item => (
-                  <li
-                    key={item}
-                    style={{ fontSize: '0.78rem', color: '#d1d5db', cursor: 'pointer', transition: 'color 200ms ease', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                    onMouseEnter={e => { e.currentTarget.style.color = '#818cf8'; }}
-                    onMouseLeave={e => { e.currentTarget.style.color = '#d1d5db'; }}
-                  >
-                    <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#6366f1', flexShrink: 0 }} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Security */}
-            <div>
-              <h4 style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#e5e7eb', marginBottom: '1rem' }}>
-                Security & Compliance
-              </h4>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-                {[
-                  'JWT + Role-Based Access Control (RBAC)',
-                  'Trivy Vulnerability Scanner',
-                  'SonarQube Code Analysis',
-                  'Prometheus & Grafana Telemetry',
-                ].map(item => (
-                  <li
-                    key={item}
-                    style={{ fontSize: '0.78rem', color: '#d1d5db', cursor: 'pointer', transition: 'color 200ms ease', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                    onMouseEnter={e => { e.currentTarget.style.color = '#6ee7b7'; }}
-                    onMouseLeave={e => { e.currentTarget.style.color = '#d1d5db'; }}
-                  >
-                    <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Academic Details */}
-            <div>
-              <h4 style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#e5e7eb', marginBottom: '1rem' }}>
-                Academic Project
-              </h4>
-              <div
-                style={{
-                  padding: '1rem', borderRadius: '0.875rem',
-                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(165,180,252,0.35)',
-                }}
-              >
-                <p style={{ fontSize: '0.78rem', fontWeight: 700, color: '#c7d2fe', marginBottom: '0.625rem' }}>
-                  DevOps Engineering (EC5207)
-                </p>
-                <p style={{ fontSize: '0.7rem', fontWeight: 700, color: '#a5b4fc', marginBottom: '0.75rem' }}>
-                  Group No. 73
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-                  <p style={{ fontSize: '0.72rem', color: '#d1d5db' }}>EG/2023/5897 — Silva TCK</p>
-                  <p style={{ fontSize: '0.72rem', color: '#d1d5db' }}>EG/2023/5902 — Siriwardena M.K.W.L</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', lineHeight: 1.5 }}>
+                  <MapPin size={15} style={{ color: '#a5b4fc', flexShrink: 0, marginTop: '0.1rem' }} />
+                  <span>42 Health Street, Boston, MA 02108</span>
                 </div>
+                <a href="tel:+15552345678" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', textDecoration: 'none' }}>
+                  <Phone size={15} style={{ color: '#a5b4fc', flexShrink: 0 }} />
+                  +1 (555) 234-5678
+                </a>
+                <a href="mailto:care@healthops.health" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', textDecoration: 'none' }}>
+                  <Mail size={15} style={{ color: '#a5b4fc', flexShrink: 0 }} />
+                  care@healthops.health
+                </a>
+                <a href="https://wa.me/15552345678" target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', textDecoration: 'none' }}>
+                  <MessageCircle size={15} style={{ color: '#6ee7b7', flexShrink: 0 }} />
+                  WhatsApp: +1 (555) 234-5678
+                </a>
+              </div>
+            </div>
+
+            {/* Social Media */}
+            <div>
+              <h4 style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#e5e7eb', marginBottom: '1rem' }}>
+                Follow HealthOps
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {[
+                  ['Facebook', 'https://facebook.com/healthops', Globe],
+                  ['Instagram', 'https://instagram.com/healthops', Camera],
+                  ['TikTok', 'https://tiktok.com/@healthops', Music2],
+                  ['Twitter / X', 'https://twitter.com/healthops', AtSign],
+                ].map(([label, url, Icon]) => (
+                  <a key={label} href={url} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', fontSize: '0.78rem', color: '#d1d5db', textDecoration: 'none' }}>
+                    <Icon size={16} style={{ color: '#a5b4fc', flexShrink: 0 }} />
+                    {label}
+                  </a>
+                ))}
               </div>
             </div>
           </div>
@@ -182,26 +151,13 @@ const Footer = () => {
           <div
             style={{
               background: 'rgba(20,50,43,0.94)',
-              paddingTop: '1.5rem',
+              padding: '1.25rem 0 0.25rem',
               borderTop: '1px solid rgba(167,243,208,0.18)',
-              display: 'flex', flexWrap: 'wrap',
-              alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
             }}
           >
-            <p style={{ fontSize: '0.75rem', color: '#d1fae5' }}>
-              © {year} HealthOps Platform. Built with React & Tailwind CSS.
+            <p style={{ maxWidth: '62rem', margin: '0 auto', fontSize: '0.78rem', color: '#d1fae5', lineHeight: 1.7, textAlign: 'center' }}>
+              HealthOps Hospital provides connected, patient-centered healthcare services that bring patients, doctors, and hospital teams together for safer appointments, trusted medical support, and continuous care.
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{
-                padding: '0.25rem 0.75rem', borderRadius: '0.375rem',
-                background: 'rgba(16,185,129,0.12)', color: '#6ee7b7',
-                border: '1px solid rgba(16,185,129,0.25)',
-                fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-              }}>
-                ✓ Production Build
-              </span>
-              <span style={{ fontSize: '0.72rem', color: '#a7f3d0' }}>Version 1.0.0</span>
-            </div>
           </div>
         </div>
       </div>

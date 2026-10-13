@@ -22,17 +22,25 @@ const Login = () => {
     else navigate('/patient');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    if (!email) { setError('Please enter your email address.'); return; }
-    setIsLoading(true);
-    setTimeout(() => {
-      const res = login(email, password);
-      setIsLoading(false);
-      if (res.success) redirectAfterLogin(res.user.role);
-      else setError('Invalid credentials. Use the demo buttons below to try the app!');
-    }, 400);
+setError('');
+if (!email) {
+  setError('Please enter your email address.');
+  return;
+}
+
+setIsLoading(true);
+
+const res = await login(email, password);
+
+setIsLoading(false);
+
+if (res.success) {
+  redirectAfterLogin(res.user.role);
+} else {
+  setError(res.message || 'Invalid email or password.');
+}
   };
 
   const handleQuickDemo = (role) => {
