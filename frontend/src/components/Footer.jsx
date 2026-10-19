@@ -1,58 +1,10 @@
 import React from 'react';
-import { Activity, ShieldCheck, GitBranch, CheckCircle2, MapPin, Phone, Mail, MessageCircle, Globe, Camera, Music2, AtSign } from 'lucide-react';
+import { MapPin, Phone, Mail, MessageCircle, Globe, Camera, Music2, AtSign, PhoneCall } from 'lucide-react';
+import hospitalIcon from '../assets/hospital-icon.png';
 
 const Footer = () => {
   return (
     <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginTop: 'auto', position: 'relative' }}>
-      {/* DevSecOps Status Bar */}
-      <div
-        style={{
-          background: 'rgba(0,0,0,0.3)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          padding: '0.625rem 1rem',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: '88rem', margin: '0 auto',
-            display: 'flex', flexWrap: 'wrap', alignItems: 'center',
-            justifyContent: 'space-between', gap: '0.75rem',
-          }}
-        >
-          {/* Live Status Indicator */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-              <span style={{ position: 'relative', display: 'inline-flex', width: '8px', height: '8px' }}>
-                <span style={{
-                  position: 'absolute', inset: 0, borderRadius: '50%',
-                  background: '#10b981', opacity: 0.75,
-                  animation: 'ping 1.5s ease-in-out infinite',
-                }} />
-                <span style={{ position: 'relative', display: 'inline-flex', width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-              </span>
-            </span>
-            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#94a3b8' }}>
-              Cluster Status:{' '}
-              <span style={{ color: '#6ee7b7', fontWeight: 700 }}>All Pods Healthy (3/3)</span>
-            </span>
-          </div>
-
-          {/* Tech Indicators */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
-            {[
-              { icon: ShieldCheck, label: 'Trivy Scan', value: '0 Critical', valueColor: '#6ee7b7', iconColor: '#818cf8' },
-              { icon: CheckCircle2, label: 'Quality Gate', value: 'Passed (A)', valueColor: '#6ee7b7', iconColor: '#6ee7b7' },
-              { icon: GitBranch, label: 'GitOps', value: 'Argo CD Synced', valueColor: '#a5b4fc', iconColor: '#818cf8' },
-            ].map(({ icon: Icon, label, value, valueColor, iconColor }, i) => (
-              <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.7rem', color: '#94a3b8' }}>
-                <Icon size={13} style={{ color: iconColor }} />
-                {label}: <strong style={{ color: valueColor }}>{value}</strong>
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer Content */}
       <div
         style={{
@@ -68,36 +20,67 @@ const Footer = () => {
         >
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '2.5rem', marginBottom: '2.5rem' }}>
 
-            {/* Brand */}
+            {/* Brand / Hospital Mission & Emergency Hotline */}
             <div style={{ gridColumn: 'span 1' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <img
+                  src={hospitalIcon}
+                  alt="HealthOps Hospital Icon"
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '0.625rem',
+                    objectFit: 'cover',
+                    boxShadow: '0 4px 15px rgba(99,102,241,0.3)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    flexShrink: 0,
+                  }}
+                />
+                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#f9fafb' }}>HealthOps Hospital</span>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: '#d1d5db', lineHeight: 1.8, maxWidth: '260px' }}>
+                Dedicated to providing compassionate patient care, medical excellence, and round-the-clock emergency services for our community.
+              </p>
+
+              {/* 24/7 Emergency Hotline */}
+              <div
+                style={{
+                  marginTop: '1.25rem',
+                  padding: '0.75rem 0.875rem',
+                  borderRadius: '0.625rem',
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  maxWidth: '260px',
+                }}
+              >
                 <div
                   style={{
-                    width: '36px', height: '36px', borderRadius: '0.625rem',
-                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 4px 15px rgba(99,102,241,0.3)',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: 'rgba(239, 68, 68, 0.25)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
                   }}
                 >
-                  <Activity size={18} color="white" strokeWidth={2.5} />
+                  <PhoneCall size={16} color="#f87171" />
                 </div>
-                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#f9fafb' }}>HealthOps</span>
-              </div>
-              <p style={{ fontSize: '0.78rem', color: '#d1d5db', lineHeight: 1.8, maxWidth: '240px' }}>
-                Secure Cloud-Native Healthcare Management Platform with Automated DevSecOps, Role-Based Access Control, and Continuous Observability.
-              </p>
-              {/* Tech Badges */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginTop: '1rem' }}>
-                {['React', 'Docker', 'K8s', 'ArgoCD'].map(tech => (
-                  <span key={tech} style={{
-                    fontSize: '0.6rem', fontWeight: 700, padding: '0.2rem 0.5rem',
-                    borderRadius: '0.375rem', background: 'rgba(99,102,241,0.15)',
-                    color: '#c7d2fe', border: '1px solid rgba(165,180,252,0.35)',
-                    textTransform: 'uppercase', letterSpacing: '0.05em',
-                  }}>
-                    {tech}
-                  </span>
-                ))}
+                <div>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#fca5a5' }}>
+                    24/7 Emergency Hotline
+                  </div>
+                  <a
+                    href="tel:+15559112273"
+                    style={{ fontSize: '0.85rem', fontWeight: 800, color: '#fee2e2', textDecoration: 'none' }}
+                  >
+                    +1 (555) 911-CARE
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -161,13 +144,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes ping {
-          0%, 100% { transform: scale(1); opacity: 0.75; }
-          50% { transform: scale(2); opacity: 0; }
-        }
-      `}</style>
     </footer>
   );
 };

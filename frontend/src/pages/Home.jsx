@@ -2,8 +2,8 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import hospitalImage from '../assets/hospital.png';
-import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp } from 'lucide-react';
+import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp, HeartPulse } from 'lucide-react';
+import fibreRushBanner from '../assets/fibre-rush.png';
 
 const Home = () => {
   const { loginAs, isAuthenticated, role } = useAuth();
@@ -57,86 +57,145 @@ const Home = () => {
     },
   ];
 
-  const techPillars = [
-    { icon: Server, label: 'Kubernetes', sub: 'High Availability' },
-    { icon: Lock, label: 'Zero Trust', sub: 'JWT RBAC' },
-    { icon: Globe, label: 'CI/CD', sub: 'GitHub Actions' },
-    { icon: Activity, label: 'Monitoring', sub: 'Prometheus' },
-  ];
-
   return (
     <div style={{ position: 'relative' }}>
       {/* ================================================================
-          HERO SECTION
+          HERO SECTION WITH VIDEO BACKGROUND
       ================================================================ */}
       <section style={{ minHeight: '92vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden', paddingTop: '4rem', paddingBottom: '6rem' }}>
-        <div className="page-wrapper" style={{ padding: 0 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
+        {/* Background Video */}
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0, pointerEvents: 'none' }}>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              minWidth: '100%',
+              minHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              transform: 'translate(-50%, -50%)',
+              objectFit: 'cover',
+              filter: 'brightness(0.85) contrast(1.05)',
+            }}
+          >
+            <source src="/vedio.mp4" type="video/mp4" />
+          </video>
+          {/* Theme overlay gradient to ensure high readability */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(217, 240, 223, 0.72) 0%, rgba(217, 240, 223, 0.82) 60%, var(--bg-page, #d9f0df) 100%)',
+              backdropFilter: 'blur(1px)',
+            }}
+          />
+        </div>
+
+        <div className="page-wrapper" style={{ padding: 0, position: 'relative', zIndex: 1 }}>
+          <div className="animate-fade-up" style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '2rem' }}>
             
-            {/* Left: Text Content */}
-            <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-                <span className="badge badge-primary">
-                  <Sparkles size={12} />
-                  Next-Gen Healthcare DevSecOps Platform
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.45rem 1.15rem',
+                  borderRadius: '9999px',
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.15)',
+                  backdropFilter: 'blur(8px)',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  color: '#047857',
+                }}
+              >
+                <HeartPulse size={15} style={{ color: '#ef4444' }} />
+                Leading Multi-Specialty Hospital & Medical Center
+              </span>
+            </div>
+
+            <div>
+              <h1
+                style={{
+                  fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif",
+                  fontSize: 'clamp(2.5rem, 5.5vw, 4.25rem)',
+                  fontWeight: 900,
+                  lineHeight: 1.12,
+                  letterSpacing: '-0.03em',
+                  marginBottom: '1.5rem',
+                  color: '#0f172a',
+                }}
+              >
+                Caring for Your Health,<br />
+                <span
+                  style={{
+                    background: 'linear-gradient(135deg, #1d4ed8 0%, #0284c7 40%, #059669 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    display: 'inline-block',
+                    filter: 'drop-shadow(0 2px 14px rgba(29, 78, 216, 0.2))',
+                  }}
+                >
+                  Inspiring Better Living.
                 </span>
-              </div>
+              </h1>
 
-              <div>
-                <h1 className="page-title" style={{ fontSize: 'clamp(2.25rem, 4vw, 3.5rem)', lineHeight: 1.1, marginBottom: '1.5rem' }}>
-                  Intelligent Care<br />
-                  Delivery, <span style={{ color: 'var(--c-primary)' }}>Cloud-Native</span><br />
-                  Security.
-                </h1>
+              <p
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 'clamp(1.05rem, 2vw, 1.22rem)',
+                  color: '#334155',
+                  lineHeight: 1.8,
+                  maxWidth: '700px',
+                  margin: '0 auto',
+                  fontWeight: 500,
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                HealthOps Hospital provides comprehensive patient care, board-certified specialists, modern medical treatments, and 24/7 emergency response — bringing compassionate care and clinical excellence to you and your family.
+              </p>
+            </div>
 
-                <p className="page-subtitle" style={{ fontSize: '1.1rem', maxWidth: '520px' }}>
-                  HealthOps bridges patients, clinical specialists, and hospital administration on a
-                  containerized, audited microservice architecture with automated CI/CD and zero-trust RBAC.
-                </p>
-              </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem' }}>
+              <Link to={isAuthenticated ? (role === 'doctor' ? '/doctor' : role === 'admin' ? '/admin' : '/patient/book') : '/register'} className="btn btn-primary btn-lg">
+                Book an Appointment
+                <ArrowRight size={18} />
+              </Link>
+              <Link to="/doctors" className="btn btn-secondary btn-lg">
+                <Stethoscope size={18} />
+                Browse Specialists
+              </Link>
+            </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <Link to={isAuthenticated ? (role === 'doctor' ? '/doctor' : role === 'admin' ? '/admin' : '/patient/book') : '/register'} className="btn btn-primary btn-lg">
-                  Book an Appointment
-                  <ArrowRight size={18} />
-                </Link>
-                <Link to="/doctors" className="btn btn-secondary btn-lg">
-                  <Stethoscope size={18} />
-                  Browse Specialists
-                </Link>
-              </div>
-
-              {/* Demo Launch Banner */}
-              <div style={{ padding: '1.25rem', borderRadius: '1rem', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)', boxShadow: 'var(--shdw-sm)' }}>
-                <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-secondary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Zap size={14} style={{ color: 'var(--c-amber)' }} />
-                  ⚡ Instant Demo Access — 1-Click Role Login
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <button onClick={() => handleDemoAccess('patient')} className="btn btn-sm" style={{ background: 'var(--c-primary-pale)', color: 'var(--c-primary)' }}>
-                    <Users size={14} /> Launch as Patient
-                  </button>
-                  <button onClick={() => handleDemoAccess('doctor')} className="btn btn-sm" style={{ background: 'var(--c-cyan-pale)', color: 'var(--c-cyan)' }}>
-                    <Stethoscope size={14} /> Launch as Doctor
-                  </button>
-                  <button onClick={() => handleDemoAccess('admin')} className="btn btn-sm" style={{ background: 'var(--c-emerald-pale)', color: 'var(--c-emerald)' }}>
-                    <Server size={14} /> Launch as Admin
-                  </button>
-                </div>
+            {/* Demo Launch Banner */}
+            <div style={{ padding: '1.25rem 1.75rem', borderRadius: '1rem', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)', boxShadow: 'var(--shdw-md)', backdropFilter: 'blur(8px)', width: '100%', maxWidth: '620px' }}>
+              <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-secondary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                <Zap size={14} style={{ color: 'var(--c-amber)' }} />
+                ⚡ Instant Demo Access — 1-Click Role Login
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem' }}>
+                <button onClick={() => handleDemoAccess('patient')} className="btn btn-sm" style={{ background: 'var(--c-primary-pale)', color: 'var(--c-primary)' }}>
+                  <Users size={14} /> Launch as Patient
+                </button>
+                <button onClick={() => handleDemoAccess('doctor')} className="btn btn-sm" style={{ background: 'var(--c-cyan-pale)', color: 'var(--c-cyan)' }}>
+                  <Stethoscope size={14} /> Launch as Doctor
+                </button>
+                <button onClick={() => handleDemoAccess('admin')} className="btn btn-sm" style={{ background: 'var(--c-emerald-pale)', color: 'var(--c-emerald)' }}>
+                  <Server size={14} /> Launch as Admin
+                </button>
               </div>
             </div>
 
-            {/* Right: Hospital Photo */}
-            <div className="animate-fade-up-2" style={{ maxWidth: '640px', width: '100%', margin: '0 auto' }}>
-              <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '16 / 9', borderRadius: '1rem', border: '1px solid var(--bdr-default)', boxShadow: 'var(--shdw-lg)' }}>
-                <img
-                  src={hospitalImage}
-                  alt="HealthOps Hospital exterior"
-                  style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
-                />
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -193,23 +252,30 @@ const Home = () => {
       </section>
 
       {/* ================================================================
-          TECH PILLARS STRIP
+          FEATURED BANNER
       ================================================================ */}
-      <section className="page-wrapper" style={{ paddingTop: '0' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', padding: '1.75rem 2rem', borderRadius: 'var(--r-xl)', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)' }}>
-          <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-muted)', marginRight: '0.5rem' }}>Powered by:</p>
-          {techPillars.map((tp, i) => {
-            const TIcon = tp.icon;
-            return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: 'var(--r-md)', background: 'var(--bg-surface)', border: '1px solid var(--bdr-subtle)' }}>
-                <TIcon size={16} style={{ color: 'var(--c-primary)' }} />
-                <div>
-                  <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--txt-primary)' }}>{tp.label}</p>
-                  <p style={{ fontSize: '0.65rem', color: 'var(--txt-muted)' }}>{tp.sub}</p>
-                </div>
-              </div>
-            );
-          })}
+      <section className="page-wrapper" style={{ paddingTop: '0', paddingBottom: '2.5rem' }}>
+        <div
+          style={{
+            borderRadius: '1.25rem',
+            overflow: 'hidden',
+            boxShadow: 'var(--shdw-lg)',
+            border: '1px solid var(--bdr-default)',
+            background: '#041740',
+            maxWidth: '100%',
+          }}
+        >
+          <img
+            src={fibreRushBanner}
+            alt="Featured Banner"
+            style={{
+              width: '100%',
+              maxHeight: '440px',
+              objectFit: 'cover',
+              display: 'block',
+              margin: '0 auto',
+            }}
+          />
         </div>
       </section>
 

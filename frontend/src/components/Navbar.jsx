@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  Activity, 
   LogOut, 
   Menu, 
   X, 
@@ -13,6 +12,7 @@ import {
   Shield,
   Zap
 } from 'lucide-react';
+import hospitalIcon from '../assets/hospital-icon.png';
 
 const Navbar = () => {
   const { user, isAuthenticated, role, logout, loginAs } = useAuth();
@@ -80,16 +80,20 @@ const Navbar = () => {
             <Link to="/" className="flex items-center gap-3 group" aria-label="HealthOps Home">
               {/* Logo Icon */}
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-white relative overflow-hidden"
+                className="w-10 h-10 rounded-xl flex items-center justify-center relative overflow-hidden flex-shrink-0"
                 style={{
-                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%)',
                   boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
                   transition: 'transform 300ms ease, box-shadow 300ms ease',
+                  border: '1px solid rgba(255,255,255,0.15)',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08) rotate(-3deg)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(99,102,241,0.6)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1) rotate(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(99,102,241,0.4)'; }}
               >
-                <Activity size={20} strokeWidth={2.5} />
+                <img
+                  src={hospitalIcon}
+                  alt="HealthOps Hospital Logo"
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               {/* Brand Text */}
