@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import hospitalImage from '../assets/hospital.png';
 import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp } from 'lucide-react';
 
 const Home = () => {
@@ -67,76 +66,94 @@ const Home = () => {
   return (
     <div style={{ position: 'relative' }}>
       {/* ================================================================
-          HERO SECTION
+          HERO SECTION WITH VIDEO BACKGROUND
       ================================================================ */}
       <section style={{ minHeight: '92vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden', paddingTop: '4rem', paddingBottom: '6rem' }}>
-        <div className="page-wrapper" style={{ padding: 0 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
+        {/* Background Video */}
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0, pointerEvents: 'none' }}>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              minWidth: '100%',
+              minHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              transform: 'translate(-50%, -50%)',
+              objectFit: 'cover',
+              filter: 'brightness(0.85) contrast(1.05)',
+            }}
+          >
+            <source src="/vedio.mp4" type="video/mp4" />
+          </video>
+          {/* Theme overlay gradient to ensure high readability */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(217, 240, 223, 0.72) 0%, rgba(217, 240, 223, 0.82) 60%, var(--bg-page, #d9f0df) 100%)',
+              backdropFilter: 'blur(1px)',
+            }}
+          />
+        </div>
+
+        <div className="page-wrapper" style={{ padding: 0, position: 'relative', zIndex: 1 }}>
+          <div className="animate-fade-up" style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '2rem' }}>
             
-            {/* Left: Text Content */}
-            <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-                <span className="badge badge-primary">
-                  <Sparkles size={12} />
-                  Next-Gen Healthcare DevSecOps Platform
-                </span>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span className="badge badge-primary">
+                <Sparkles size={12} />
+                Next-Gen Healthcare DevSecOps Platform
+              </span>
+            </div>
 
-              <div>
-                <h1 className="page-title" style={{ fontSize: 'clamp(2.25rem, 4vw, 3.5rem)', lineHeight: 1.1, marginBottom: '1.5rem' }}>
-                  Intelligent Care<br />
-                  Delivery, <span style={{ color: 'var(--c-primary)' }}>Cloud-Native</span><br />
-                  Security.
-                </h1>
+            <div>
+              <h1 className="page-title" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', lineHeight: 1.15, marginBottom: '1.5rem' }}>
+                Intelligent Care Delivery,<br />
+                <span style={{ color: 'var(--c-primary)' }}>Cloud-Native</span> Security.
+              </h1>
 
-                <p className="page-subtitle" style={{ fontSize: '1.1rem', maxWidth: '520px' }}>
-                  HealthOps bridges patients, clinical specialists, and hospital administration on a
-                  containerized, audited microservice architecture with automated CI/CD and zero-trust RBAC.
-                </p>
-              </div>
+              <p className="page-subtitle" style={{ fontSize: '1.15rem', maxWidth: '640px', margin: '0 auto' }}>
+                HealthOps bridges patients, clinical specialists, and hospital administration on a
+                containerized, audited microservice architecture with automated CI/CD and zero-trust RBAC.
+              </p>
+            </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <Link to={isAuthenticated ? (role === 'doctor' ? '/doctor' : role === 'admin' ? '/admin' : '/patient/book') : '/register'} className="btn btn-primary btn-lg">
-                  Book an Appointment
-                  <ArrowRight size={18} />
-                </Link>
-                <Link to="/doctors" className="btn btn-secondary btn-lg">
-                  <Stethoscope size={18} />
-                  Browse Specialists
-                </Link>
-              </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem' }}>
+              <Link to={isAuthenticated ? (role === 'doctor' ? '/doctor' : role === 'admin' ? '/admin' : '/patient/book') : '/register'} className="btn btn-primary btn-lg">
+                Book an Appointment
+                <ArrowRight size={18} />
+              </Link>
+              <Link to="/doctors" className="btn btn-secondary btn-lg">
+                <Stethoscope size={18} />
+                Browse Specialists
+              </Link>
+            </div>
 
-              {/* Demo Launch Banner */}
-              <div style={{ padding: '1.25rem', borderRadius: '1rem', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)', boxShadow: 'var(--shdw-sm)' }}>
-                <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-secondary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Zap size={14} style={{ color: 'var(--c-amber)' }} />
-                  ⚡ Instant Demo Access — 1-Click Role Login
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <button onClick={() => handleDemoAccess('patient')} className="btn btn-sm" style={{ background: 'var(--c-primary-pale)', color: 'var(--c-primary)' }}>
-                    <Users size={14} /> Launch as Patient
-                  </button>
-                  <button onClick={() => handleDemoAccess('doctor')} className="btn btn-sm" style={{ background: 'var(--c-cyan-pale)', color: 'var(--c-cyan)' }}>
-                    <Stethoscope size={14} /> Launch as Doctor
-                  </button>
-                  <button onClick={() => handleDemoAccess('admin')} className="btn btn-sm" style={{ background: 'var(--c-emerald-pale)', color: 'var(--c-emerald)' }}>
-                    <Server size={14} /> Launch as Admin
-                  </button>
-                </div>
+            {/* Demo Launch Banner */}
+            <div style={{ padding: '1.25rem 1.75rem', borderRadius: '1rem', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)', boxShadow: 'var(--shdw-md)', backdropFilter: 'blur(8px)', width: '100%', maxWidth: '620px' }}>
+              <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-secondary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                <Zap size={14} style={{ color: 'var(--c-amber)' }} />
+                ⚡ Instant Demo Access — 1-Click Role Login
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem' }}>
+                <button onClick={() => handleDemoAccess('patient')} className="btn btn-sm" style={{ background: 'var(--c-primary-pale)', color: 'var(--c-primary)' }}>
+                  <Users size={14} /> Launch as Patient
+                </button>
+                <button onClick={() => handleDemoAccess('doctor')} className="btn btn-sm" style={{ background: 'var(--c-cyan-pale)', color: 'var(--c-cyan)' }}>
+                  <Stethoscope size={14} /> Launch as Doctor
+                </button>
+                <button onClick={() => handleDemoAccess('admin')} className="btn btn-sm" style={{ background: 'var(--c-emerald-pale)', color: 'var(--c-emerald)' }}>
+                  <Server size={14} /> Launch as Admin
+                </button>
               </div>
             </div>
 
-            {/* Right: Hospital Photo */}
-            <div className="animate-fade-up-2" style={{ maxWidth: '640px', width: '100%', margin: '0 auto' }}>
-              <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '16 / 9', borderRadius: '1rem', border: '1px solid var(--bdr-default)', boxShadow: 'var(--shdw-lg)' }}>
-                <img
-                  src={hospitalImage}
-                  alt="HealthOps Hospital exterior"
-                  style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
-                />
-              </div>
-            </div>
           </div>
         </div>
       </section>
