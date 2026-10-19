@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp } from 'lucide-react';
+import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp, HeartPulse } from 'lucide-react';
 
 const Home = () => {
   const { loginAs, isAuthenticated, role } = useAuth();
@@ -106,21 +106,69 @@ const Home = () => {
           <div className="animate-fade-up" style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '2rem' }}>
             
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span className="badge badge-primary">
-                <Sparkles size={12} />
-                Next-Gen Healthcare DevSecOps Platform
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.45rem 1.15rem',
+                  borderRadius: '9999px',
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.15)',
+                  backdropFilter: 'blur(8px)',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  color: '#047857',
+                }}
+              >
+                <HeartPulse size={15} style={{ color: '#ef4444' }} />
+                Leading Multi-Specialty Hospital & Medical Center
               </span>
             </div>
 
             <div>
-              <h1 className="page-title" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', lineHeight: 1.15, marginBottom: '1.5rem' }}>
-                Intelligent Care Delivery,<br />
-                <span style={{ color: 'var(--c-primary)' }}>Cloud-Native</span> Security.
+              <h1
+                style={{
+                  fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif",
+                  fontSize: 'clamp(2.5rem, 5.5vw, 4.25rem)',
+                  fontWeight: 900,
+                  lineHeight: 1.12,
+                  letterSpacing: '-0.03em',
+                  marginBottom: '1.5rem',
+                  color: '#0f172a',
+                }}
+              >
+                Caring for Your Health,<br />
+                <span
+                  style={{
+                    background: 'linear-gradient(135deg, #1d4ed8 0%, #0284c7 40%, #059669 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    display: 'inline-block',
+                    filter: 'drop-shadow(0 2px 14px rgba(29, 78, 216, 0.2))',
+                  }}
+                >
+                  Inspiring Better Living.
+                </span>
               </h1>
 
-              <p className="page-subtitle" style={{ fontSize: '1.15rem', maxWidth: '640px', margin: '0 auto' }}>
-                HealthOps bridges patients, clinical specialists, and hospital administration on a
-                containerized, audited microservice architecture with automated CI/CD and zero-trust RBAC.
+              <p
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 'clamp(1.05rem, 2vw, 1.22rem)',
+                  color: '#334155',
+                  lineHeight: 1.8,
+                  maxWidth: '700px',
+                  margin: '0 auto',
+                  fontWeight: 500,
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                HealthOps Hospital provides comprehensive patient care, board-certified specialists, modern medical treatments, and 24/7 emergency response — bringing compassionate care and clinical excellence to you and your family.
               </p>
             </div>
 
