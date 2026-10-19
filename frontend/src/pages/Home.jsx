@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp, HeartPulse } from 'lucide-react';
+import fibreRushBanner from '../assets/fibre-rush.png';
 
 const Home = () => {
   const { loginAs, isAuthenticated, role } = useAuth();
@@ -54,13 +55,6 @@ const Home = () => {
       border: 'var(--c-emerald-border)',
       glow: 'rgba(5,150,105,0.15)',
     },
-  ];
-
-  const techPillars = [
-    { icon: Server, label: 'Kubernetes', sub: 'High Availability' },
-    { icon: Lock, label: 'Zero Trust', sub: 'JWT RBAC' },
-    { icon: Globe, label: 'CI/CD', sub: 'GitHub Actions' },
-    { icon: Activity, label: 'Monitoring', sub: 'Prometheus' },
   ];
 
   return (
@@ -258,23 +252,30 @@ const Home = () => {
       </section>
 
       {/* ================================================================
-          TECH PILLARS STRIP
+          FEATURED BANNER
       ================================================================ */}
-      <section className="page-wrapper" style={{ paddingTop: '0' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', padding: '1.75rem 2rem', borderRadius: 'var(--r-xl)', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)' }}>
-          <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-muted)', marginRight: '0.5rem' }}>Powered by:</p>
-          {techPillars.map((tp, i) => {
-            const TIcon = tp.icon;
-            return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: 'var(--r-md)', background: 'var(--bg-surface)', border: '1px solid var(--bdr-subtle)' }}>
-                <TIcon size={16} style={{ color: 'var(--c-primary)' }} />
-                <div>
-                  <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--txt-primary)' }}>{tp.label}</p>
-                  <p style={{ fontSize: '0.65rem', color: 'var(--txt-muted)' }}>{tp.sub}</p>
-                </div>
-              </div>
-            );
-          })}
+      <section className="page-wrapper" style={{ paddingTop: '0', paddingBottom: '2.5rem' }}>
+        <div
+          style={{
+            borderRadius: '1.25rem',
+            overflow: 'hidden',
+            boxShadow: 'var(--shdw-lg)',
+            border: '1px solid var(--bdr-default)',
+            background: '#041740',
+            maxWidth: '100%',
+          }}
+        >
+          <img
+            src={fibreRushBanner}
+            alt="Featured Banner"
+            style={{
+              width: '100%',
+              maxHeight: '440px',
+              objectFit: 'cover',
+              display: 'block',
+              margin: '0 auto',
+            }}
+          />
         </div>
       </section>
 
