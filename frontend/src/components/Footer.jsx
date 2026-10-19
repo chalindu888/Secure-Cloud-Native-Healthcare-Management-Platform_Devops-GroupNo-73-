@@ -1,5 +1,6 @@
 import React from 'react';
-import { Activity, MapPin, Phone, Mail, MessageCircle, Globe, Camera, Music2, AtSign, PhoneCall } from 'lucide-react';
+import { MapPin, Phone, Mail, MessageCircle, Globe, Camera, Music2, AtSign, PhoneCall } from 'lucide-react';
+import hospitalIcon from '../assets/hospital-icon.png';
 
 const Footer = () => {
   return (
@@ -22,16 +23,19 @@ const Footer = () => {
             {/* Brand / Hospital Mission & Emergency Hotline */}
             <div style={{ gridColumn: 'span 1' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                <div
+                <img
+                  src={hospitalIcon}
+                  alt="HealthOps Hospital Icon"
                   style={{
-                    width: '36px', height: '36px', borderRadius: '0.625rem',
-                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '0.625rem',
+                    objectFit: 'cover',
                     boxShadow: '0 4px 15px rgba(99,102,241,0.3)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    flexShrink: 0,
                   }}
-                >
-                  <Activity size={18} color="white" strokeWidth={2.5} />
-                </div>
+                />
                 <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#f9fafb' }}>HealthOps Hospital</span>
               </div>
               <p style={{ fontSize: '0.78rem', color: '#d1d5db', lineHeight: 1.8, maxWidth: '260px' }}>
