@@ -3,15 +3,47 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import StatusBadge from '../../components/StatusBadge';
 import Modal from '../../components/Modal';
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Search, 
-  CheckCircle, 
-  FileText, 
-  CheckCircle2
+import {
+  Calendar,
+  Clock,
+  Stethoscope,
+  Search,
+  CheckCircle,
+  FileText,
+  CheckCircle2,
+  X,
+  Pill,
+  ClipboardList,
+  Pencil
 } from 'lucide-react';
+
+// Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
+// so spacing here uses flex/grid `gap` and inline padding instead.
+
+const FILTER_TABS = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
+
+// Pending requests need action first, then upcoming confirmed visits
+const STATUS_ORDER = { pending: 0, confirmed: 1, completed: 2, cancelled: 3 };
+
+const formatDate = (isoDate) => {
+  if (!isoDate) return '—';
+  const [y, m, d] = isoDate.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
+
+const getInitials = (name = '') =>
+  name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
 
 const DoctorAppointments = () => {
   const { user } = useAuth();
@@ -19,6 +51,7 @@ const DoctorAppointments = () => {
 
   const [activeFilter, setActiveFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [decliningId, setDecliningId] = useState(null);
 
   // Complete/Prescribe Modal state
   const [activeModalApt, setActiveModalApt] = useState(null);
@@ -29,18 +62,31 @@ const DoctorAppointments = () => {
     (apt) => apt.doctorId === user?.id || apt.doctorName === user?.name
   );
 
-  const filtered = docAppointments.filter((apt) => {
-    if (activeFilter !== 'all' && apt.status !== activeFilter) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      return (
-        apt.patientName.toLowerCase().includes(q) ||
-        apt.patientEmail.toLowerCase().includes(q) ||
-        apt.reason.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  const counts = FILTER_TABS.reduce((acc, tab) => {
+    acc[tab] = tab === 'all'
+      ? docAppointments.length
+      : docAppointments.filter((apt) => apt.status === tab).length;
+    return acc;
+  }, {});
+
+  const filtered = docAppointments
+    .filter((apt) => {
+      if (activeFilter !== 'all' && apt.status !== activeFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return (
+          apt.patientName.toLowerCase().includes(q) ||
+          apt.patientEmail.toLowerCase().includes(q) ||
+          apt.reason.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const byStatus = (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9);
+      if (byStatus !== 0) return byStatus;
+      return `${a.date} ${a.timeSlot}`.localeCompare(`${b.date} ${b.timeSlot}`);
+    });
 
   const handleOpenCompleteModal = (apt) => {
     setActiveModalApt(apt);
@@ -62,159 +108,264 @@ const DoctorAppointments = () => {
     }
   };
 
+  const handleDecline = (aptId) => {
+    updateAppointmentStatus(aptId, 'cancelled', '', '', user?.email);
+    setDecliningId(null);
+  };
+
+  const clearFilters = () => {
+    setActiveFilter('all');
+    setSearch('');
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Clinical Appointments Ledger</h1>
-        <p className="text-sm text-slate-600">
-          Manage your schedule, accept incoming requests, and record medical diagnoses and prescriptions.
-        </p>
+    <div className="page-wrapper flex flex-col gap-8">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="page-title">Clinical Appointments</h1>
+          <p className="page-subtitle">
+            Review new requests, confirm visits, and record diagnoses and prescriptions.
+          </p>
+        </div>
+        {counts.pending > 0 && (
+          <button
+            onClick={() => setActiveFilter('pending')}
+            className="badge badge-warning self-start md:self-auto"
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', cursor: 'pointer' }}
+          >
+            <span className="badge-dot"></span>
+            {counts.pending} request{counts.pending > 1 ? 's' : ''} awaiting your response
+          </button>
+        )}
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-          {/* Status Tabs */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full md:w-auto overflow-x-auto text-xs">
-            {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map((tab) => (
+      <div
+        className="card-strong flex flex-col lg:flex-row gap-4 justify-between lg:items-center"
+        style={{ padding: '1rem' }}
+      >
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filter by status">
+          {FILTER_TABS.map((tab) => {
+            const isActive = activeFilter === tab;
+            return (
               <button
                 key={tab}
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => setActiveFilter(tab)}
-                className={`px-3 py-1.5 rounded-lg font-semibold capitalize whitespace-nowrap transition ${
-                  activeFilter === tab
-                    ? 'bg-white text-indigo-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                className={`inline-flex items-center gap-2 rounded-full text-sm font-semibold capitalize transition border ${
+                  isActive
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-700'
                 }`}
+                style={{ padding: '0.45rem 0.9rem' }}
               >
                 {tab}
+                <span
+                  className={`rounded-full text-xs font-bold ${
+                    isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}
+                  style={{ padding: '0.05rem 0.5rem' }}
+                >
+                  {counts[tab]}
+                </span>
               </button>
-            ))}
-          </div>
+            );
+          })}
+        </div>
 
-          {/* Search Box */}
-          <div className="w-full md:w-72 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <Search size={16} />
-            </div>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search patient name or email..."
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+        <div className="relative w-full lg:w-80">
+          <Search
+            size={18}
+            className="absolute text-slate-400 pointer-events-none"
+            style={{ left: '0.9rem', top: '50%', transform: 'translateY(-50%)' }}
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search patient, email or symptoms"
+            aria-label="Search appointments"
+            style={{ paddingLeft: '2.6rem', paddingRight: search ? '2.6rem' : undefined }}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              aria-label="Clear search"
+              className="absolute text-slate-400 hover:text-slate-700 rounded-full"
+              style={{ right: '0.75rem', top: '50%', transform: 'translateY(-50%)', padding: '0.25rem' }}
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Appointments List */}
-      <div className="space-y-4">
+      <div className="flex flex-col gap-5">
         {filtered.length > 0 ? (
           filtered.map((apt) => (
-            <div
+            <article
               key={apt.id}
-              className="bg-white rounded-2xl border border-slate-200 shadow-xs hover:border-slate-300 transition p-6 space-y-4"
+              className={`card-strong flex flex-col gap-5 border-l-4 ${
+                apt.status === 'pending'
+                  ? 'border-l-amber-400'
+                  : apt.status === 'confirmed'
+                  ? 'border-l-emerald-500'
+                  : apt.status === 'completed'
+                  ? 'border-l-indigo-500'
+                  : 'border-l-slate-300'
+              }`}
+              style={{ padding: '1.5rem' }}
             >
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-sm">
-                    {apt.patientName.slice(0, 2).toUpperCase()}
+              {/* Patient + Status */}
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-12 h-12 shrink-0 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+                    {getInitials(apt.patientName)}
                   </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-base">{apt.patientName}</h3>
-                    <p className="text-xs text-slate-500">{apt.patientEmail}</p>
+                  <div className="min-w-0">
+                    <h3 className="text-lg text-slate-900 truncate">{apt.patientName}</h3>
+                    <p className="text-sm text-slate-500 truncate">{apt.patientEmail}</p>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col items-end gap-1">
                   <StatusBadge status={apt.status} />
-                  <span className="text-xs text-slate-400">Ref: {apt.id}</span>
+                  <span className="text-xs text-slate-400">Ref #{apt.id}</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Calendar size={15} className="text-slate-400" />
-                  <span>Date: <strong className="text-slate-900">{apt.date}</strong></span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Clock size={15} className="text-slate-400" />
-                  <span>Slot: <strong className="text-slate-900">{apt.timeSlot}</strong></span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-700">
-                  <User size={15} className="text-slate-400" />
-                  <span>Specialty: <strong className="text-slate-900">{apt.doctorSpecialty}</strong></span>
-                </div>
+              {/* When & What */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { icon: Calendar, label: 'Date', value: formatDate(apt.date) },
+                  { icon: Clock, label: 'Time', value: apt.timeSlot },
+                  { icon: Stethoscope, label: 'Specialty', value: apt.doctorSpecialty }
+                ].map(({ icon: Icon, label, value }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-3 rounded-xl bg-slate-50 border border-slate-100"
+                    style={{ padding: '0.75rem 1rem' }}
+                  >
+                    <Icon size={18} className="text-indigo-500 shrink-0" />
+                    <div>
+                      <p className="text-xs text-slate-500">{label}</p>
+                      <p className="text-sm font-semibold text-slate-900">{value}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <div>
-                <p className="text-xs text-slate-600">
-                  <strong className="text-slate-700">Presenting Symptoms / Reason:</strong> {apt.reason}
-                </p>
+              {/* Reason for Visit */}
+              <div className="flex flex-col gap-1">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Reason for visit</p>
+                <p className="text-sm text-slate-800">{apt.reason}</p>
               </div>
 
               {/* Existing Notes or Prescriptions */}
               {(apt.notes || apt.prescription) && (
-                <div className="p-3 rounded-xl bg-indigo-50/50 border border-indigo-100 space-y-1.5 text-xs text-indigo-950">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {apt.notes && (
-                    <p>
-                      <strong className="text-indigo-900">Diagnosis:</strong> {apt.notes}
-                    </p>
+                    <div
+                      className="flex gap-3 rounded-xl bg-indigo-50 border border-indigo-100"
+                      style={{ padding: '0.9rem 1rem' }}
+                    >
+                      <ClipboardList size={18} className="text-indigo-600 shrink-0" style={{ marginTop: '0.1rem' }} />
+                      <div className="flex flex-col gap-1">
+                        <p className="text-xs font-bold uppercase tracking-wider text-indigo-700">Diagnosis</p>
+                        <p className="text-sm text-slate-800">{apt.notes}</p>
+                      </div>
+                    </div>
                   )}
                   {apt.prescription && (
-                    <p className="font-mono text-emerald-800">
-                      <strong>Rx:</strong> {apt.prescription}
-                    </p>
+                    <div
+                      className="flex gap-3 rounded-xl bg-emerald-50 border border-emerald-100"
+                      style={{ padding: '0.9rem 1rem' }}
+                    >
+                      <Pill size={18} className="text-emerald-600 shrink-0" style={{ marginTop: '0.1rem' }} />
+                      <div className="flex flex-col gap-1">
+                        <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Prescription</p>
+                        <p className="text-sm text-slate-800 whitespace-pre-line">{apt.prescription}</p>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                {apt.status === 'pending' && (
-                  <>
-                    <button
-                      onClick={() => updateAppointmentStatus(apt.id, 'cancelled', '', '', user?.email)}
-                      className="px-4 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 transition"
-                    >
-                      Decline Request
-                    </button>
-                    <button
-                      onClick={() => updateAppointmentStatus(apt.id, 'confirmed', '', '', user?.email)}
-                      className="px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5 shadow-xs"
-                    >
-                      <CheckCircle size={14} />
-                      <span>Accept Appointment</span>
-                    </button>
-                  </>
-                )}
+              {apt.status !== 'cancelled' && (
+                <div
+                  className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-100"
+                  style={{ paddingTop: '1rem' }}
+                >
+                  {apt.status === 'pending' && (
+                    decliningId === apt.id ? (
+                      <>
+                        <span className="text-sm text-slate-600 mr-auto">
+                          Decline this request? The patient will be notified.
+                        </span>
+                        <button onClick={() => setDecliningId(null)} className="btn btn-secondary btn-sm">
+                          Keep Request
+                        </button>
+                        <button onClick={() => handleDecline(apt.id)} className="btn btn-danger btn-sm">
+                          Yes, Decline
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => setDecliningId(apt.id)}
+                          className="btn btn-secondary btn-sm"
+                          style={{ color: 'var(--c-rose)' }}
+                        >
+                          <X size={16} />
+                          Decline
+                        </button>
+                        <button
+                          onClick={() => updateAppointmentStatus(apt.id, 'confirmed', '', '', user?.email)}
+                          className="btn btn-success btn-sm"
+                        >
+                          <CheckCircle size={16} />
+                          Accept Appointment
+                        </button>
+                      </>
+                    )
+                  )}
 
-                {apt.status === 'confirmed' && (
-                  <button
-                    onClick={() => handleOpenCompleteModal(apt)}
-                    className="px-5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition flex items-center gap-1.5 shadow-xs"
-                  >
-                    <FileText size={14} />
-                    <span>Complete & Write Prescription</span>
-                  </button>
-                )}
+                  {apt.status === 'confirmed' && (
+                    <button onClick={() => handleOpenCompleteModal(apt)} className="btn btn-primary btn-sm">
+                      <FileText size={16} />
+                      Complete Visit & Write Prescription
+                    </button>
+                  )}
 
-                {apt.status === 'completed' && (
-                  <button
-                    onClick={() => handleOpenCompleteModal(apt)}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
-                  >
-                    Edit Prescription / Notes
-                  </button>
-                )}
-              </div>
-            </div>
+                  {apt.status === 'completed' && (
+                    <button onClick={() => handleOpenCompleteModal(apt)} className="btn btn-secondary btn-sm">
+                      <Pencil size={16} />
+                      Edit Notes / Prescription
+                    </button>
+                  )}
+                </div>
+              )}
+            </article>
           ))
         ) : (
-          <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-2">
-            <Calendar size={36} className="text-slate-300 mx-auto" />
-            <h3 className="font-bold text-slate-700 text-base">No appointments found</h3>
-            <p className="text-xs text-slate-500">No records match the current filter query.</p>
+          <div className="card-strong empty-state">
+            <div className="empty-state-icon">
+              <Calendar size={28} />
+            </div>
+            <h3 className="text-lg text-slate-800">No appointments found</h3>
+            <p className="text-sm text-slate-500">
+              {search || activeFilter !== 'all'
+                ? 'Nothing matches your current filter or search.'
+                : 'You have no appointments yet.'}
+            </p>
+            {(search || activeFilter !== 'all') && (
+              <button onClick={clearFilters} className="btn btn-secondary btn-sm">
+                Clear filters
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -223,57 +374,54 @@ const DoctorAppointments = () => {
       <Modal
         isOpen={!!activeModalApt}
         onClose={() => setActiveModalApt(null)}
-        title={`Clinical Record & Prescription: ${activeModalApt?.patientName}`}
+        title={`Clinical Record: ${activeModalApt?.patientName}`}
       >
-        <form onSubmit={handleSaveModal} className="space-y-4 text-xs">
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+        <form onSubmit={handleSaveModal} className="flex flex-col gap-5" style={{ padding: '1.5rem' }}>
+          <div
+            className="flex flex-col gap-1 text-sm rounded-xl bg-slate-50 border border-slate-200"
+            style={{ padding: '0.9rem 1rem' }}
+          >
             <p><strong>Patient:</strong> {activeModalApt?.patientName} ({activeModalApt?.patientEmail})</p>
-            <p><strong>Reason for Visit:</strong> {activeModalApt?.reason}</p>
-            <p><strong>Date & Slot:</strong> {activeModalApt?.date} at {activeModalApt?.timeSlot}</p>
+            <p><strong>Reason for visit:</strong> {activeModalApt?.reason}</p>
+            <p><strong>When:</strong> {formatDate(activeModalApt?.date)} at {activeModalApt?.timeSlot}</p>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Diagnosis Assessment & Clinical Notes
+          <div className="flex flex-col gap-2">
+            <label htmlFor="diagnosis-notes" className="text-sm font-bold text-slate-700">
+              Diagnosis & clinical notes
             </label>
             <textarea
+              id="diagnosis-notes"
               rows={3}
               value={diagnosisNotes}
               onChange={(e) => setDiagnosisNotes(e.target.value)}
               placeholder="e.g. Patient presents with acute bronchitis. Lungs show wheezing..."
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Digital Medical Prescription (Rx)
+          <div className="flex flex-col gap-2">
+            <label htmlFor="prescription-text" className="text-sm font-bold text-slate-700">
+              Prescription (Rx)
             </label>
             <textarea
-              rows={3}
+              id="prescription-text"
+              rows={4}
               value={prescriptionText}
               onChange={(e) => setPrescriptionText(e.target.value)}
-              placeholder="e.g. 1. Amoxicillin 500mg (1 tablet every 8h for 7 days)&#10;2. Salbutamol Inhaler as needed"
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+              placeholder={'e.g. 1. Amoxicillin 500mg (1 tablet every 8h for 7 days)\n2. Salbutamol Inhaler as needed'}
               required
             />
+            <p className="text-xs text-slate-500">Put each medicine on its own line.</p>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => setActiveModalApt(null)}
-              className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition"
-            >
+          <div className="flex justify-end gap-3 border-t border-slate-100" style={{ paddingTop: '1rem' }}>
+            <button type="button" onClick={() => setActiveModalApt(null)} className="btn btn-secondary btn-sm">
               Cancel
             </button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition flex items-center gap-1.5 shadow-sm"
-            >
+            <button type="submit" className="btn btn-primary btn-sm">
               <CheckCircle2 size={16} />
-              <span>Save Record & Issue Rx</span>
+              Save & Complete Visit
             </button>
           </div>
         </form>

@@ -1,16 +1,18 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
+  Home,
   LogOut, 
   Menu, 
   X, 
   Server,
-  ChevronDown,
   User,
   Stethoscope,
   Shield,
-  Zap
+  LayoutDashboard,
+  Calendar,
+  Clock
 } from 'lucide-react';
 import hospitalIcon from '../assets/hospital-icon.png';
 
@@ -60,122 +62,141 @@ const Navbar = () => {
 
   return (
     <nav
-      className="sticky top-0 z-50"
+      className="sticky top-0 z-50 w-full"
       style={{
-        background: scrolled
-          ? 'rgba(20, 50, 43, 0.94)'
-          : 'rgba(20, 50, 43, 0.86)',
+        background: scrolled ? 'rgba(20, 50, 43, 0.96)' : 'rgba(20, 50, 43, 0.92)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: scrolled ? '0 8px 40px rgba(0,0,0,0.4)' : 'none',
+        boxShadow: scrolled ? '0 8px 40px rgba(0,0,0,0.4)' : '0 2px 10px rgba(0,0,0,0.2)',
         transition: 'all 300ms ease',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
 
-          {/* Brand Logo */}
-          <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-3 group" aria-label="HealthOps Home">
-              {/* Logo Icon */}
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center relative overflow-hidden flex-shrink-0"
+          {/* Left: Hospital Brand Logo ONLY */}
+          <Link to="/" className="flex items-center gap-3 group flex-shrink-0" aria-label="HealthOps Home">
+            <div
+              className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center relative flex-shrink-0"
+              style={{
+                boxShadow: '0 4px 15px rgba(99,102,241,0.4)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                transition: 'transform 300ms ease, box-shadow 300ms ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.06)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              <img
+                src={hospitalIcon}
+                alt="HealthOps Hospital Logo"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="leading-tight">
+              <span
+                className="font-extrabold text-lg tracking-tight block"
                 style={{
-                  boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-                  transition: 'transform 300ms ease, box-shadow 300ms ease',
-                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'linear-gradient(90deg, #e2e8f0, #a5b4fc)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08) rotate(-3deg)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(99,102,241,0.6)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1) rotate(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(99,102,241,0.4)'; }}
               >
-                <img
-                  src={hospitalIcon}
-                  alt="HealthOps Hospital Logo"
-                  className="w-full h-full object-cover"
-                />
-              </div>
+                Health<span style={{ background: 'linear-gradient(135deg, #818cf8, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Ops</span>
+              </span>
+              <p className="text-[10px] font-medium leading-none" style={{ color: '#94a3b8' }}>
+                Hospital Platform
+              </p>
+            </div>
+          </Link>
 
-              {/* Brand Text */}
-              <div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="font-extrabold text-xl tracking-tight"
-                    style={{
-                      background: 'linear-gradient(90deg, #e2e8f0, #a5b4fc)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    Health<span style={{ background: 'linear-gradient(135deg, #818cf8, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Ops</span>
-                  </span>
-                  <span
-                    className="text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider"
-                    style={{ background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)' }}
-                  >
-                    DevSecOps
-                  </span>
-                </div>
-                <p className="text-[10px] font-medium leading-none" style={{ color: '#64748b' }}>
-                  Cloud-Native Healthcare
-                </p>
-              </div>
-            </Link>
-
-            {/* Desktop Nav Links */}
-            <div className="hidden md:flex items-center gap-1">
-              <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>Home</Link>
-              <Link to="/doctors" className={`nav-link ${isActive('/doctors') ? 'active' : ''}`}>Find Doctors</Link>
+          {/* Right: All Navigation Links, Demo Switcher, & Profile on the Right Side */}
+          <div className="hidden lg:flex items-center gap-3">
+            
+            {/* Nav Links */}
+            <div className="flex items-center gap-1 mr-2">
+              <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
+                <Home size={14} />
+                Home
+              </Link>
+              <Link to="/doctors" className={`nav-link ${isActive('/doctors') ? 'active' : ''}`}>
+                <Stethoscope size={14} />
+                Find Doctors
+              </Link>
 
               {isAuthenticated && role === 'patient' && (
                 <>
-                  <Link to="/patient" className={`nav-link ${isActive('/patient') ? 'active' : ''}`}>Dashboard</Link>
-                  <Link to="/patient/book" className={`nav-link ${isActive('/patient/book') ? 'active' : ''}`}>Book</Link>
-                  <Link to="/patient/appointments" className={`nav-link ${isActive('/patient/appointments') ? 'active' : ''}`}>My Appointments</Link>
+                  <Link to="/patient" className={`nav-link ${isActive('/patient') ? 'active' : ''}`}>
+                    <LayoutDashboard size={14} />
+                    Dashboard
+                  </Link>
+                  <Link to="/patient/book" className={`nav-link ${isActive('/patient/book') ? 'active' : ''}`}>
+                    <Calendar size={14} />
+                    Book
+                  </Link>
+                  <Link to="/patient/appointments" className={`nav-link ${isActive('/patient/appointments') ? 'active' : ''}`}>
+                    <Clock size={14} />
+                    My Appointments
+                  </Link>
                 </>
               )}
 
               {isAuthenticated && role === 'doctor' && (
                 <>
-                  <Link to="/doctor" className={`nav-link ${isActive('/doctor') ? 'active' : ''}`}>Dashboard</Link>
-                  <Link to="/doctor/appointments" className={`nav-link ${isActive('/doctor/appointments') ? 'active' : ''}`}>Queue</Link>
-                  <Link to="/doctor/schedule" className={`nav-link ${isActive('/doctor/schedule') ? 'active' : ''}`}>Schedule</Link>
+                  <Link to="/doctor" className={`nav-link ${isActive('/doctor') ? 'active' : ''}`}>
+                    <LayoutDashboard size={14} />
+                    Dashboard
+                  </Link>
+                  <Link to="/doctor/appointments" className={`nav-link ${isActive('/doctor/appointments') ? 'active' : ''}`}>
+                    <Clock size={14} />
+                    Queue
+                  </Link>
+                  <Link to="/doctor/schedule" className={`nav-link ${isActive('/doctor/schedule') ? 'active' : ''}`}>
+                    <Calendar size={14} />
+                    Schedule
+                  </Link>
                 </>
               )}
 
               {isAuthenticated && role === 'admin' && (
                 <>
-                  <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>Admin Hub</Link>
-                  <Link to="/admin/users" className={`nav-link ${isActive('/admin/users') ? 'active' : ''}`}>Users</Link>
-                  <Link to="/admin/audit-logs" className={`nav-link ${isActive('/admin/audit-logs') ? 'active' : ''}`}>Audit</Link>
+                  <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
+                    <LayoutDashboard size={14} />
+                    Admin Hub
+                  </Link>
+                  <Link to="/admin/users" className={`nav-link ${isActive('/admin/users') ? 'active' : ''}`}>
+                    <User size={14} />
+                    Users
+                  </Link>
+                  <Link to="/admin/audit-logs" className={`nav-link ${isActive('/admin/audit-logs') ? 'active' : ''}`}>
+                    <Shield size={14} />
+                    Audit
+                  </Link>
                   <Link
                     to="/admin/devops"
                     className={`nav-link flex items-center gap-1.5 ${isActive('/admin/devops') ? 'active' : ''}`}
                     style={{ color: isActive('/admin/devops') ? '#6ee7b7' : undefined }}
                   >
-                    <Server size={13} />
+                    <Server size={14} />
                     DevOps
                   </Link>
                 </>
               )}
             </div>
-          </div>
 
-          {/* Right Section */}
-          <div className="hidden lg:flex items-center gap-3">
-            {/* Demo Role Switcher */}
+            {/* Quick Demo Role Switcher */}
             <div
               className="flex items-center gap-1 p-1 rounded-xl"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
             >
-              <span className="px-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#475569' }}>
+              <span className="px-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#94a3b8' }}>
                 Demo:
               </span>
               {[
-                { r: 'patient', label: 'Patient', active: 'rgba(99,102,241,0.85)' },
-                { r: 'doctor', label: 'Doctor', active: 'rgba(6,182,212,0.85)' },
-                { r: 'admin', label: 'Admin', active: 'rgba(16,185,129,0.85)' },
+                { r: 'patient', label: 'Patient', active: 'rgba(99,102,241,0.9)' },
+                { r: 'doctor', label: 'Doctor', active: 'rgba(6,182,212,0.9)' },
+                { r: 'admin', label: 'Admin', active: 'rgba(16,185,129,0.9)' },
               ].map(({ r, label, active }) => (
                 <button
                   key={r}
@@ -186,7 +207,6 @@ const Navbar = () => {
                     background: role === r ? active : 'transparent',
                     color: role === r ? '#fff' : '#94a3b8',
                     boxShadow: role === r ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
-                    transition: 'all 200ms ease',
                   }}
                 >
                   {label}
@@ -203,21 +223,21 @@ const Navbar = () => {
                   style={{
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.1)',
-                    transition: 'all 200ms ease',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
                 >
-                  {/* Avatar */}
                   <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white"
-                    style={{ background: currentRole?.bg || 'rgba(99,102,241,0.3)', border: `1px solid ${currentRole?.border || 'rgba(99,102,241,0.4)'}`, color: currentRole?.color || '#a5b4fc' }}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                    style={{
+                      background: currentRole?.bg || 'rgba(99,102,241,0.3)',
+                      border: `1px solid ${currentRole?.border || 'rgba(99,102,241,0.4)'}`,
+                      color: currentRole?.color || '#a5b4fc',
+                    }}
                   >
                     {user?.name ? user.name.slice(0, 2).toUpperCase() : 'US'}
                   </div>
                   <div className="hidden xl:block text-left leading-none">
-                    <p className="text-xs font-semibold" style={{ color: '#e2e8f0' }}>{user?.name}</p>
-                    <p className="text-[10px] capitalize mt-0.5" style={{ color: '#64748b' }}>{role}</p>
+                    <p className="text-xs font-semibold" style={{ color: '#e2e8f0' }}>{user?.name || 'Account'}</p>
+                    <p className="text-[10px] capitalize mt-0.5" style={{ color: '#94a3b8' }}>{role}</p>
                   </div>
                 </Link>
 
@@ -227,17 +247,15 @@ const Navbar = () => {
                   title="Sign Out"
                   className="btn btn-icon transition-all"
                   style={{
-                    background: 'rgba(239,68,68,0.1)',
-                    border: '1px solid rgba(239,68,68,0.2)',
+                    background: 'rgba(239,68,68,0.12)',
+                    border: '1px solid rgba(239,68,68,0.25)',
                     color: '#f87171',
                     minHeight: '2.25rem',
                     width: '2.25rem',
                     borderRadius: '0.625rem',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.2)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.4)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.2)'; }}
                 >
-                  <LogOut size={16} />
+                  <LogOut size={15} />
                 </button>
               </div>
             ) : (
@@ -252,12 +270,11 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Button (< lg screens) */}
           <div className="flex items-center lg:hidden">
             <button
               type="button"
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-xl transition-all"
               style={{
@@ -269,24 +286,22 @@ const Navbar = () => {
               {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
+
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer Dropdown */}
       {mobileMenuOpen && (
         <div
-          id="mobile-navigation"
-          role="dialog"
-          aria-label="Mobile navigation"
-          className="lg:hidden px-4 pt-4 pb-6 space-y-4"
+          className="lg:hidden px-4 pt-3 pb-6 space-y-4"
           style={{
-            background: 'rgba(10,15,30,0.97)',
+            background: 'rgba(20, 50, 43, 0.98)',
             borderTop: '1px solid rgba(255,255,255,0.08)',
           }}
         >
-          {/* Role Switcher */}
+          {/* Demo Role Switcher Mobile */}
           <div className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#475569' }}>Switch Demo Role</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#94a3b8' }}>Switch Demo Role</p>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { r: 'patient', label: 'Patient', color: '#818cf8', bg: 'rgba(99,102,241,0.25)' },
@@ -310,50 +325,62 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Nav Links */}
+          {/* Mobile Nav Links */}
           <div className="space-y-1">
-            {[
-              { to: '/', label: 'Home' },
-              { to: '/doctors', label: 'Find Doctors' },
-            ].map(({ to, label }) => (
-              <Link
-                key={to}
-                to={to}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive(to) ? 'nav-link active' : 'nav-link'}`}
-              >
+            <Link
+              to="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium ${isActive('/') ? 'nav-link active' : 'nav-link'}`}
+            >
+              <Home size={16} />
+              Home
+            </Link>
+            <Link
+              to="/doctors"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium ${isActive('/doctors') ? 'nav-link active' : 'nav-link'}`}
+            >
+              <Stethoscope size={16} />
+              Find Doctors
+            </Link>
+
+            {isAuthenticated && role === 'patient' && [
+              { to: '/patient', label: 'Patient Dashboard', icon: LayoutDashboard },
+              { to: '/patient/book', label: 'Book Appointment', icon: Calendar },
+              { to: '/patient/appointments', label: 'My Appointments', icon: Clock },
+              { to: '/patient/profile', label: 'Medical Profile', icon: User },
+            ].map(({ to, label, icon: Icon }) => (
+              <Link key={to} to={to} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium ${isActive(to) ? 'nav-link active' : 'nav-link'}`}>
+                <Icon size={16} />
                 {label}
               </Link>
             ))}
 
-            {isAuthenticated && role === 'patient' && [
-              { to: '/patient', label: 'Patient Dashboard' },
-              { to: '/patient/book', label: 'Book Appointment' },
-              { to: '/patient/appointments', label: 'My Appointments' },
-              { to: '/patient/profile', label: 'Medical Profile' },
-            ].map(({ to, label }) => (
-              <Link key={to} to={to} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl text-sm font-medium nav-link">{label}</Link>
-            ))}
-
             {isAuthenticated && role === 'doctor' && [
-              { to: '/doctor', label: 'Doctor Dashboard' },
-              { to: '/doctor/appointments', label: 'Appointment Queue' },
-              { to: '/doctor/schedule', label: 'Schedule Settings' },
-            ].map(({ to, label }) => (
-              <Link key={to} to={to} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl text-sm font-medium nav-link">{label}</Link>
+              { to: '/doctor', label: 'Doctor Dashboard', icon: LayoutDashboard },
+              { to: '/doctor/appointments', label: 'Appointment Queue', icon: Clock },
+              { to: '/doctor/schedule', label: 'Schedule Settings', icon: Calendar },
+            ].map(({ to, label, icon: Icon }) => (
+              <Link key={to} to={to} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium ${isActive(to) ? 'nav-link active' : 'nav-link'}`}>
+                <Icon size={16} />
+                {label}
+              </Link>
             ))}
 
             {isAuthenticated && role === 'admin' && [
-              { to: '/admin', label: 'Admin Hub' },
-              { to: '/admin/users', label: 'User Management' },
-              { to: '/admin/audit-logs', label: 'Audit Logs' },
-              { to: '/admin/devops', label: 'DevOps Observability' },
-            ].map(({ to, label }) => (
-              <Link key={to} to={to} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-xl text-sm font-medium nav-link">{label}</Link>
+              { to: '/admin', label: 'Admin Hub', icon: LayoutDashboard },
+              { to: '/admin/users', label: 'User Management', icon: User },
+              { to: '/admin/audit-logs', label: 'Audit Logs', icon: Shield },
+              { to: '/admin/devops', label: 'DevOps Observability', icon: Server },
+            ].map(({ to, label, icon: Icon }) => (
+              <Link key={to} to={to} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium ${isActive(to) ? 'nav-link active' : 'nav-link'}`}>
+                <Icon size={16} />
+                {label}
+              </Link>
             ))}
           </div>
 
-          {/* Auth Section */}
+          {/* Mobile Auth */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1rem' }}>
             {isAuthenticated ? (
               <div className="space-y-2">
@@ -368,7 +395,7 @@ const Navbar = () => {
                   </div>
                   <div>
                     <p className="text-sm font-semibold" style={{ color: '#e2e8f0' }}>{user?.name || 'Account'}</p>
-                    <p className="text-xs capitalize" style={{ color: '#64748b' }}>Open {role} dashboard</p>
+                    <p className="text-xs capitalize" style={{ color: '#94a3b8' }}>Open {role} dashboard</p>
                   </div>
                 </Link>
                 <button
