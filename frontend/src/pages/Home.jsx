@@ -18,18 +18,18 @@ const Home = () => {
   };
 
   const stats = [
-    { value: '5+', label: 'Board Specialists', sub: 'Cardiology, Neuro, Derm', color: 'var(--c-primary)' },
-    { value: '100%', label: 'RBAC Protected', sub: 'JWT zero-trust auth', color: 'var(--c-cyan)' },
-    { value: '< 8 min', label: 'MTTR Recovery', sub: 'Automated GitOps healing', color: 'var(--c-emerald)' },
-    { value: '0 CVEs', label: 'Security Hardened', sub: 'Trivy container scanning', color: 'var(--c-amber)' },
+    { value: '5+', label: 'Specialist Doctors', sub: 'Cardiology, neurology, dermatology', color: 'var(--c-primary)' },
+    { value: '100%', label: 'Secure Access', sub: 'Role-based, encrypted sign-in', color: 'var(--c-cyan)' },
+    { value: '< 8 min', label: 'Service Recovery', sub: 'Automatic self-healing', color: 'var(--c-emerald)' },
+    { value: '0', label: 'Known Vulnerabilities', sub: 'Every release security-scanned', color: 'var(--c-amber)' },
   ];
 
   const features = [
     {
       icon: Calendar,
       title: 'For Patients',
-      desc: 'Explore specialists, filter by specialty, book convenient appointment slots, track consultation status, and manage your health journey.',
-      items: ['Real-time appointment scheduling', 'Digital medical history & profile', 'Consultation notes & prescriptions'],
+      desc: 'Find the right specialist, book a convenient time, and keep track of every visit.',
+      items: ['Online appointment booking', 'Personal health profile', 'Visit notes & prescriptions'],
       color: 'var(--c-primary-light)',
       bg: 'var(--c-primary-pale)',
       border: 'var(--c-primary-border)',
@@ -38,8 +38,8 @@ const Home = () => {
     {
       icon: Stethoscope,
       title: 'For Doctors',
-      desc: 'Organize daily consultation schedules, review incoming patient requests, write clinical diagnoses, and manage your availability.',
-      items: ['Daily consultation queue', 'Accept, reject, or complete requests', 'Flexible weekly schedule planner'],
+      desc: 'Manage your patient list, respond to requests, and set your availability.',
+      items: ['Daily appointment queue', 'Accept or decline requests', 'Weekly schedule planner'],
       color: 'var(--c-cyan)',
       bg: 'var(--c-cyan-pale)',
       border: 'rgba(8,145,178,0.2)',
@@ -48,8 +48,8 @@ const Home = () => {
     {
       icon: ShieldCheck,
       title: 'For Administrators',
-      desc: 'Comprehensive role management, user account control, security audit trails, and live Cloud-Native DevSecOps observability dashboards.',
-      items: ['User and role administration', 'Immutable audit trail logs', 'Kubernetes & CI/CD telemetry'],
+      desc: 'Manage users and roles, review activity, and monitor system health.',
+      items: ['User & role management', 'Complete activity history', 'Live system monitoring'],
       color: 'var(--c-emerald)',
       bg: 'var(--c-emerald-pale)',
       border: 'var(--c-emerald-border)',
@@ -207,9 +207,9 @@ const Home = () => {
         <div className="animate-fade-up-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
           {stats.map((stat, i) => (
             <div key={i} className="stat-card" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1.5rem' }}>
-              <p style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 900, color: stat.color, marginBottom: '0.25rem' }}>{stat.value}</p>
-              <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--txt-primary)', marginBottom: '0.25rem' }}>{stat.label}</p>
-              <p style={{ fontSize: '0.7rem', color: 'var(--txt-secondary)' }}>{stat.sub}</p>
+              <p style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", fontSize: 'clamp(1.6rem, 3vw, 2rem)', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.2, color: stat.color, marginBottom: '0.5rem' }}>{stat.value}</p>
+              <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--txt-primary)', marginBottom: '0.2rem' }}>{stat.label}</p>
+              <p style={{ fontSize: '0.825rem', color: 'var(--txt-muted)', lineHeight: 1.5 }}>{stat.sub}</p>
             </div>
           ))}
         </div>
@@ -220,10 +220,10 @@ const Home = () => {
       ================================================================ */}
       <section className="page-wrapper" style={{ paddingTop: '0' }}>
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          <span className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>Architected for Reliability</span>
-          <h2 className="page-title" style={{ marginBottom: '1rem' }}>Complete Care Lifecycle</h2>
-          <p className="page-subtitle" style={{ maxWidth: '560px', margin: '0 auto' }}>
-            Engineered with modern DevSecOps principles to ensure zero downtime, clinical accuracy, and patient privacy at scale.
+          <span style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--c-primary)' }}>Who It's For</span>
+          <h2 className="page-title" style={{ fontWeight: 700, letterSpacing: '-0.01em', marginBottom: '1rem' }}>One Platform for Every Role</h2>
+          <p className="page-subtitle" style={{ fontSize: '1.05rem', maxWidth: '520px', margin: '0 auto' }}>
+            Secure, reliable care management for patients, doctors, and hospital staff.
           </p>
         </div>
 
@@ -235,12 +235,12 @@ const Home = () => {
                 <div style={{ width: '52px', height: '52px', borderRadius: 'var(--r-md)', background: f.bg, border: `1px solid ${f.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
                   <Icon size={24} style={{ color: f.color }} />
                 </div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--txt-primary)', marginBottom: '0.75rem' }}>{f.title}</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--txt-secondary)', lineHeight: 1.7, marginBottom: '1.25rem' }}>{f.desc}</p>
-                <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.01em', color: 'var(--txt-primary)', marginBottom: '0.6rem' }}>{f.title}</h3>
+                <p style={{ fontSize: '0.95rem', color: 'var(--txt-secondary)', lineHeight: 1.65, marginBottom: '1.25rem' }}>{f.desc}</p>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', listStyle: 'none', paddingTop: '1.25rem', borderTop: '1px solid var(--bdr-default)' }}>
                   {f.items.map((item, j) => (
-                    <li key={j} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--txt-muted)' }}>
-                      <CheckCircle2 size={15} style={{ color: f.color, flexShrink: 0 }} />
+                    <li key={j} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', fontWeight: 500, color: 'var(--txt-primary)' }}>
+                      <CheckCircle2 size={17} style={{ color: f.color, flexShrink: 0 }} />
                       {item}
                     </li>
                   ))}
