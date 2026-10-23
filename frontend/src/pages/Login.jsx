@@ -8,7 +8,9 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [email, setEmail] = useState('');
+  // Coming from sign-up: prefill the new email and confirm the account was created
+  const [email, setEmail] = useState(location.state?.registeredEmail || '');
+  const signupMessage = location.state?.message || '';
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -144,11 +146,17 @@ if (res.success) {
           style={{ padding: '2rem' }}
         >
           {/* Error Alert */}
+          {signupMessage && !error && (
+            <div className="alert alert-success" role="status" style={{ padding: '0.875rem 1rem', marginBottom: '1.25rem', borderRadius: '0.75rem', fontSize: '0.85rem', fontWeight: 600 }}>
+              ✅ {signupMessage}
+            </div>
+          )}
+
           {error && (
-            <div style={{
+            <div role="alert" style={{
               padding: '0.875rem 1rem', borderRadius: '0.75rem', marginBottom: '1.25rem',
-              background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
-              color: '#fca5a5', fontSize: '0.8rem', fontWeight: 600,
+              background: '#fff1f2', border: '1px solid #fecdd3',
+              color: '#be123c', fontSize: '0.85rem', fontWeight: 600,
             }}>
               ⚠️ {error}
             </div>
