@@ -65,6 +65,11 @@ const initDb = async () => {
       ADD COLUMN IF NOT EXISTS blood_group VARCHAR(5),
       ADD COLUMN IF NOT EXISTS specialty VARCHAR(100),
       ADD COLUMN IF NOT EXISTS license VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS department VARCHAR(150),
+      ADD COLUMN IF NOT EXISTS qualifications VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS clinic_location VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS consultation_fee NUMERIC(10, 2),
+      ADD COLUMN IF NOT EXISTS bio TEXT,
       ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()
   `);
 };
@@ -72,7 +77,21 @@ const initDb = async () => {
 // --- 1. SIGN-UP ROUTE ---
 app.post('/api/signup', async (req, res) => {
   try {
-    const { name, email, password, phone, role, blood_group, specialty, license } = req.body;
+    const {
+      name,
+      email,
+      password,
+      phone,
+      role,
+      blood_group,
+      specialty,
+      license,
+      department,
+      qualifications,
+      clinic_location,
+      consultation_fee,
+      bio
+    } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required.' });
@@ -89,9 +108,12 @@ app.post('/api/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await pool.query(
-      `INSERT INTO users (name, email, password, phone, role, blood_group, specialty, license)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       RETURNING id, name, email, phone, role, blood_group, specialty, license`,
+      `INSERT INTO users
+       (name, email, password, phone, role, blood_group, specialty, license,
+        department, qualifications, clinic_location, consultation_fee, bio)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+       RETURNING id, name, email, phone, role, blood_group, specialty, license,
+                 department, qualifications, clinic_location, consultation_fee, bio`,
       [
         name || null,
         email,
@@ -101,6 +123,11 @@ app.post('/api/signup', async (req, res) => {
         role === 'patient' ? blood_group || null : null,
         role === 'doctor' ? specialty || null : null,
         role === 'doctor' ? license || null : null,
+        role === 'doctor' ? department || null : null,
+        role === 'doctor' ? qualifications || null : null,
+        role === 'doctor' ? clinic_location || null : null,
+        role === 'doctor' && consultation_fee !== '' ? consultation_fee || null : null,
+        role === 'doctor' ? bio || null : null,
       ]
     );
 
@@ -108,6 +135,37 @@ app.post('/api/signup', async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: 'A server error occurred.' });
+  }
+});
+
+// --- 2. DOCTOR DIRECTORY ---
+app.get('/api/doctors', async (_req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id,
+        name,
+        email,
+        specialty,
+        department,
+        qualifications,
+        clinic_location,
+        consultation_fee,
+        bio,
+        license,
+        created_at
+      FROM users
+      WHERE role = 'doctor'
+      ORDER BY name ASC NULLS LAST, id ASC
+    `);
+
+    res.json({
+      success: true,
+      doctors: result.rows
+    });
+  } catch (err) {
+    console.error('Doctor directory query failed:', err.message);
+    res.status(500).json({ error: 'Unable to load doctors.' });
   }
 });
 

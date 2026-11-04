@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useData } from '../context/DataContext';
+import api from '../services/api';
 import { Search, MapPin, Award, Calendar, Star, Filter, Stethoscope } from 'lucide-react';
 
 const SPECIALTIES = ['All', 'Cardiology', 'Neurology', 'Dermatology', 'Pediatrics', 'General Medicine'];
@@ -17,10 +17,48 @@ const SPECIALTY_COLORS = {
 const getSpecialtyStyle = (spec) => SPECIALTY_COLORS[spec] || SPECIALTY_COLORS['Default'];
 
 const DoctorsDirectory = () => {
-  const { doctors } = useData();
+  const [doctors, setDoctors] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('All');
   const [searchFocused, setSearchFocused] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadDoctors = async () => {
+      try {
+        const { data } = await api.get('/doctors');
+        if (!isMounted) return;
+
+        setDoctors((data.doctors || []).map((doctor) => ({
+          ...doctor,
+          name: doctor.name || 'Unnamed doctor',
+          specialty: doctor.specialty || 'General Medicine',
+          department: doctor.department || 'Medical Services',
+          qualification: doctor.qualifications || doctor.license || 'Qualifications not provided',
+          location: doctor.clinic_location || 'Clinic location not provided',
+          consultationFee: doctor.consultation_fee ?? 'Not provided',
+          bio: doctor.bio || 'Doctor profile details will be updated soon.',
+          availableDays: doctor.available_days || [],
+          rating: doctor.rating ?? 'New',
+          reviewsCount: doctor.reviews_count ?? 0,
+        })));
+        setError('');
+      } catch (requestError) {
+        if (isMounted) {
+          console.error('Doctor directory request failed:', requestError);
+          setError('Unable to load doctors. Please try again later.');
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadDoctors();
+    return () => { isMounted = false; };
+  }, []);
 
   const filteredDoctors = doctors.filter(doctor => {
     const matchesSpecialty = selectedSpecialty === 'All' || doctor.specialty === selectedSpecialty;
@@ -126,12 +164,24 @@ const DoctorsDirectory = () => {
         </p>
       </div>
 
+      {isLoading && (
+        <p style={{ color: '#94a3b8', textAlign: 'center', padding: '3rem' }}>
+          Loading doctors...
+        </p>
+      )}
+
+      {error && !isLoading && (
+        <p role="alert" style={{ color: '#fca5a5', textAlign: 'center', padding: '3rem' }}>
+          {error}
+        </p>
+      )}
+
       {/* Doctors Grid */}
       <div
         className="animate-fade-up-2"
         style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}
       >
-        {filteredDoctors.map((doc, i) => {
+        {!isLoading && !error && filteredDoctors.map((doc, i) => {
           const specStyle = getSpecialtyStyle(doc.specialty);
           return (
             <div
@@ -254,7 +304,7 @@ const DoctorsDirectory = () => {
       </div>
 
       {/* Empty State */}
-      {filteredDoctors.length === 0 && (
+      {!isLoading && !error && filteredDoctors.length === 0 && (
         <div
           className="glass-card"
           style={{ padding: '4rem 2rem', textAlign: 'center' }}

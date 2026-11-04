@@ -102,7 +102,12 @@ export const AuthProvider = ({ children }) => {
         role: data.role,
         blood_group: data.bloodGroup,
         specialty: data.specialty,
-        license: data.license
+        license: data.license,
+        department: data.department,
+        qualifications: data.qualifications,
+        clinic_location: data.clinicLocation,
+        consultation_fee: data.consultationFee,
+        bio: data.bio
       });
 
       return {
