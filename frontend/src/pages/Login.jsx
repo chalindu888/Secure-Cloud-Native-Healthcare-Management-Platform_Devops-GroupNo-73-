@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Activity, Lock, Mail, ArrowRight, UserCheck, Stethoscope, ShieldAlert, Eye, EyeOff, Zap } from 'lucide-react';
+import { Activity, Lock, Mail, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
-  const { login, loginAs } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -45,17 +45,6 @@ if (res.success) {
 }
   };
 
-  const handleQuickDemo = (role) => {
-    const user = loginAs(role);
-    redirectAfterLogin(user.role);
-  };
-
-  const demoButtons = [
-    { role: 'patient', label: 'Patient', icon: UserCheck, color: '#a5b4fc', bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.35)', hoverBg: 'rgba(99,102,241,0.28)' },
-    { role: 'doctor', label: 'Doctor', icon: Stethoscope, color: '#67e8f9', bg: 'rgba(6,182,212,0.15)', border: 'rgba(6,182,212,0.35)', hoverBg: 'rgba(6,182,212,0.28)' },
-    { role: 'admin', label: 'Admin', icon: ShieldAlert, color: '#6ee7b7', bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.35)', hoverBg: 'rgba(16,185,129,0.28)' },
-  ];
-
   return (
     <div
       style={{
@@ -91,53 +80,6 @@ if (res.success) {
           <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
             Sign in to your HealthOps account to continue
           </p>
-        </div>
-
-        {/* Demo Quick Login */}
-        <div
-          className="animate-fade-up-1"
-          style={{
-            padding: '1.25rem',
-            borderRadius: '1rem',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            marginBottom: '1.25rem',
-          }}
-        >
-          <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#475569', marginBottom: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Zap size={12} style={{ color: '#fbbf24' }} />
-            ⚡ 1-Click Evaluator Demo Login
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.625rem' }}>
-            {demoButtons.map(({ role, label, icon: Icon, color, bg, border, hoverBg }) => (
-              <button
-                key={role}
-                type="button"
-                onClick={() => handleQuickDemo(role)}
-                className="btn"
-                style={{
-                  flexDirection: 'column', gap: '0.375rem',
-                  padding: '0.75rem 0.5rem',
-                  background: bg, color, border: `1px solid ${border}`,
-                  minHeight: 'auto', borderRadius: '0.75rem',
-                  fontSize: '0.75rem', fontWeight: 700,
-                  transition: 'all 200ms ease',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = hoverBg; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = bg; e.currentTarget.style.transform = 'translateY(0)'; }}
-              >
-                <Icon size={18} />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
-          <span style={{ fontSize: '0.7rem', color: '#475569', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>or sign in with credentials</span>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
         </div>
 
         {/* Login Card */}

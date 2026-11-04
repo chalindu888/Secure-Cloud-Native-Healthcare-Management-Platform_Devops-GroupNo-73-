@@ -4,45 +4,7 @@ const AuthContext = createContext(null);
 
 const API_URL = 'http://localhost:5000';
 
-export const DEMO_USERS = {
-  patient: {
-    id: 'usr_pat_1',
-    name: 'Johnathan Doe',
-    email: 'patient@healthops.io',
-    role: 'patient',
-    token: 'jwt_mock_token_patient_123',
-    phone: '+1 (555) 234-5678',
-    bloodGroup: 'O+',
-    allergies: 'Penicillin, Peanuts',
-    emergencyContact: 'Jane Doe (+1 555-987-6543)',
-    dateOfBirth: '1990-05-14',
-    address: '42 Health St, Boston, MA'
-  },
-
-  doctor: {
-    id: 'usr_doc_1',
-    name: 'Dr. Sarah Alistair',
-    email: 'doctor@healthops.io',
-    role: 'doctor',
-    token: 'jwt_mock_token_doctor_456',
-    specialty: 'Cardiology',
-    department: 'Cardiovascular Medicine',
-    experience: '12 Years',
-    license: 'MED-89410-US',
-    consultationFee: 120,
-    phone: '+1 (555) 789-0123'
-  },
-
-  admin: {
-    id: 'usr_adm_1',
-    name: 'Alex Rivera (DevSecOps Lead)',
-    email: 'admin@healthops.io',
-    role: 'admin',
-    token: 'jwt_mock_token_admin_789',
-    department: 'System Architecture & Security',
-    accessLevel: 'Super Administrator'
-  }
-};
+const ROLE_KEY = 'healthops_role';
 
 export const AuthProvider = ({ children }) => {
 
@@ -87,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   // REAL LOGIN
   const login = async (email, password) => {
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch(`${API_URL}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -103,7 +65,7 @@ export const AuthProvider = ({ children }) => {
       if (!response.ok) {
         return {
           success: false,
-          message: data.message || 'Login failed'
+          message: data.error || data.message || 'Login failed'
         };
       }
 
@@ -118,6 +80,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(loggedInUser);
       setToken(data.token);
+      localStorage.setItem(ROLE_KEY, data.role);
 
       return {
         success: true,
@@ -136,24 +99,10 @@ export const AuthProvider = ({ children }) => {
   };
 
 
-  // Temporary demo login
-  // We can remove this later when the real accounts are ready
-  const loginAs = (role) => {
-    if (DEMO_USERS[role]) {
-      const u = DEMO_USERS[role];
-
-      setUser(u);
-      setToken(u.token);
-
-      return u;
-    }
-  };
-
-
-  // Registration will be connected to the backend next
+  // Create an account; the chosen role ('patient' | 'doctor') is saved by the backend
   const register = async (data) => {
     try {
-      const response = await fetch(`${API_URL}/api/auth/register`, {
+      const response = await fetch(`${API_URL}/api/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -175,7 +124,7 @@ export const AuthProvider = ({ children }) => {
       if (!response.ok) {
         return {
           success: false,
-          message: result.message || 'Registration failed'
+          message: result.error || result.message || 'Registration failed'
         };
       }
 
@@ -209,6 +158,7 @@ export const AuthProvider = ({ children }) => {
 
     localStorage.removeItem('healthops_user');
     localStorage.removeItem('healthops_token');
+    localStorage.removeItem(ROLE_KEY);
   };
 
 
@@ -220,7 +170,6 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: !!user,
         role: user ? user.role : null,
         login,
-        loginAs,
         register,
         updateProfile,
         logout

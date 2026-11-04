@@ -6,16 +6,9 @@ import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Serve
 import fibreRushBanner from '../assets/fibre-rush.png';
 
 const Home = () => {
-  const { loginAs, isAuthenticated, role } = useAuth();
+  const { isAuthenticated, role } = useAuth();
   const { doctors } = useData();
   const navigate = useNavigate();
-
-  const handleDemoAccess = (demoRole) => {
-    loginAs(demoRole);
-    if (demoRole === 'patient') navigate('/patient');
-    if (demoRole === 'doctor') navigate('/doctor');
-    if (demoRole === 'admin') navigate('/admin');
-  };
 
   const stats = [
     { value: '5+', label: 'Board Specialists', sub: 'Cardiology, Neuro, Derm', color: 'var(--c-primary)' },
@@ -175,25 +168,6 @@ const Home = () => {
                 <Stethoscope size={18} />
                 Browse Specialists
               </Link>
-            </div>
-
-            {/* Demo Launch Banner */}
-            <div style={{ padding: '1.25rem 1.75rem', borderRadius: '1rem', background: 'var(--bg-card)', border: '1px solid var(--bdr-default)', boxShadow: 'var(--shdw-md)', backdropFilter: 'blur(8px)', width: '100%', maxWidth: '620px' }}>
-              <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--txt-secondary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                <Zap size={14} style={{ color: 'var(--c-amber)' }} />
-                ⚡ Instant Demo Access — 1-Click Role Login
-              </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem' }}>
-                <button onClick={() => handleDemoAccess('patient')} className="btn btn-sm" style={{ background: 'var(--c-primary-pale)', color: 'var(--c-primary)' }}>
-                  <Users size={14} /> Launch as Patient
-                </button>
-                <button onClick={() => handleDemoAccess('doctor')} className="btn btn-sm" style={{ background: 'var(--c-cyan-pale)', color: 'var(--c-cyan)' }}>
-                  <Stethoscope size={14} /> Launch as Doctor
-                </button>
-                <button onClick={() => handleDemoAccess('admin')} className="btn btn-sm" style={{ background: 'var(--c-emerald-pale)', color: 'var(--c-emerald)' }}>
-                  <Server size={14} /> Launch as Admin
-                </button>
-              </div>
             </div>
 
           </div>

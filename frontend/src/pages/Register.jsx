@@ -61,11 +61,13 @@ const Register = () => {
     setIsLoading(false);
 
     if (res.success) {
-      if (role === 'doctor') {
-        navigate('/doctor');
-      } else {
-        navigate('/patient');
-      }
+      // The account exists now; sign in to get a token and be routed by role
+      navigate('/login', {
+        state: {
+          registeredEmail: formData.email,
+          message: 'Account created! Please sign in.'
+        }
+      });
     } else {
       setError(res.message || 'Failed to create account.');
     }
