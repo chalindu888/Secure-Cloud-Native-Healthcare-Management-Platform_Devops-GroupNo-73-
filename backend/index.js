@@ -9,8 +9,23 @@ dotenv.config();
 const { Pool } = pkg;
 
 const app = express();
+
+app.use(cors({
+  origin: (origin, callback) => {
+    const isLocalFrontend = !origin
+      || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
+    if (isLocalFrontend) {
+      callback(null, true);
+      return;
+    }
+
+    callback(null, false);
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
-app.use(cors());
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -23,6 +38,14 @@ const pool = new Pool({
 // Roles that may be chosen on the public sign-up form. 'admin' accounts can
 // never be self-registered.
 const SIGNUP_ROLES = ['patient', 'doctor'];
+
+app.get('/', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
 
 // Create the users table / add any missing columns, so an existing
 // (email, password only) table is upgraded automatically.

@@ -237,39 +237,6 @@ const Navbar = () => {
           })}
         </div>
 
-        {/* Authenticated navigation */}
-        <div className="hidden xl:flex items-center gap-1">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const active = isActive(link.to);
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                aria-current={active ? 'page' : undefined}
-                className="relative inline-flex items-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-colors"
-                style={{
-                  padding: '0.5rem 0.9rem',
-                  color: active ? '#ffffff' : '#cbd5e1',
-                  background: active ? 'rgba(255,255,255,0.12)' : 'transparent',
-                }}
-                onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-                onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
-              >
-                <Icon size={16} style={{ color: active ? currentRole?.color || '#6ee7b7' : undefined }} />
-                {link.label}
-                {renderBadge(link)}
-                {active && (
-                  <span
-                    className="absolute rounded-full"
-                    style={{ left: '30%', right: '30%', bottom: -12, height: 3, background: currentRole?.color || '#6ee7b7' }}
-                  />
-                )}
-              </Link>
-            );
-          })}
-        </div>
-
         {/* Right side */}
         <div className="flex items-center gap-2 shrink-0">
           <div className="relative hidden xl:block" ref={menuRef}>
@@ -400,6 +367,44 @@ const Navbar = () => {
           </button>
         </div>
       </div>
+
+      {/* Role navigation: second row so it never squeezes the site menu */}
+      {isAuthenticated && (
+          <div
+            className="hidden xl:flex items-center justify-center gap-1 w-full"
+            style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: '0.35rem clamp(1rem, 2.5vw, 2.5rem)' }}
+          >
+            {links.map((link) => {
+              const Icon = link.icon;
+              const active = isActive(link.to);
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  aria-current={active ? 'page' : undefined}
+                  className="relative inline-flex items-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-colors"
+                  style={{
+                    padding: '0.5rem 0.9rem',
+                    color: active ? '#ffffff' : '#cbd5e1',
+                    background: active ? 'rgba(255,255,255,0.12)' : 'transparent',
+                  }}
+                  onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+                  onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <Icon size={16} style={{ color: active ? currentRole?.color || '#6ee7b7' : undefined }} />
+                  {link.label}
+                  {renderBadge(link)}
+                  {active && (
+                    <span
+                      className="absolute rounded-full"
+                      style={{ left: '30%', right: '30%', bottom: -6, height: 3, background: currentRole?.color || '#6ee7b7' }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+      )}
 
       {/* Mobile drawer */}
       {mobileMenuOpen && (

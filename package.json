@@ -5,7 +5,14 @@
   "description": "HealthOps Cloud-Native Healthcare Management Platform",
   "scripts": {
     "dev": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:all": "concurrently -n backend,frontend -c green,cyan \"npm:dev:backend\" \"npm:dev\"",
+    "start": "npm run dev:all",
+    "install:all": "npm install && npm --prefix frontend install && npm --prefix backend install",
     "build": "npm --prefix frontend run build",
     "lint": "npm --prefix frontend run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
   }
 }

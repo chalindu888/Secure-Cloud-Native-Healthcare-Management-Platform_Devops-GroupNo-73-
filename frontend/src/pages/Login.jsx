@@ -26,23 +26,34 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-setError('');
-if (!email) {
-  setError('Please enter your email address.');
-  return;
-}
+    setError('');
 
-setIsLoading(true);
+    if (!email.trim()) {
+      setError('Please enter your email address.');
+      return;
+    }
 
-const res = await login(email, password);
+    if (!password) {
+      setError('Please enter your password.');
+      return;
+    }
 
-setIsLoading(false);
+    setIsLoading(true);
 
-if (res.success) {
-  redirectAfterLogin(res.user.role);
-} else {
-  setError(res.message || 'Invalid email or password.');
-}
+    try {
+      const res = await login(email.trim(), password);
+
+      if (res.success) {
+        redirectAfterLogin(res.user.role);
+      } else {
+        setError(res.message || 'Invalid email or password.');
+      }
+    } catch (requestError) {
+      console.error('Unexpected login request error:', requestError);
+      setError('Cannot connect to the backend server. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

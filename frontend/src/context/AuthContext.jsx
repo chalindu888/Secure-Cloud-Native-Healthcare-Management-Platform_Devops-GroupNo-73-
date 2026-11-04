@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
-
-const API_URL = 'http://localhost:5000';
 
 const ROLE_KEY = 'healthops_role';
 
@@ -49,23 +48,12 @@ export const AuthProvider = ({ children }) => {
   // REAL LOGIN
   const login = async (email, password) => {
     try {
-      const response = await fetch(`${API_URL}/api/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      });
+      const { data } = await api.post('/login', { email, password });
 
-      const data = await response.json();
-
-      if (!response.ok) {
+      if (!data.token || !data.user) {
         return {
           success: false,
-          message: data.error || data.message || 'Login failed'
+          message: 'The backend returned an incomplete login response.'
         };
       }
 
@@ -93,7 +81,11 @@ export const AuthProvider = ({ children }) => {
 
       return {
         success: false,
-        message: 'Cannot connect to the backend server'
+        message: error.response
+          ? error.response.data?.error
+            || error.response.data?.message
+            || 'Login failed. Please check your credentials.'
+          : 'Cannot connect to the backend server. Make sure it is running on http://localhost:5000.'
       };
     }
   };
@@ -102,31 +94,16 @@ export const AuthProvider = ({ children }) => {
   // Create an account; the chosen role ('patient' | 'doctor') is saved by the backend
   const register = async (data) => {
     try {
-      const response = await fetch(`${API_URL}/api/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          password: data.password,
-          phone: data.phone,
-          role: data.role,
-          blood_group: data.bloodGroup,
-          specialty: data.specialty,
-          license: data.license
-        })
+      const { data: result } = await api.post('/signup', {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
+        role: data.role,
+        blood_group: data.bloodGroup,
+        specialty: data.specialty,
+        license: data.license
       });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        return {
-          success: false,
-          message: result.error || result.message || 'Registration failed'
-        };
-      }
 
       return {
         success: true,
@@ -138,7 +115,9 @@ export const AuthProvider = ({ children }) => {
 
       return {
         success: false,
-        message: 'Cannot connect to the backend server'
+        message: error.response?.data?.error
+          || error.response?.data?.message
+          || 'Cannot connect to the backend server'
       };
     }
   };

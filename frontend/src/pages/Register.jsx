@@ -79,7 +79,7 @@ const Register = () => {
     background: 'rgba(255,255,255,0.07)',
     border: '1px solid rgba(255,255,255,0.12)',
     borderRadius: '0.75rem',
-    color: '#f1f5f9',
+    color: '#111827',
     fontFamily: 'Inter, sans-serif',
     fontSize: '0.875rem',
     outline: 'none',
@@ -276,6 +276,7 @@ const Register = () => {
           )}
 
           <form
+            id="registration-form"
             onSubmit={handleSubmit}
             style={{
               display: 'flex',
@@ -723,8 +724,13 @@ const Register = () => {
         }
 
         select option {
-          background: #1e293b;
-          color: #f1f5f9;
+          background: #ffffff;
+          color: #111827;
+        }
+
+        #registration-form input::placeholder {
+          color: #111827;
+          opacity: 1;
         }
       `}</style>
     </div>
