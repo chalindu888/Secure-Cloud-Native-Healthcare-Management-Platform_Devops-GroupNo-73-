@@ -36,6 +36,40 @@ const PUBLIC_LINKS = [
   { to: '/doctors', label: 'Find Doctors', icon: Stethoscope },
 ];
 
+const SITE_NAV_ITEMS = [
+  {
+    label: 'About',
+    children: [
+      { to: '#about', label: 'About HealthOps' },
+      { to: '#values', label: 'Our Values' },
+    ],
+  },
+  {
+    label: 'Centres',
+    children: [
+      { to: '/doctors', label: 'Specialist Centre' },
+      { to: '#centres', label: 'All Centres' },
+    ],
+  },
+  {
+    label: 'Services',
+    children: [
+      { to: '#services', label: 'Patient Services' },
+      { to: '/doctors', label: 'Find a Specialist' },
+    ],
+  },
+  { to: '#international', label: 'International' },
+  {
+    label: 'News',
+    children: [
+      { to: '#news', label: 'Latest News' },
+      { to: '#events', label: 'Events' },
+    ],
+  },
+  { to: '#careers', label: 'Careers' },
+  { to: '#contact', label: 'Contact' },
+];
+
 const ROLE_LINKS = {
   patient: [
     { to: '/patient', label: 'Dashboard', icon: LayoutDashboard },
@@ -169,8 +203,42 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Desktop links */}
-        <div className="hidden xl:flex items-center gap-1 flex-1 justify-center">
+        {/* Public healthcare navigation */}
+        <div className="hidden xl:flex items-center gap-1 flex-1 justify-center" aria-label="Primary navigation">
+          {SITE_NAV_ITEMS.map((item) => {
+            const hasChildren = item.children?.length;
+            return (
+              <div key={item.label} className="health-nav-item relative">
+                {hasChildren ? (
+                  <button
+                    type="button"
+                    className="health-nav-trigger"
+                    aria-haspopup="true"
+                  >
+                    {item.label}
+                    <ChevronDown size={14} aria-hidden="true" />
+                  </button>
+                ) : (
+                  <Link to={item.to} className="health-nav-trigger">
+                    {item.label}
+                  </Link>
+                )}
+                {hasChildren && (
+                  <div className="health-nav-dropdown" role="menu">
+                    {item.children.map((child) => (
+                      <Link key={child.label} to={child.to} role="menuitem">
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Authenticated navigation */}
+        <div className="hidden xl:flex items-center gap-1">
           {links.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.to);
@@ -358,6 +426,31 @@ const Navbar = () => {
           )}
 
           <div className="flex flex-col gap-1">
+            <div className="mobile-health-nav" aria-label="Primary navigation">
+              {SITE_NAV_ITEMS.map((item) => (
+                <div key={item.label} className="mobile-health-nav-group">
+                  {item.children ? (
+                    <>
+                      <div className="mobile-health-nav-label">
+                        {item.label}
+                        <ChevronDown size={15} aria-hidden="true" />
+                      </div>
+                      <div className="mobile-health-nav-children">
+                        {item.children.map((child) => (
+                          <Link key={child.label} to={child.to} onClick={() => setMobileMenuOpen(false)}>
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <Link to={item.to} className="mobile-health-nav-label" onClick={() => setMobileMenuOpen(false)}>
+                      {item.label}
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </div>
             {[...links, ...(role === 'patient' && isAuthenticated ? [{ to: '/patient/profile', label: 'Medical Profile', icon: User }] : [])].map((link) => {
               const Icon = link.icon;
               const active = isActive(link.to);

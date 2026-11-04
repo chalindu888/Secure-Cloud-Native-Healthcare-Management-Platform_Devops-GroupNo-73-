@@ -113,6 +113,100 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 button { cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
 button:disabled { cursor: not-allowed; opacity: 0.5; }
 
+/* ══════ HEALTHCARE NAVIGATION ══════ */
+.health-nav-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: #dbeafe;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 180ms ease, background 180ms ease;
+}
+.health-nav-trigger:hover,
+.health-nav-item:focus-within .health-nav-trigger {
+  color: #ffffff;
+  background: rgba(110, 231, 183, 0.12);
+}
+.health-nav-dropdown {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 50%;
+  z-index: 20;
+  display: flex;
+  min-width: 12rem;
+  padding: 0.45rem;
+  flex-direction: column;
+  gap: 0.15rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0.85rem;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -0.35rem);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.health-nav-item:hover .health-nav-dropdown,
+.health-nav-item:focus-within .health-nav-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+.health-nav-dropdown a {
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.55rem;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.health-nav-dropdown a:hover,
+.health-nav-dropdown a:focus-visible {
+  background: #ecfdf5;
+  color: #047857;
+}
+.mobile-health-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.mobile-health-nav-group {
+  display: flex;
+  flex-direction: column;
+}
+.mobile-health-nav-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.65rem;
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.mobile-health-nav-label:hover,
+.mobile-health-nav-label:focus-visible {
+  background: rgba(110, 231, 183, 0.12);
+}
+.mobile-health-nav-children {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0 0 0.2rem 1rem;
+}
+.mobile-health-nav-children a {
+  padding: 0.38rem 0.85rem;
+  color: #a7f3d0;
+  font-size: 0.78rem;
+}
+
 /* ══════════════════════════════════════════════════════════════
    BUTTON SYSTEM
 ══════════════════════════════════════════════════════════════ */
