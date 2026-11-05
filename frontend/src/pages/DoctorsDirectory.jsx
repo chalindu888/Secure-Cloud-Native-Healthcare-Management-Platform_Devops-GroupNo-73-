@@ -76,7 +76,7 @@ const DoctorsDirectory = () => {
       {/* Header */}
       <div className="animate-fade-up" style={{ marginBottom: '2.5rem' }}>
         <span className="section-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Our Specialists</span>
-        <h1 style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 900, color: '#f1f5f9', marginBottom: '0.75rem' }}>
+        <h1 style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 900, color: '#0f172a', marginBottom: '0.75rem' }}>
           Clinical Specialists Directory
         </h1>
         <p style={{ fontSize: '0.95rem', color: '#64748b', maxWidth: '560px', lineHeight: 1.7 }}>
@@ -112,7 +112,7 @@ const DoctorsDirectory = () => {
               border: `1px solid ${searchFocused ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.12)'}`,
               boxShadow: searchFocused ? '0 0 0 3px rgba(99,102,241,0.12)' : 'none',
               borderRadius: '0.75rem',
-              color: '#f1f5f9',
+              color: '#0f172a',
               fontFamily: 'Inter, sans-serif',
               fontSize: '0.875rem',
               outline: 'none',
@@ -145,7 +145,7 @@ const DoctorsDirectory = () => {
                 boxShadow: selectedSpecialty === spec ? '0 4px 15px rgba(99,102,241,0.35)' : 'none',
                 border: selectedSpecialty === spec ? 'none' : '1px solid rgba(255,255,255,0.08)',
               }}
-              onMouseEnter={e => { if (selectedSpecialty !== spec) { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#f1f5f9'; }}}
+              onMouseEnter={e => { if (selectedSpecialty !== spec) { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#0f172a'; }}}
               onMouseLeave={e => { if (selectedSpecialty !== spec) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#94a3b8'; }}}
             >
               {spec}
@@ -215,7 +215,7 @@ const DoctorsDirectory = () => {
                     <Stethoscope size={22} style={{ color: specStyle.color }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f1f5f9', marginBottom: '0.25rem' }}>
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.25rem' }}>
                       {doc.name}
                     </h3>
                     <span style={{
@@ -278,7 +278,7 @@ const DoctorsDirectory = () => {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
                   <div>
                     <p style={{ fontSize: '0.65rem', color: '#475569', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Consultation Fee</p>
-                    <p style={{ fontSize: '1.15rem', fontWeight: 900, color: '#f1f5f9' }}>${doc.consultationFee}</p>
+                    <p style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a' }}>${doc.consultationFee}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', justifyContent: 'flex-end' }}>
