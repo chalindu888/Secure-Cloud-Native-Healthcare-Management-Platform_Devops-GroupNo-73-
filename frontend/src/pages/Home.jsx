@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp, HeartPulse } from 'lucide-react';
-import fibreRushBanner from '../assets/fibre-rush.png';
 
 const Home = () => {
   const { isAuthenticated, role } = useAuth();
@@ -222,34 +221,6 @@ const Home = () => {
               </div>
             );
           })}
-        </div>
-      </section>
-
-      {/* ================================================================
-          FEATURED BANNER
-      ================================================================ */}
-      <section className="page-wrapper" style={{ paddingTop: '0', paddingBottom: '2.5rem' }}>
-        <div
-          style={{
-            borderRadius: '1.25rem',
-            overflow: 'hidden',
-            boxShadow: 'var(--shdw-lg)',
-            border: '1px solid var(--bdr-default)',
-            background: '#041740',
-            maxWidth: '100%',
-          }}
-        >
-          <img
-            src={fibreRushBanner}
-            alt="Featured Banner"
-            style={{
-              width: '100%',
-              maxHeight: '440px',
-              objectFit: 'cover',
-              display: 'block',
-              margin: '0 auto',
-            }}
-          />
         </div>
       </section>
 
