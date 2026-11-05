@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import careImage from '../assets/hospital-care.png';
 import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp, HeartPulse } from 'lucide-react';
 
 const Home = () => {
@@ -221,6 +222,49 @@ const Home = () => {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* ================================================================
+          CARE FOR EVERY FAMILY
+      ================================================================ */}
+      <section className="page-wrapper" style={{ paddingTop: '0', paddingBottom: '2.5rem' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '2rem',
+            alignItems: 'center',
+            padding: 'clamp(1.25rem, 3vw, 2rem)',
+            borderRadius: '1.25rem',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--bdr-default)',
+            boxShadow: 'var(--shdw-md)',
+          }}
+        >
+          <img
+            src={careImage}
+            alt="A doctor talking with a patient's family at the bedside"
+            style={{
+              width: '100%',
+              maxWidth: '600px',
+              justifySelf: 'center',
+              borderRadius: '1rem',
+              boxShadow: 'var(--shdw-lg)',
+              display: 'block',
+            }}
+          />
+          <div>
+            <span className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>Compassionate Care</span>
+            <h2 className="page-title" style={{ marginBottom: '1rem' }}>Caring for the whole family</h2>
+            <p className="page-subtitle" style={{ marginBottom: '1.5rem' }}>
+              Our specialists take the time to listen, explain and support patients and their loved ones at every step of treatment.
+            </p>
+            <Link to="/doctors" className="btn btn-primary">
+              Meet Our Specialists
+              <ArrowRight size={18} />
+            </Link>
+          </div>
         </div>
       </section>
 
