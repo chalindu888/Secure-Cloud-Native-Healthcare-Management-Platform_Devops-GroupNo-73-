@@ -81,6 +81,7 @@ const ROLE_LINKS = {
     { to: '/doctor/appointments', label: 'Appointments', icon: ClipboardList, badge: 'pending' },
     { to: '/doctor/patients', label: 'My Patients', icon: Users },
     { to: '/doctor/schedule', label: 'Schedule', icon: Calendar },
+    { to: '/doctor/profile', label: 'My Profile', icon: User },
   ],
   admin: [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -313,6 +314,16 @@ const Navbar = () => {
                         <LayoutDashboard size={16} className="text-slate-400" />
                         My Dashboard
                       </Link>
+                      {role === 'doctor' && (
+                        <Link
+                          to="/doctor/profile"
+                          className="flex items-center gap-3 rounded-lg text-sm text-slate-700 hover:bg-slate-50"
+                          style={{ padding: '0.5rem 0.65rem' }}
+                        >
+                          <User size={16} className="text-slate-400" />
+                          My Profile
+                        </Link>
+                      )}
                       {role === 'patient' && (
                         <Link
                           to="/patient/profile"

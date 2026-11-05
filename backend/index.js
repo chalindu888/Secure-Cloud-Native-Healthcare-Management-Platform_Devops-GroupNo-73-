@@ -220,6 +220,33 @@ app.get('/api/doctors', async (_req, res) => {
   }
 });
 
+// --- DOCTOR: READ OWN PROFILE ---
+app.get(
+  '/api/doctor/profile/:id',
+  authenticate,
+  requireRole('doctor'),
+  requireSelf('id'),
+  async (req, res) => {
+    try {
+      const result = await pool.query(
+        `SELECT id, name, email, phone, specialty, department, qualifications,
+                clinic_location, consultation_fee, bio, license
+         FROM users WHERE id = $1 AND role = 'doctor'`,
+        [req.params.id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Doctor not found.' });
+      }
+
+      res.json({ doctor: result.rows[0] });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: 'A server error occurred.' });
+    }
+  }
+);
+
 // --- DOCTOR: UPDATE OWN PROFILE ---
 app.put(
   '/api/doctor/profile/:id',
