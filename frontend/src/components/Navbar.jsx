@@ -79,6 +79,7 @@ const ROLE_LINKS = {
   doctor: [
     { to: '/doctor', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/doctor/appointments', label: 'Appointments', icon: ClipboardList, badge: 'pending' },
+    { to: '/doctor/patients', label: 'My Patients', icon: Users },
     { to: '/doctor/schedule', label: 'Schedule', icon: Calendar },
   ],
   admin: [
@@ -114,7 +115,9 @@ const Navbar = () => {
 
   const currentRole = role ? ROLE_CONFIG[role] : null;
   const roleLinks = isAuthenticated && role ? ROLE_LINKS[role] : [];
-  const links = [...PUBLIC_LINKS, ...roleLinks];
+  // Doctors don't browse the doctor directory
+  const publicLinks = role === 'doctor' ? PUBLIC_LINKS.filter((l) => l.to !== '/doctors') : PUBLIC_LINKS;
+  const links = [...publicLinks, ...roleLinks];
 
   const pendingCount = role === 'doctor'
     ? appointments.filter(
