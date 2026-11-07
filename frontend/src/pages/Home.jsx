@@ -5,11 +5,12 @@ import { useData } from '../context/DataContext';
 import careImage from '../assets/hospital-care.png';
 import careTeamImage from '../assets/care-team.png';
 import Reveal from '../components/Reveal';
+import { centres } from '../data/centres';
 import emergencyIcon from '../assets/service-emergency.png';
 import opdIcon from '../assets/service-opd.png';
 import indoorIcon from '../assets/service-indoor.png';
 import roomsIcon from '../assets/service-rooms.png';
-import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp } from 'lucide-react';
+import { ArrowRight, Stethoscope } from 'lucide-react';
 
 const Home = () => {
   const { isAuthenticated, role } = useAuth();
@@ -50,39 +51,6 @@ const Home = () => {
       image: roomsIcon,
       title: 'Room Facilities',
       desc: 'Choose from AC or non-AC private rooms and shared ward rooms, with extras such as satellite TV, hot water and healthy meals.',
-    },
-  ];
-
-  const features = [
-    {
-      icon: Calendar,
-      title: 'For Patients',
-      desc: 'Explore specialists, filter by specialty, book convenient appointment slots, track consultation status, and manage your health journey.',
-      items: ['Real-time appointment scheduling', 'Digital medical history & profile', 'Consultation notes & prescriptions'],
-      color: 'var(--c-primary-light)',
-      bg: 'var(--c-primary-pale)',
-      border: 'var(--c-primary-border)',
-      glow: 'rgba(99,102,241,0.15)',
-    },
-    {
-      icon: Stethoscope,
-      title: 'For Doctors',
-      desc: 'Organize daily consultation schedules, review incoming patient requests, write clinical diagnoses, and manage your availability.',
-      items: ['Daily consultation queue', 'Accept, reject, or complete requests', 'Flexible weekly schedule planner'],
-      color: 'var(--c-cyan)',
-      bg: 'var(--c-cyan-pale)',
-      border: 'rgba(8,145,178,0.2)',
-      glow: 'rgba(8,145,178,0.15)',
-    },
-    {
-      icon: ShieldCheck,
-      title: 'For Administrators',
-      desc: 'Comprehensive role management, user account control, security audit trails, and live Cloud-Native DevSecOps observability dashboards.',
-      items: ['User and role administration', 'Immutable audit trail logs', 'Kubernetes & CI/CD telemetry'],
-      color: 'var(--c-emerald)',
-      bg: 'var(--c-emerald-pale)',
-      border: 'var(--c-emerald-border)',
-      glow: 'rgba(5,150,105,0.15)',
     },
   ];
 
@@ -257,37 +225,52 @@ const Home = () => {
       </section>
 
       {/* ================================================================
-          CORE PLATFORM PILLARS
+          CENTRES OF EXCELLENCE
       ================================================================ */}
-      <section className="page-wrapper" style={{ paddingTop: '0' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          <Reveal as="span" className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>Architected for Reliability</Reveal>
-          <Reveal as="h2" delay={120} className="page-title" style={{ marginBottom: '1rem' }}>Complete Care Lifecycle</Reveal>
+      <section id="centres" className="page-wrapper" style={{ paddingTop: '0' }}>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <Reveal as="span" className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>Specialised Care</Reveal>
+          <Reveal as="h2" delay={120} className="page-title" style={{ marginBottom: '1rem' }}>Our Centres of Excellence</Reveal>
           <Reveal as="p" delay={240} className="page-subtitle" style={{ maxWidth: '560px', margin: '0 auto' }}>
-            Engineered with modern DevSecOps principles to ensure zero downtime, clinical accuracy, and patient privacy at scale.
+            Dedicated clinics and units with experienced teams for every stage of life.
           </Reveal>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-          {features.map((f, i) => {
-            const Icon = f.icon;
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(max(220px, calc(25% - 1rem)), 1fr))', gap: '1.25rem' }}>
+          {centres.map((centre, i) => {
+            const Icon = centre.icon;
             return (
-              <Reveal key={i} direction={i === 0 ? 'left' : i === features.length - 1 ? 'right' : 'up'} delay={i * 130} style={{ display: 'flex' }}>
-              <div className="card" style={{ padding: '2rem', flex: 1 }}>
-                <div style={{ width: '52px', height: '52px', borderRadius: 'var(--r-md)', background: f.bg, border: `1px solid ${f.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
-                  <Icon size={24} style={{ color: f.color }} />
-                </div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--txt-primary)', marginBottom: '0.75rem' }}>{f.title}</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--txt-secondary)', lineHeight: 1.7, marginBottom: '1.25rem' }}>{f.desc}</p>
-                <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {f.items.map((item, j) => (
-                    <li key={j} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--txt-muted)' }}>
-                      <CheckCircle2 size={15} style={{ color: f.color, flexShrink: 0 }} />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <Reveal key={centre.label} delay={(i % 4) * 110} style={{ display: 'flex' }}>
+                <Link
+                  to={`/centres/${centre.slug}`}
+                  className="centre-tile"
+                  aria-label={`${centre.label}: read more`}
+                  style={{
+                    flex: 1,
+                    minHeight: '11.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '1rem',
+                    padding: '1.5rem 1.25rem',
+                    borderRadius: '0.5rem',
+                    textAlign: 'center',
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                    color: '#ffffff',
+                    background: 'linear-gradient(160deg, #8c9ad2 0%, #7585c3 100%)',
+                    boxShadow: '0 10px 24px rgba(88, 103, 170, 0.28)',
+                  }}
+                >
+                  <Icon size={52} strokeWidth={1.25} aria-hidden="true" />
+                  <span style={{ fontSize: '0.78rem', fontWeight: 800, lineHeight: 1.4, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+                    {centre.label}
+                  </span>
+                  <span className="centre-tile-more" aria-hidden="true">
+                    Learn more <ArrowRight size={14} />
+                  </span>
+                </Link>
               </Reveal>
             );
           })}
