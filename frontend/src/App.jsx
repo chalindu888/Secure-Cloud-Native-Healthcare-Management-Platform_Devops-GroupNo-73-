@@ -6,6 +6,7 @@ import { DataProvider } from './context/DataContext';
 // Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import WhatsAppButton from './components/WhatsAppButton';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Public Pages
@@ -205,6 +206,7 @@ function App() {
           </main>
 
           <Footer />
+          <WhatsAppButton />
         </div>
       </DataProvider>
     </AuthProvider>
