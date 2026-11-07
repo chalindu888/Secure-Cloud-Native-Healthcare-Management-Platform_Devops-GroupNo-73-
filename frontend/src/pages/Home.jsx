@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import careImage from '../assets/hospital-care.png';
-import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp, HeartPulse } from 'lucide-react';
+import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp } from 'lucide-react';
 
 const Home = () => {
   const { isAuthenticated, role } = useAuth();
@@ -92,72 +92,48 @@ const Home = () => {
         <div className="page-wrapper" style={{ padding: 0, position: 'relative', zIndex: 1 }}>
           <div className="animate-fade-up" style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '2rem' }}>
             
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <h1 style={{ fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif", margin: 0 }}>
               <span
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.45rem 1.15rem',
-                  borderRadius: '9999px',
-                  background: 'rgba(255, 255, 255, 0.9)',
-                  border: '1px solid rgba(16, 185, 129, 0.4)',
-                  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.15)',
-                  backdropFilter: 'blur(8px)',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                  color: '#047857',
-                }}
-              >
-                <HeartPulse size={15} style={{ color: '#ef4444' }} />
-                Leading Multi-Specialty Hospital & Medical Center
-              </span>
-            </div>
-
-            <div>
-              <h1
-                style={{
-                  fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif",
-                  fontSize: 'clamp(2.5rem, 5.5vw, 4.25rem)',
-                  fontWeight: 900,
-                  lineHeight: 1.12,
-                  letterSpacing: '-0.03em',
-                  marginBottom: '1.5rem',
-                  color: '#0f172a',
-                }}
-              >
-                Caring for Your Health,<br />
-                <span
-                  style={{
-                    background: 'linear-gradient(135deg, #1d4ed8 0%, #0284c7 40%, #059669 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    display: 'inline-block',
-                    filter: 'drop-shadow(0 2px 14px rgba(29, 78, 216, 0.2))',
-                  }}
-                >
-                  Inspiring Better Living.
-                </span>
-              </h1>
-
-              <p
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 'clamp(1.05rem, 2vw, 1.22rem)',
-                  color: '#334155',
-                  lineHeight: 1.8,
-                  maxWidth: '700px',
-                  margin: '0 auto',
+                  display: 'block',
+                  marginBottom: '0.35rem',
+                  fontSize: 'clamp(1.1rem, 2.4vw, 1.6rem)',
                   fontWeight: 500,
-                  letterSpacing: '-0.01em',
+                  letterSpacing: '0.32em',
+                  textTransform: 'uppercase',
+                  color: '#334155',
                 }}
               >
-                HealthOps Hospital provides comprehensive patient care, board-certified specialists, modern medical treatments, and 24/7 emergency response — bringing compassionate care and clinical excellence to you and your family.
-              </p>
-            </div>
+                Welcome to
+              </span>
+              <span
+                style={{
+                  display: 'inline-block',
+                  fontSize: 'clamp(2.75rem, 7vw, 5.25rem)',
+                  fontWeight: 800,
+                  lineHeight: 1.1,
+                  letterSpacing: '-0.025em',
+                  background: 'linear-gradient(135deg, #1d4ed8 0%, #0284c7 45%, #059669 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  filter: 'drop-shadow(0 2px 14px rgba(29, 78, 216, 0.2))',
+                }}
+              >
+                HealthOps Hospital
+              </span>
+              <span
+                aria-hidden="true"
+                style={{
+                  display: 'block',
+                  width: '5rem',
+                  height: '4px',
+                  margin: '1.25rem auto 0',
+                  borderRadius: '9999px',
+                  background: 'linear-gradient(90deg, #0284c7, #059669)',
+                }}
+              />
+            </h1>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem' }}>
               <Link to={isAuthenticated ? (role === 'doctor' ? '/doctor' : role === 'admin' ? '/admin' : '/patient/book') : '/register'} className="btn btn-primary btn-lg">
