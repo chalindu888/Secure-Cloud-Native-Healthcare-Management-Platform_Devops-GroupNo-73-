@@ -37,38 +37,43 @@ const PUBLIC_LINKS = [
   { to: '/doctors', label: 'Find Doctors', icon: Stethoscope },
 ];
 
+// Every item (including the ones with a dropdown) opens a real page or a section of one
 const SITE_NAV_ITEMS = [
   {
     label: 'About',
+    to: '/about',
     children: [
-      { to: '#about', label: 'About HealthOps' },
-      { to: '#values', label: 'Our Values' },
+      { to: '/about#about', label: 'About HealthOps' },
+      { to: '/about#values', label: 'Our Values' },
     ],
   },
   {
     label: 'Centres',
+    to: '/#centres',
     children: [
+      { to: '/#centres', label: 'All Centres' },
       { to: '/doctors', label: 'Specialist Centre' },
-      { to: '#centres', label: 'All Centres' },
     ],
   },
   {
     label: 'Services',
+    to: '/#services',
     children: [
-      { to: '#services', label: 'Patient Services' },
+      { to: '/#services', label: 'Patient Services' },
       { to: '/doctors', label: 'Find a Specialist' },
     ],
   },
-  { to: '#international', label: 'International' },
+  { to: '/international', label: 'International' },
   {
     label: 'News',
+    to: '/news',
     children: [
-      { to: '#news', label: 'Latest News' },
-      { to: '#events', label: 'Events' },
+      { to: '/news#news', label: 'Latest News' },
+      { to: '/news#events', label: 'Events' },
     ],
   },
-  { to: '#careers', label: 'Careers' },
-  { to: '#contact', label: 'Contact' },
+  { to: '/careers', label: 'Careers' },
+  { to: '/contact', label: 'Contact' },
 ];
 
 const ROLE_LINKS = {
@@ -205,20 +210,10 @@ const Navbar = () => {
             const hasChildren = item.children?.length;
             return (
               <div key={item.label} className="health-nav-item relative">
-                {hasChildren ? (
-                  <button
-                    type="button"
-                    className="health-nav-trigger"
-                    aria-haspopup="true"
-                  >
-                    {item.label}
-                    <ChevronDown size={14} aria-hidden="true" />
-                  </button>
-                ) : (
-                  <Link to={item.to} className="health-nav-trigger">
-                    {item.label}
-                  </Link>
-                )}
+                <Link to={item.to} className="health-nav-trigger" aria-haspopup={hasChildren ? 'true' : undefined}>
+                  {item.label}
+                  {hasChildren && <ChevronDown size={14} aria-hidden="true" />}
+                </Link>
                 {hasChildren && (
                   <div className="health-nav-dropdown" role="menu">
                     {item.children.map((child) => (
@@ -427,10 +422,10 @@ const Navbar = () => {
                 <div key={item.label} className="mobile-health-nav-group">
                   {item.children ? (
                     <>
-                      <div className="mobile-health-nav-label">
+                      <Link to={item.to} className="mobile-health-nav-label" onClick={() => setMobileMenuOpen(false)}>
                         {item.label}
                         <ChevronDown size={15} aria-hidden="true" />
-                      </div>
+                      </Link>
                       <div className="mobile-health-nav-children">
                         {item.children.map((child) => (
                           <Link key={child.label} to={child.to} onClick={() => setMobileMenuOpen(false)}>

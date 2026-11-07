@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 
@@ -15,6 +15,7 @@ import Register from './pages/Register';
 import DoctorsDirectory from './pages/DoctorsDirectory';
 import NotFound from './pages/NotFound';
 import CentreDetail from './pages/CentreDetail';
+import SitePage from './pages/SitePage';
 
 // Patient Pages
 import PatientDashboard from './pages/patient/PatientDashboard';
@@ -35,12 +36,44 @@ import UserManagement from './pages/admin/UserManagement';
 import AuditLogs from './pages/admin/AuditLogs';
 import DevOpsHealth from './pages/admin/DevOpsHealth';
 
+// After every navigation: jump to the section named in the URL (#centres, #values...)
+// or, when there is none, to the top of the new page.
+const ScrollToSection = () => {
+  const { pathname, hash } = useLocation();
+
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      return undefined;
+    }
+
+    const id = decodeURIComponent(hash.slice(1));
+    let attempts = 0;
+    let timer;
+    // The target may not be on screen yet (a new page is still rendering), so retry briefly
+    const scrollToTarget = () => {
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (attempts < 20) {
+        attempts += 1;
+        timer = setTimeout(scrollToTarget, 100);
+      }
+    };
+    scrollToTarget();
+    return () => clearTimeout(timer);
+  }, [pathname, hash]);
+
+  return null;
+};
+
 function App() {
   return (
     <AuthProvider>
       <DataProvider>
         <div className="min-h-screen flex flex-col" style={{ color: '#f1f5f9' }}>
           <Navbar />
+          <ScrollToSection />
           
           <main className="flex-1">
             <Routes>
@@ -50,6 +83,11 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/doctors" element={<DoctorsDirectory />} />
               <Route path="/centres/:slug" element={<CentreDetail />} />
+              <Route path="/about" element={<SitePage page="about" />} />
+              <Route path="/international" element={<SitePage page="international" />} />
+              <Route path="/news" element={<SitePage page="news" />} />
+              <Route path="/careers" element={<SitePage page="careers" />} />
+              <Route path="/contact" element={<SitePage page="contact" />} />
 
               {/* Patient Protected Routes */}
               <Route

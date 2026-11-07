@@ -714,3 +714,6 @@ select:focus {
 
 /* contents list on centre pages is only useful on wide screens */
 @media (max-width: 960px) { .centre-toc { display: none; } }
+
+/* Anchors (#centres, #values...) should stop below the sticky navbar, not under it */
+[id] { scroll-margin-top: 8.5rem; }
