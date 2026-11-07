@@ -630,3 +630,20 @@ select:focus {
   .service-card:hover .service-icon { transform: none; }
   .service-card, .service-card:hover { transform: none; transition: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   SCROLL REVEAL: content slides in as it enters the viewport
+══════════════════════════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transition: opacity 800ms ease, transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-up    { transform: translateY(48px); }
+.reveal-left  { transform: translateX(-72px); }
+.reveal-right { transform: translateX(72px); }
+.reveal-zoom  { transform: scale(0.9); }
+.reveal.is-visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}

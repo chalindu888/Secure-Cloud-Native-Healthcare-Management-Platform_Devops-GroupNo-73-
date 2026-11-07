@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import careImage from '../assets/hospital-care.png';
+import careTeamImage from '../assets/care-team.png';
+import Reveal from '../components/Reveal';
 import emergencyIcon from '../assets/service-emergency.png';
 import opdIcon from '../assets/service-opd.png';
 import indoorIcon from '../assets/service-indoor.png';
@@ -13,13 +15,6 @@ const Home = () => {
   const { isAuthenticated, role } = useAuth();
   const { doctors } = useData();
   const navigate = useNavigate();
-
-  const stats = [
-    { value: '5+', label: 'Board Specialists', sub: 'Cardiology, Neuro, Derm', color: 'var(--c-primary)' },
-    { value: '100%', label: 'RBAC Protected', sub: 'JWT zero-trust auth', color: 'var(--c-cyan)' },
-    { value: '< 8 min', label: 'MTTR Recovery', sub: 'Automated GitOps healing', color: 'var(--c-emerald)' },
-    { value: '0 CVEs', label: 'Security Hardened', sub: 'Trivy container scanning', color: 'var(--c-amber)' },
-  ];
 
   // Tilt a card toward the pointer (the CSS turns --rx / --ry into a slight 3D rotation)
   const tiltCard = (e) => {
@@ -92,7 +87,7 @@ const Home = () => {
   ];
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', overflowX: 'clip' }}>
       {/* ================================================================
           HERO SECTION WITH VIDEO BACKGROUND
       ================================================================ */}
@@ -192,18 +187,27 @@ const Home = () => {
       </section>
 
       {/* ================================================================
-          STATS SECTION
+          CARE TEAM PHOTO
       ================================================================ */}
       <section className="page-wrapper" style={{ paddingBottom: '3rem' }}>
-        <div className="animate-fade-up-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
-          {stats.map((stat, i) => (
-            <div key={i} className="stat-card" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1.5rem' }}>
-              <p style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 900, color: stat.color, marginBottom: '0.25rem' }}>{stat.value}</p>
-              <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--txt-primary)', marginBottom: '0.25rem' }}>{stat.label}</p>
-              <p style={{ fontSize: '0.7rem', color: 'var(--txt-secondary)' }}>{stat.sub}</p>
-            </div>
-          ))}
-        </div>
+        <Reveal
+          direction="zoom"
+          style={{
+            maxWidth: '52rem',
+            margin: '0 auto',
+            borderRadius: '1.5rem',
+            overflow: 'hidden',
+            border: '6px solid #ffffff',
+            boxShadow: 'var(--shdw-lg)',
+            background: '#ffffff',
+          }}
+        >
+          <img
+            src={careTeamImage}
+            alt="A doctor and a nurse caring for an elderly patient at her bedside"
+            style={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover', objectPosition: 'center 35%', display: 'block' }}
+          />
+        </Reveal>
       </section>
 
       {/* ================================================================
@@ -211,16 +215,16 @@ const Home = () => {
       ================================================================ */}
       <section id="services" className="page-wrapper" style={{ paddingTop: '0', paddingBottom: '3rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <span className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>What We Offer</span>
-          <h2 className="page-title" style={{ marginBottom: '1rem' }}>Our Hospital Services</h2>
-          <p className="page-subtitle" style={{ maxWidth: '560px', margin: '0 auto' }}>
+          <Reveal as="span" className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>What We Offer</Reveal>
+          <Reveal as="h2" delay={120} className="page-title" style={{ marginBottom: '1rem' }}>Our Hospital Services</Reveal>
+          <Reveal as="p" delay={240} className="page-subtitle" style={{ maxWidth: '560px', margin: '0 auto' }}>
             From urgent care to a comfortable recovery, everything you need is under one roof.
-          </p>
+          </Reveal>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
           {hospitalServices.map((service, i) => (
-              <div key={service.title} className="animate-fade-up" style={{ display: 'flex', animationDelay: `${i * 100}ms` }}>
+              <Reveal key={service.title} delay={i * 130} style={{ display: 'flex' }}>
               <div
                 className="card service-card"
                 onMouseMove={tiltCard}
@@ -247,7 +251,7 @@ const Home = () => {
                 </h3>
                 <p style={{ fontSize: '0.92rem', color: 'var(--txt-secondary)', lineHeight: 1.75 }}>{service.desc}</p>
               </div>
-              </div>
+              </Reveal>
           ))}
         </div>
       </section>
@@ -257,18 +261,19 @@ const Home = () => {
       ================================================================ */}
       <section className="page-wrapper" style={{ paddingTop: '0' }}>
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          <span className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>Architected for Reliability</span>
-          <h2 className="page-title" style={{ marginBottom: '1rem' }}>Complete Care Lifecycle</h2>
-          <p className="page-subtitle" style={{ maxWidth: '560px', margin: '0 auto' }}>
+          <Reveal as="span" className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>Architected for Reliability</Reveal>
+          <Reveal as="h2" delay={120} className="page-title" style={{ marginBottom: '1rem' }}>Complete Care Lifecycle</Reveal>
+          <Reveal as="p" delay={240} className="page-subtitle" style={{ maxWidth: '560px', margin: '0 auto' }}>
             Engineered with modern DevSecOps principles to ensure zero downtime, clinical accuracy, and patient privacy at scale.
-          </p>
+          </Reveal>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
           {features.map((f, i) => {
             const Icon = f.icon;
             return (
-              <div key={i} className="card animate-fade-up" style={{ padding: '2rem', animationDelay: `${i * 100}ms` }}>
+              <Reveal key={i} direction={i === 0 ? 'left' : i === features.length - 1 ? 'right' : 'up'} delay={i * 130} style={{ display: 'flex' }}>
+              <div className="card" style={{ padding: '2rem', flex: 1 }}>
                 <div style={{ width: '52px', height: '52px', borderRadius: 'var(--r-md)', background: f.bg, border: `1px solid ${f.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
                   <Icon size={24} style={{ color: f.color }} />
                 </div>
@@ -283,6 +288,7 @@ const Home = () => {
                   ))}
                 </ul>
               </div>
+              </Reveal>
             );
           })}
         </div>
@@ -305,6 +311,7 @@ const Home = () => {
             boxShadow: 'var(--shdw-md)',
           }}
         >
+          <Reveal direction="left" style={{ width: '100%', maxWidth: '600px', justifySelf: 'center' }}>
           <img
             src={careImage}
             alt="A doctor talking with a patient's family at the bedside"
@@ -317,7 +324,8 @@ const Home = () => {
               display: 'block',
             }}
           />
-          <div>
+          </Reveal>
+          <Reveal direction="right" delay={150}>
             <span className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>Compassionate Care</span>
             <h2 className="page-title" style={{ marginBottom: '1rem' }}>Caring for the whole family</h2>
             <p className="page-subtitle" style={{ marginBottom: '1.5rem' }}>
@@ -327,7 +335,7 @@ const Home = () => {
               Meet Our Specialists
               <ArrowRight size={18} />
             </Link>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -335,7 +343,7 @@ const Home = () => {
           CTA SECTION
       ================================================================ */}
       <section className="page-wrapper" style={{ paddingTop: '0' }}>
-        <div style={{ padding: '4rem 2rem', borderRadius: 'var(--r-2xl)', textAlign: 'center', background: 'var(--c-primary-pale)', border: '1px solid var(--c-primary-border)', boxShadow: 'var(--shdw-md)' }}>
+        <Reveal direction="zoom" style={{ padding: '4rem 2rem', borderRadius: 'var(--r-2xl)', textAlign: 'center', background: 'var(--c-primary-pale)', border: '1px solid var(--c-primary-border)', boxShadow: 'var(--shdw-md)' }}>
           <span className="section-label" style={{ display: 'block', marginBottom: '1rem' }}>Ready to Transform Healthcare?</span>
           <h2 className="page-title" style={{ marginBottom: '1.25rem' }}>Start Your Journey Today</h2>
           <p className="page-subtitle" style={{ maxWidth: '500px', margin: '0 auto 2.5rem' }}>
@@ -350,7 +358,7 @@ const Home = () => {
               View Our Doctors
             </Link>
           </div>
-        </div>
+        </Reveal>
       </section>
     </div>
   );
