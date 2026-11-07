@@ -34,6 +34,10 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
+  // Enough connections for many users at once; excess requests queue instead of failing
+  max: Number(process.env.DB_POOL_MAX) || 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
 });
 
 // Roles that may be chosen on the public sign-up form. 'admin' accounts can
@@ -423,45 +427,58 @@ app.post('/api/appointments', authenticate, requireRole('patient'), async (req, 
       return res.status(400).json({ error: 'Appointments cannot be booked in the past.' });
     }
 
-    const doctorResult = await pool.query(
-      "SELECT id, name, available_days, time_slots, max_patients_per_day FROM users WHERE id = $1 AND role = 'doctor'",
-      [doctorIdNumber]
-    );
-    const doctor = doctorResult.rows[0];
-    if (!doctor) {
-      return res.status(404).json({ error: 'Doctor not found.' });
-    }
-
-    if (doctor.time_slots?.length && !doctor.time_slots.includes(timeSlot)) {
-      return res.status(400).json({ error: 'That time slot is not offered by this doctor.' });
-    }
-    const weekday = WEEK_DAYS[(new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7];
-    if (doctor.available_days?.length && !doctor.available_days.includes(weekday)) {
-      return res.status(400).json({ error: `This doctor does not see patients on ${weekday}s.` });
-    }
-
-    if (doctor.max_patients_per_day) {
-      const count = await pool.query(
-        "SELECT COUNT(*)::int AS n FROM appointments WHERE doctor_id = $1 AND appointment_date = $2 AND status <> 'cancelled'",
-        [doctorIdNumber, date]
-      );
-      if (count.rows[0].n >= doctor.max_patients_per_day) {
-        return res.status(409).json({ error: 'This doctor is fully booked on that date. Please choose another day.' });
-      }
-    }
-
+    // One transaction per booking. Locking the doctor's row makes simultaneous bookings for
+    // the same doctor run one after another, so the daily limit can't be overshot.
+    const client = await pool.connect();
     let inserted;
     try {
-      inserted = await pool.query(
+      await client.query('BEGIN');
+
+      const doctorResult = await client.query(
+        "SELECT id, name, available_days, time_slots, max_patients_per_day FROM users WHERE id = $1 AND role = 'doctor' FOR UPDATE",
+        [doctorIdNumber]
+      );
+      const doctor = doctorResult.rows[0];
+      if (!doctor) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Doctor not found.' });
+      }
+
+      if (doctor.time_slots?.length && !doctor.time_slots.includes(timeSlot)) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'That time slot is not offered by this doctor.' });
+      }
+      const weekday = WEEK_DAYS[(new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7];
+      if (doctor.available_days?.length && !doctor.available_days.includes(weekday)) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: `This doctor does not see patients on ${weekday}s.` });
+      }
+
+      if (doctor.max_patients_per_day) {
+        const count = await client.query(
+          "SELECT COUNT(*)::int AS n FROM appointments WHERE doctor_id = $1 AND appointment_date = $2 AND status <> 'cancelled'",
+          [doctorIdNumber, date]
+        );
+        if (count.rows[0].n >= doctor.max_patients_per_day) {
+          await client.query('ROLLBACK');
+          return res.status(409).json({ error: 'This doctor is fully booked on that date. Please choose another day.' });
+        }
+      }
+
+      inserted = await client.query(
         `INSERT INTO appointments (patient_id, doctor_id, appointment_date, time_slot, reason)
          VALUES ($1, $2, $3, $4, $5) RETURNING id`,
         [req.user.id, doctorIdNumber, date, timeSlot, reasonText]
       );
-    } catch (insertError) {
-      if (insertError.code === '23505') {
+      await client.query('COMMIT');
+    } catch (bookingError) {
+      await client.query('ROLLBACK').catch(() => {});
+      if (bookingError.code === '23505') {
         return res.status(409).json({ error: 'That time slot has just been booked. Please pick another.' });
       }
-      throw insertError;
+      throw bookingError;
+    } finally {
+      client.release();
     }
 
     const created = await pool.query(`${APPOINTMENT_SELECT} WHERE a.id = $1`, [inserted.rows[0].id]);

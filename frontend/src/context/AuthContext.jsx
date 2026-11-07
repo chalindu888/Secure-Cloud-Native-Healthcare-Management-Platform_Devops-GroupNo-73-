@@ -5,6 +5,9 @@ const AuthContext = createContext(null);
 
 const ROLE_KEY = 'healthops_role';
 
+// Sessions used to live in localStorage, which every tab shares; clear any leftovers
+['healthops_token', 'healthops_user', ROLE_KEY].forEach((key) => localStorage.removeItem(key));
+
 // Reads the `exp` claim from a JWT without verifying it (the server does that)
 const isTokenExpired = (token) => {
   try {
@@ -17,7 +20,7 @@ const isTokenExpired = (token) => {
 
 // A saved session is only usable while its token is still valid
 const hasValidSession = () => {
-  const savedToken = localStorage.getItem('healthops_token');
+  const savedToken = sessionStorage.getItem('healthops_token');
   return !!savedToken && !isTokenExpired(savedToken);
 };
 
@@ -25,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
   // Start logged out unless a real login was previously saved
   const [user, setUser] = useState(() => {
-    const saved = hasValidSession() ? localStorage.getItem('healthops_user') : null;
+    const saved = hasValidSession() ? sessionStorage.getItem('healthops_user') : null;
 
     if (saved) {
       try {
@@ -39,24 +42,24 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [token, setToken] = useState(() => {
-    return hasValidSession() ? localStorage.getItem('healthops_token') : null;
+    return hasValidSession() ? sessionStorage.getItem('healthops_token') : null;
   });
 
-  // Save user in localStorage
+  // Save user in sessionStorage (per browser tab, so different accounts can be signed in side by side)
   useEffect(() => {
     if (user) {
-      localStorage.setItem('healthops_user', JSON.stringify(user));
+      sessionStorage.setItem('healthops_user', JSON.stringify(user));
     } else {
-      localStorage.removeItem('healthops_user');
+      sessionStorage.removeItem('healthops_user');
     }
   }, [user]);
 
-  // Save token in localStorage
+  // Save token in sessionStorage
   useEffect(() => {
     if (token) {
-      localStorage.setItem('healthops_token', token);
+      sessionStorage.setItem('healthops_token', token);
     } else {
-      localStorage.removeItem('healthops_token');
+      sessionStorage.removeItem('healthops_token');
     }
   }, [token]);
 
@@ -84,7 +87,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(loggedInUser);
       setToken(data.token);
-      localStorage.setItem(ROLE_KEY, data.role);
+      sessionStorage.setItem(ROLE_KEY, data.role);
 
       return {
         success: true,
@@ -156,9 +159,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
 
-    localStorage.removeItem('healthops_user');
-    localStorage.removeItem('healthops_token');
-    localStorage.removeItem(ROLE_KEY);
+    sessionStorage.removeItem('healthops_user');
+    sessionStorage.removeItem('healthops_token');
+    sessionStorage.removeItem(ROLE_KEY);
   };
 
 

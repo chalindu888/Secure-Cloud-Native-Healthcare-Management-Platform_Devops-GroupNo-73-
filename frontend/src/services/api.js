@@ -14,7 +14,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('healthops_token');
+    const token = sessionStorage.getItem('healthops_token');
     if (token) {
       config.headers.set('Authorization', 'Bearer ' + token);
     }
@@ -28,7 +28,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid: drop the stale session and send the user to sign in again
-      ['healthops_token', 'healthops_user', 'healthops_role'].forEach((key) => localStorage.removeItem(key));
+      ['healthops_token', 'healthops_user', 'healthops_role'].forEach((key) => sessionStorage.removeItem(key));
       if (window.location.pathname !== '/login') {
         window.location.assign('/login?expired=1');
       }
