@@ -5,11 +5,27 @@ const AuthContext = createContext(null);
 
 const ROLE_KEY = 'healthops_role';
 
+// Reads the `exp` claim from a JWT without verifying it (the server does that)
+const isTokenExpired = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return !payload.exp || payload.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+};
+
+// A saved session is only usable while its token is still valid
+const hasValidSession = () => {
+  const savedToken = localStorage.getItem('healthops_token');
+  return !!savedToken && !isTokenExpired(savedToken);
+};
+
 export const AuthProvider = ({ children }) => {
 
   // Start logged out unless a real login was previously saved
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('healthops_user');
+    const saved = hasValidSession() ? localStorage.getItem('healthops_user') : null;
 
     if (saved) {
       try {
@@ -23,7 +39,7 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [token, setToken] = useState(() => {
-    return localStorage.getItem('healthops_token') || null;
+    return hasValidSession() ? localStorage.getItem('healthops_token') : null;
   });
 
   // Save user in localStorage

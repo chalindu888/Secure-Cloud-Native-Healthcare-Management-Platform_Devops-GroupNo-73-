@@ -25,7 +25,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(express.json());
+// Profile photos arrive as small resized data URLs, so allow a bit more than the 100kb default
+app.use(express.json({ limit: '1mb' }));
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -38,6 +39,10 @@ const pool = new Pool({
 // Roles that may be chosen on the public sign-up form. 'admin' accounts can
 // never be self-registered.
 const SIGNUP_ROLES = ['patient', 'doctor'];
+
+// Profile photo: a base64 image data URL, max ~500 KB
+const PHOTO_PATTERN = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+const MAX_PHOTO_LENGTH = 500 * 1024;
 
 app.get('/', (_req, res) => {
   res.json({ status: 'ok' });
@@ -70,6 +75,9 @@ const initDb = async () => {
       ADD COLUMN IF NOT EXISTS clinic_location VARCHAR(255),
       ADD COLUMN IF NOT EXISTS consultation_fee NUMERIC(10, 2),
       ADD COLUMN IF NOT EXISTS bio TEXT,
+      ADD COLUMN IF NOT EXISTS photo TEXT,
+      ADD COLUMN IF NOT EXISTS years_experience INTEGER,
+      ADD COLUMN IF NOT EXISTS max_patients_per_day INTEGER,
       ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()
   `);
   await pool.query(`
@@ -204,6 +212,9 @@ app.get('/api/doctors', async (_req, res) => {
         consultation_fee,
         bio,
         license,
+        photo,
+        years_experience,
+        max_patients_per_day,
         created_at
       FROM users
       WHERE role = 'doctor'
@@ -220,6 +231,57 @@ app.get('/api/doctors', async (_req, res) => {
   }
 });
 
+// Columns a doctor sees on their own profile
+const DOCTOR_PROFILE_COLUMNS = `id, name, email, phone, specialty, department, qualifications,
+  clinic_location, consultation_fee, bio, license, photo, years_experience, max_patients_per_day`;
+
+const textField = (label, max) => (value) => {
+  const text = String(value ?? '').trim();
+  if (text.length > max) throw new Error(`${label} must be ${max} characters or fewer.`);
+  return text || null;
+};
+
+const numberField = (label, { min, max, integer }) => (value) => {
+  if (value === '' || value === null) return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < min || n > max || (integer && !Number.isInteger(n))) {
+    throw new Error(`${label} must be ${integer ? 'a whole number' : 'a number'} between ${min} and ${max}.`);
+  }
+  return n;
+};
+
+// Editable doctor profile fields: request key -> { column, validate }.
+// Only fields present in the request body are updated; '' clears a field.
+const DOCTOR_PROFILE_FIELDS = {
+  specialty: { column: 'specialty', validate: textField('Specialty', 100) },
+  qualifications: { column: 'qualifications', validate: textField('Qualifications', 255) },
+  clinic_location: { column: 'clinic_location', validate: textField('Clinic location', 255) },
+  consultation_fee: { column: 'consultation_fee', validate: numberField('Consultation fee', { min: 0, max: 10000000 }) },
+  bio: { column: 'bio', validate: textField('Biography', 2000) },
+  years_experience: { column: 'years_experience', validate: numberField('Years of experience', { min: 0, max: 70, integer: true }) },
+  max_patients_per_day: { column: 'max_patients_per_day', validate: numberField('Max patients per day', { min: 1, max: 200, integer: true }) },
+  license: {
+    column: 'license',
+    validate: (value) => {
+      const text = textField('SLMC registration number', 30)(value);
+      if (text && !/^[A-Za-z0-9][A-Za-z0-9/\- ]*$/.test(text)) {
+        throw new Error('SLMC registration number may only contain letters, numbers, spaces, "-" and "/".');
+      }
+      return text;
+    },
+  },
+  photo: {
+    column: 'photo',
+    validate: (value) => {
+      if (!value) return null;
+      if (!PHOTO_PATTERN.test(value) || value.length > MAX_PHOTO_LENGTH) {
+        throw new Error('Photo must be a JPEG, PNG or WebP image under 500 KB.');
+      }
+      return value;
+    },
+  },
+};
+
 // --- DOCTOR: READ OWN PROFILE ---
 app.get(
   '/api/doctor/profile/:id',
@@ -229,9 +291,7 @@ app.get(
   async (req, res) => {
     try {
       const result = await pool.query(
-        `SELECT id, name, email, phone, specialty, department, qualifications,
-                clinic_location, consultation_fee, bio, license
-         FROM users WHERE id = $1 AND role = 'doctor'`,
+        `SELECT ${DOCTOR_PROFILE_COLUMNS} FROM users WHERE id = $1 AND role = 'doctor'`,
         [req.params.id]
       );
 
@@ -255,34 +315,29 @@ app.put(
   requireSelf('id'),
   async (req, res) => {
     try {
-      const { specialty, qualifications, clinic_location, consultation_fee } = req.body;
+      const assignments = [];
+      const values = [];
 
-      if (
-        consultation_fee !== undefined &&
-        consultation_fee !== null &&
-        consultation_fee !== '' &&
-        !(Number(consultation_fee) >= 0)
-      ) {
-        return res.status(400).json({ error: 'Consultation fee must be a non-negative number.' });
+      for (const [key, { column, validate }] of Object.entries(DOCTOR_PROFILE_FIELDS)) {
+        if (req.body[key] === undefined) continue;
+        try {
+          values.push(validate(req.body[key]));
+        } catch (validationError) {
+          return res.status(400).json({ error: validationError.message });
+        }
+        assignments.push(`${column} = $${values.length}`);
       }
 
-      // COALESCE keeps the existing value for any field not sent
+      if (assignments.length === 0) {
+        return res.status(400).json({ error: 'No profile fields were provided.' });
+      }
+
+      values.push(req.params.id);
       const result = await pool.query(
-        `UPDATE users
-         SET specialty = COALESCE($1, specialty),
-             qualifications = COALESCE($2, qualifications),
-             clinic_location = COALESCE($3, clinic_location),
-             consultation_fee = COALESCE($4, consultation_fee)
-         WHERE id = $5 AND role = 'doctor'
-         RETURNING id, name, email, specialty, department, qualifications,
-                   clinic_location, consultation_fee, bio, license`,
-        [
-          specialty ?? null,
-          qualifications ?? null,
-          clinic_location ?? null,
-          consultation_fee === '' ? null : consultation_fee ?? null,
-          req.params.id,
-        ]
+        `UPDATE users SET ${assignments.join(', ')}
+         WHERE id = $${values.length} AND role = 'doctor'
+         RETURNING ${DOCTOR_PROFILE_COLUMNS}`,
+        values
       );
 
       if (result.rows.length === 0) {
@@ -354,7 +409,7 @@ app.post('/api/login', async (req, res) => {
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
     );
 
     res.json({

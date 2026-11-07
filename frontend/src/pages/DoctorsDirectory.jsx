@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { Search, MapPin, Award, Calendar, Star, Filter, Stethoscope } from 'lucide-react';
+import { Search, MapPin, Award, Calendar, Star, Filter, Stethoscope, Briefcase } from 'lucide-react';
 
 const SPECIALTIES = ['All', 'Cardiology', 'Neurology', 'Dermatology', 'Pediatrics', 'General Medicine'];
 
@@ -37,10 +37,11 @@ const DoctorsDirectory = () => {
           name: doctor.name || 'Unnamed doctor',
           specialty: doctor.specialty || 'General Medicine',
           department: doctor.department || 'Medical Services',
-          qualification: doctor.qualifications || doctor.license || 'Qualifications not provided',
+          qualification: doctor.qualifications || 'Qualifications not provided',
           location: doctor.clinic_location || 'Clinic location not provided',
           consultationFee: doctor.consultation_fee ?? 'Not provided',
           bio: doctor.bio || 'Doctor profile details will be updated soon.',
+          yearsExperience: doctor.years_experience,
           availableDays: doctor.available_days || [],
           rating: doctor.rating ?? 'New',
           reviewsCount: doctor.reviews_count ?? 0,
@@ -208,11 +209,15 @@ const DoctorsDirectory = () => {
                 {/* Doctor Header */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
                   <div style={{
-                    width: '52px', height: '52px', borderRadius: '0.875rem', flexShrink: 0,
+                    width: '52px', height: '52px', borderRadius: '0.875rem', flexShrink: 0, overflow: 'hidden',
                     background: specStyle.bg, border: `1px solid ${specStyle.border}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Stethoscope size={22} style={{ color: specStyle.color }} />
+                    {doc.photo ? (
+                      <img src={doc.photo} alt={doc.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    ) : (
+                      <Stethoscope size={22} style={{ color: specStyle.color }} />
+                    )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.25rem' }}>
@@ -248,6 +253,12 @@ const DoctorsDirectory = () => {
                     <MapPin size={14} style={{ color: '#475569', flexShrink: 0 }} />
                     {doc.location}
                   </div>
+                  {doc.yearsExperience !== null && doc.yearsExperience !== undefined && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.76rem', color: '#64748b' }}>
+                      <Briefcase size={14} style={{ color: '#475569', flexShrink: 0 }} />
+                      {doc.yearsExperience} {doc.yearsExperience === 1 ? 'year' : 'years'} of experience
+                    </div>
+                  )}
                 </div>
 
                 {/* Available Days */}

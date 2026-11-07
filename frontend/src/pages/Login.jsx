@@ -13,7 +13,9 @@ const Login = () => {
   const signupMessage = location.state?.message || '';
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(() =>
+    new URLSearchParams(location.search).get('expired') ? 'Your session has expired. Please sign in again.' : ''
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const redirectAfterLogin = (role) => {

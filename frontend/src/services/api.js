@@ -27,7 +27,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      console.warn('Unauthorized request - session might have expired.');
+      // Token expired or invalid: drop the stale session and send the user to sign in again
+      ['healthops_token', 'healthops_user', 'healthops_role'].forEach((key) => localStorage.removeItem(key));
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login?expired=1');
+      }
     }
     return Promise.reject(error);
   }
