@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-xl' }) => {
+// Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
+// so spacing here uses inline styles.
+const Modal = ({ isOpen, onClose, title, children, maxWidth = '36rem' }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
@@ -19,30 +21,46 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-xl' }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div 
-        className="fixed inset-0" 
-        onClick={onClose} 
-        aria-hidden="true" 
-      />
-      
-      <div 
-        className={`relative w-full ${maxWidth} bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all z-10`}
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100, overflowY: 'auto',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '1rem', background: 'rgba(15, 23, 42, 0.55)', backdropFilter: 'blur(4px)',
+      }}
+    >
+      <div style={{ position: 'fixed', inset: 0 }} onClick={onClose} aria-hidden="true" />
+
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={typeof title === 'string' ? title : undefined}
+        style={{
+          position: 'relative', zIndex: 1, width: '100%', maxWidth, overflow: 'hidden',
+          background: '#ffffff', borderRadius: '1.25rem', border: '1px solid #e2e8f0',
+          boxShadow: '0 30px 80px rgba(15, 23, 42, 0.35)',
+        }}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-          <h3 className="text-lg font-bold text-slate-800">{title}</h3>
+        <div
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+            padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', background: '#f8fafc',
+          }}
+        >
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', overflowWrap: 'anywhere' }}>{title}</h3>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
             aria-label="Close dialog"
+            style={{
+              display: 'flex', padding: '0.4rem', borderRadius: '0.6rem', border: 'none',
+              background: 'transparent', color: '#64748b', cursor: 'pointer', flexShrink: 0,
+            }}
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-6">
-          {children}
-        </div>
+        <div style={{ padding: '1.5rem', maxHeight: '75vh', overflowY: 'auto' }}>{children}</div>
       </div>
     </div>
   );

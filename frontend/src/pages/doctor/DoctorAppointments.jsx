@@ -1,17 +1,105 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import StatusBadge from '../../components/StatusBadge';
 import Modal from '../../components/Modal';
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Search, 
-  CheckCircle, 
-  FileText, 
-  CheckCircle2
+import {
+  Calendar,
+  Clock,
+  Search,
+  CheckCircle2,
+  FileText,
+  Phone,
+  Mail,
+  Pill,
+  Check,
+  X,
+  AlertTriangle,
+  ClipboardList
 } from 'lucide-react';
+
+// Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
+// so spacing here uses inline styles.
+
+const FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'pending', label: 'Pending' },
+  { key: 'confirmed', label: 'Confirmed' },
+  { key: 'completed', label: 'Completed' },
+  { key: 'cancelled', label: 'Cancelled' },
+];
+
+const STATUS_ACCENT = {
+  pending: '#d97706',
+  confirmed: '#059669',
+  completed: '#4f46e5',
+  cancelled: '#e11d48',
+};
+
+// Needs attention first, then soonest upcoming visits; finished and cancelled last (newest first)
+const STATUS_ORDER = { pending: 0, confirmed: 1, completed: 2, cancelled: 3 };
+const sortAppointments = (a, b) => {
+  const byStatus = (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9);
+  if (byStatus !== 0) return byStatus;
+  const byDate = a.date.localeCompare(b.date) || a.timeSlot.localeCompare(b.timeSlot);
+  return a.status === 'pending' || a.status === 'confirmed' ? byDate : -byDate;
+};
+
+const parseDate = (date) => new Date(`${date}T00:00:00`);
+
+const formatDate = (date) =>
+  parseDate(date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+// "Today", "Tomorrow", "In 3 days", "2 days ago"
+const relativeDay = (date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diff = Math.round((parseDate(date) - today) / 86400000);
+  if (diff === 0) return { text: 'Today', tone: 'now' };
+  if (diff === 1) return { text: 'Tomorrow', tone: 'soon' };
+  if (diff > 1) return { text: `In ${diff} days`, tone: 'later' };
+  return { text: diff === -1 ? 'Yesterday' : `${-diff} days ago`, tone: 'past' };
+};
+
+const RELATIVE_COLORS = {
+  now: { color: '#047857', background: 'rgba(5,150,105,0.12)' },
+  soon: { color: '#b45309', background: 'rgba(217,119,6,0.12)' },
+  later: { color: 'var(--txt-muted)', background: 'rgba(0,0,0,0.05)' },
+  past: { color: 'var(--txt-muted)', background: 'rgba(0,0,0,0.05)' },
+};
+
+const initials = (name = '') =>
+  name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase() || '?';
+
+const cardStyle = {
+  background: 'var(--bg-card)',
+  border: '1px solid #ffffff',
+  borderRadius: 'var(--r-xl)',
+  boxShadow: 'var(--shdw-md)',
+};
+
+const modalLabelStyle = {
+  display: 'block', marginBottom: '0.4rem', fontSize: '0.72rem', fontWeight: 700,
+  textTransform: 'uppercase', letterSpacing: '0.06em', color: '#475569',
+};
+
+const Detail = ({ icon: Icon, label, children }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+    <span
+      style={{
+        width: '2.1rem', height: '2.1rem', borderRadius: '0.65rem', flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'var(--c-primary-pale)', color: 'var(--c-primary)',
+      }}
+    >
+      <Icon size={16} />
+    </span>
+    <div style={{ minWidth: 0 }}>
+      <p style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--txt-muted)' }}>{label}</p>
+      <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--txt-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>{children}</div>
+    </div>
+  </div>
+);
 
 const DoctorAppointments = () => {
   const { user } = useAuth();
@@ -19,264 +107,381 @@ const DoctorAppointments = () => {
 
   const [activeFilter, setActiveFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [busyId, setBusyId] = useState(null);
+  const [actionError, setActionError] = useState('');
 
   // Complete/Prescribe Modal state
   const [activeModalApt, setActiveModalApt] = useState(null);
   const [diagnosisNotes, setDiagnosisNotes] = useState('');
   const [prescriptionText, setPrescriptionText] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [modalError, setModalError] = useState('');
 
   const docAppointments = appointments.filter(
     (apt) => apt.doctorId === user?.id || apt.doctorName === user?.name
   );
 
-  const filtered = docAppointments.filter((apt) => {
-    if (activeFilter !== 'all' && apt.status !== activeFilter) return false;
-    if (search) {
-      const q = search.toLowerCase();
+  const countFor = (key) =>
+    key === 'all' ? docAppointments.length : docAppointments.filter((apt) => apt.status === key).length;
+
+  const q = search.trim().toLowerCase();
+  const filtered = docAppointments
+    .filter((apt) => {
+      if (activeFilter !== 'all' && apt.status !== activeFilter) return false;
+      if (!q) return true;
       return (
         apt.patientName.toLowerCase().includes(q) ||
         apt.patientEmail.toLowerCase().includes(q) ||
-        apt.reason.toLowerCase().includes(q)
+        (apt.reason || '').toLowerCase().includes(q)
       );
+    })
+    .sort(sortAppointments);
+
+  const runAction = async (apt, status) => {
+    setActionError('');
+    setBusyId(apt.id);
+    const result = await updateAppointmentStatus(apt.id, status);
+    setBusyId(null);
+    if (!result.success) setActionError(result.message);
+  };
+
+  const handleDecline = (apt) => {
+    if (window.confirm(`Decline the request from ${apt.patientName} on ${formatDate(apt.date)} at ${apt.timeSlot}?`)) {
+      runAction(apt, 'cancelled');
     }
-    return true;
-  });
+  };
 
   const handleOpenCompleteModal = (apt) => {
     setActiveModalApt(apt);
     setDiagnosisNotes(apt.notes || '');
     setPrescriptionText(apt.prescription || '');
+    setModalError('');
   };
 
   const handleSaveModal = async (e) => {
     e.preventDefault();
-    if (activeModalApt) {
-      const result = await updateAppointmentStatus(
-        activeModalApt.id,
-        'completed',
-        diagnosisNotes,
-        prescriptionText
-      );
-      if (!result.success) {
-        window.alert(result.message);
-        return;
-      }
-      setActiveModalApt(null);
+    if (!activeModalApt) return;
+
+    setModalError('');
+    setIsSaving(true);
+    const result = await updateAppointmentStatus(activeModalApt.id, 'completed', diagnosisNotes, prescriptionText);
+    setIsSaving(false);
+
+    if (!result.success) {
+      setModalError(result.message);
+      return;
     }
+    setActiveModalApt(null);
   };
 
+  const pendingCount = countFor('pending');
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Clinical Appointments Ledger</h1>
-        <p className="text-sm text-slate-600">
-          Manage your schedule, accept incoming requests, and record medical diagnoses and prescriptions.
+    <div className="page-wrapper">
+      {/* Header */}
+      <div style={{ marginBottom: '1.75rem' }}>
+        <span style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--c-cyan)' }}>
+          Doctor Portal
+        </span>
+        <h1 className="page-title">Appointments</h1>
+        <p className="page-subtitle">
+          Review requests, confirm visits, and record diagnoses and prescriptions.
         </p>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-          {/* Status Tabs */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full md:w-auto overflow-x-auto text-xs">
-            {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveFilter(tab)}
-                className={`px-3 py-1.5 rounded-lg font-semibold capitalize whitespace-nowrap transition ${
-                  activeFilter === tab
-                    ? 'bg-white text-indigo-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+      {/* Pending attention banner */}
+      {pendingCount > 0 && activeFilter !== 'pending' && (
+        <button
+          type="button"
+          onClick={() => setActiveFilter('pending')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', marginBottom: '1.25rem',
+            padding: '0.9rem 1.1rem', borderRadius: 'var(--r-md)', textAlign: 'left', cursor: 'pointer',
+            background: 'rgba(217,119,6,0.1)', border: '1px solid rgba(217,119,6,0.3)', color: '#92400e',
+            fontSize: '0.88rem', fontWeight: 600,
+          }}
+        >
+          <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+          <span>
+            You have {pendingCount} appointment request{pendingCount === 1 ? '' : 's'} waiting for your response.
+          </span>
+          <span style={{ marginLeft: 'auto', fontWeight: 800, whiteSpace: 'nowrap' }}>Review →</span>
+        </button>
+      )}
 
-          {/* Search Box */}
-          <div className="w-full md:w-72 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <Search size={16} />
-            </div>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search patient name or email..."
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+      {/* Filter + search */}
+      <div style={{ ...cardStyle, padding: '1rem 1.25rem', marginBottom: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div role="tablist" aria-label="Filter appointments by status" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+          {FILTERS.map(({ key, label }) => {
+            const active = activeFilter === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setActiveFilter(key)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.45rem',
+                  padding: '0.5rem 0.95rem', borderRadius: 'var(--r-pill)', cursor: 'pointer',
+                  fontSize: '0.82rem', fontWeight: 700, transition: 'all 180ms ease',
+                  border: `1px solid ${active ? 'var(--c-primary)' : 'var(--bdr-default)'}`,
+                  background: active ? 'var(--c-primary)' : 'rgba(255,255,255,0.7)',
+                  color: active ? '#ffffff' : 'var(--txt-secondary)',
+                }}
+              >
+                {label}
+                <span
+                  style={{
+                    minWidth: '1.3rem', padding: '0.05rem 0.4rem', borderRadius: 'var(--r-pill)', textAlign: 'center',
+                    fontSize: '0.7rem', fontWeight: 800,
+                    background: active ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.06)',
+                    color: active ? '#ffffff' : 'var(--txt-muted)',
+                  }}
+                >
+                  {countFor(key)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div style={{ position: 'relative', flex: '1 1 16rem', maxWidth: '22rem' }}>
+          <Search size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--txt-muted)', pointerEvents: 'none' }} />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search patient, email or reason..."
+            aria-label="Search appointments"
+            style={{ paddingLeft: '2.6rem', borderRadius: 'var(--r-pill)' }}
+          />
         </div>
       </div>
 
-      {/* Appointments List */}
-      <div className="space-y-4">
+      {actionError && (
+        <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem', padding: '0.85rem 1rem', borderRadius: 'var(--r-md)', background: 'var(--c-rose-pale)', border: '1px solid var(--c-rose-border)', color: 'var(--c-rose)', fontSize: '0.85rem', fontWeight: 600 }}>
+          <AlertTriangle size={16} style={{ flexShrink: 0 }} /> {actionError}
+        </div>
+      )}
+
+      {/* Appointments list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {filtered.length > 0 ? (
-          filtered.map((apt) => (
-            <div
-              key={apt.id}
-              className="bg-white rounded-2xl border border-slate-200 shadow-xs hover:border-slate-300 transition p-6 space-y-4"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-sm">
-                    {apt.patientName.slice(0, 2).toUpperCase()}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-base">{apt.patientName}</h3>
-                    <p className="text-xs text-slate-500">{apt.patientEmail}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <StatusBadge status={apt.status} />
-                  <span className="text-xs text-slate-400">Ref: {apt.id}</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Calendar size={15} className="text-slate-400" />
-                  <span>Date: <strong className="text-slate-900">{apt.date}</strong></span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Clock size={15} className="text-slate-400" />
-                  <span>Slot: <strong className="text-slate-900">{apt.timeSlot}</strong></span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-700">
-                  <User size={15} className="text-slate-400" />
-                  <span>Specialty: <strong className="text-slate-900">{apt.doctorSpecialty}</strong></span>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs text-slate-600">
-                  <strong className="text-slate-700">Presenting Symptoms / Reason:</strong> {apt.reason}
-                </p>
-              </div>
-
-              {/* Existing Notes or Prescriptions */}
-              {(apt.notes || apt.prescription) && (
-                <div className="p-3 rounded-xl bg-indigo-50/50 border border-indigo-100 space-y-1.5 text-xs text-indigo-950">
-                  {apt.notes && (
-                    <p>
-                      <strong className="text-indigo-900">Diagnosis:</strong> {apt.notes}
-                    </p>
-                  )}
-                  {apt.prescription && (
-                    <p className="font-mono text-emerald-800">
-                      <strong>Rx:</strong> {apt.prescription}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                {apt.status === 'pending' && (
-                  <>
-                    <button
-                      onClick={() => updateAppointmentStatus(apt.id, 'cancelled', '', '', user?.email)}
-                      className="px-4 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 transition"
+          filtered.map((apt) => {
+            const day = relativeDay(apt.date);
+            const isBusy = busyId === apt.id;
+            return (
+              <article
+                key={apt.id}
+                style={{
+                  ...cardStyle, padding: '1.25rem 1.5rem', borderLeft: `5px solid ${STATUS_ACCENT[apt.status] || '#94a3b8'}`,
+                  display: 'flex', flexDirection: 'column', gap: '1.1rem',
+                }}
+              >
+                {/* Patient + status */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', minWidth: 0 }}>
+                    <div
+                      style={{
+                        width: '3rem', height: '3rem', borderRadius: '50%', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontWeight: 800, fontSize: '0.95rem',
+                      }}
                     >
-                      Decline Request
-                    </button>
-                    <button
-                      onClick={() => updateAppointmentStatus(apt.id, 'confirmed', '', '', user?.email)}
-                      className="px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5 shadow-xs"
-                    >
-                      <CheckCircle size={14} />
-                      <span>Accept Appointment</span>
-                    </button>
-                  </>
+                      {initials(apt.patientName)}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--txt-primary)', overflowWrap: 'anywhere' }}>{apt.patientName}</h3>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem 1rem', marginTop: '0.2rem', fontSize: '0.8rem', color: 'var(--txt-secondary)' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><Mail size={13} /> {apt.patientEmail}</span>
+                        {apt.patientPhone && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}><Phone size={13} /> {apt.patientPhone}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <StatusBadge status={apt.status} />
+                    <span style={{ fontSize: '0.75rem', color: 'var(--txt-muted)' }}>#{apt.id}</span>
+                  </div>
+                </div>
+
+                {/* When */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '1rem', padding: '0.9rem 1rem', borderRadius: 'var(--r-md)', background: 'var(--bg-surface)' }}>
+                  <Detail icon={Calendar} label="Date">
+                    {formatDate(apt.date)}
+                    <span style={{ padding: '0.1rem 0.5rem', borderRadius: 'var(--r-pill)', fontSize: '0.68rem', fontWeight: 800, ...RELATIVE_COLORS[day.tone] }}>
+                      {day.text}
+                    </span>
+                  </Detail>
+                  <Detail icon={Clock} label="Time">{apt.timeSlot}</Detail>
+                </div>
+
+                {/* Reason */}
+                <div>
+                  <p style={{ marginBottom: '0.3rem', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--txt-muted)' }}>
+                    Reason for visit
+                  </p>
+                  <p style={{ fontSize: '0.92rem', lineHeight: 1.6, color: 'var(--txt-primary)', overflowWrap: 'anywhere' }}>{apt.reason}</p>
+                </div>
+
+                {/* Clinical record */}
+                {(apt.notes || apt.prescription) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0.9rem 1rem', borderRadius: 'var(--r-md)', background: 'var(--c-primary-pale)', border: '1px solid var(--c-primary-border)' }}>
+                    {apt.notes && (
+                      <div style={{ display: 'flex', gap: '0.65rem', fontSize: '0.88rem', color: 'var(--txt-primary)' }}>
+                        <FileText size={16} style={{ marginTop: '0.15rem', flexShrink: 0, color: 'var(--c-primary)' }} />
+                        <p style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}><strong>Diagnosis:</strong> {apt.notes}</p>
+                      </div>
+                    )}
+                    {apt.prescription && (
+                      <div style={{ display: 'flex', gap: '0.65rem', fontSize: '0.88rem', color: 'var(--txt-primary)' }}>
+                        <Pill size={16} style={{ marginTop: '0.15rem', flexShrink: 0, color: 'var(--c-emerald)' }} />
+                        <p style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}><strong>Prescription:</strong> {apt.prescription}</p>
+                      </div>
+                    )}
+                  </div>
                 )}
 
-                {apt.status === 'confirmed' && (
-                  <button
-                    onClick={() => handleOpenCompleteModal(apt)}
-                    className="px-5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition flex items-center gap-1.5 shadow-xs"
-                  >
-                    <FileText size={14} />
-                    <span>Complete & Write Prescription</span>
-                  </button>
-                )}
+                {/* Actions */}
+                {apt.status !== 'cancelled' && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '0.6rem', paddingTop: '1rem', borderTop: '1px solid var(--bdr-default)' }}>
+                    {apt.status === 'pending' && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => handleDecline(apt)}
+                          className="btn btn-secondary btn-sm"
+                          style={{ color: 'var(--c-rose)' }}
+                        >
+                          <X size={15} /> Decline
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => runAction(apt, 'confirmed')}
+                          className="btn btn-success btn-sm"
+                        >
+                          <Check size={15} /> {isBusy ? 'Confirming...' : 'Accept appointment'}
+                        </button>
+                      </>
+                    )}
 
-                {apt.status === 'completed' && (
-                  <button
-                    onClick={() => handleOpenCompleteModal(apt)}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
-                  >
-                    Edit Prescription / Notes
-                  </button>
+                    {apt.status === 'confirmed' && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => handleDecline(apt)}
+                          className="btn btn-secondary btn-sm"
+                          style={{ color: 'var(--c-rose)' }}
+                        >
+                          <X size={15} /> Cancel visit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenCompleteModal(apt)}
+                          className="btn btn-primary btn-sm"
+                        >
+                          <FileText size={15} /> Complete &amp; write prescription
+                        </button>
+                      </>
+                    )}
+
+                    {apt.status === 'completed' && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCompleteModal(apt)}
+                        className="btn btn-secondary btn-sm"
+                      >
+                        <FileText size={15} /> Edit notes / prescription
+                      </button>
+                    )}
+                  </div>
                 )}
-              </div>
-            </div>
-          ))
+              </article>
+            );
+          })
         ) : (
-          <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-2">
-            <Calendar size={36} className="text-slate-300 mx-auto" />
-            <h3 className="font-bold text-slate-700 text-base">No appointments found</h3>
-            <p className="text-xs text-slate-500">No records match the current filter query.</p>
+          <div style={{ ...cardStyle, padding: '3.5rem 1.5rem', textAlign: 'center' }}>
+            <ClipboardList size={40} style={{ color: 'var(--txt-disabled)', margin: '0 auto 0.75rem' }} />
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--txt-primary)' }}>
+              {docAppointments.length === 0 ? 'No appointments yet' : 'No appointments match'}
+            </h3>
+            <p style={{ marginTop: '0.35rem', fontSize: '0.88rem', color: 'var(--txt-secondary)' }}>
+              {docAppointments.length === 0
+                ? 'When patients book a visit with you, their requests will appear here.'
+                : 'Try a different status or clear your search.'}
+            </p>
+            {docAppointments.length > 0 && (activeFilter !== 'all' || search) && (
+              <button
+                type="button"
+                onClick={() => { setActiveFilter('all'); setSearch(''); }}
+                className="btn btn-secondary btn-sm"
+                style={{ marginTop: '1rem' }}
+              >
+                Show all appointments
+              </button>
+            )}
           </div>
         )}
       </div>
 
-      {/* Modal to Write / Edit Prescription */}
+      {/* Write / edit prescription */}
       <Modal
         isOpen={!!activeModalApt}
         onClose={() => setActiveModalApt(null)}
-        title={`Clinical Record & Prescription: ${activeModalApt?.patientName}`}
+        title={`Clinical record — ${activeModalApt?.patientName || ''}`}
       >
-        <form onSubmit={handleSaveModal} className="space-y-4 text-xs">
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+        <form onSubmit={handleSaveModal} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.85rem 1rem', borderRadius: '0.85rem', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.85rem', color: '#334155' }}>
             <p><strong>Patient:</strong> {activeModalApt?.patientName} ({activeModalApt?.patientEmail})</p>
-            <p><strong>Reason for Visit:</strong> {activeModalApt?.reason}</p>
-            <p><strong>Date & Slot:</strong> {activeModalApt?.date} at {activeModalApt?.timeSlot}</p>
+            <p><strong>Visit:</strong> {activeModalApt && formatDate(activeModalApt.date)} at {activeModalApt?.timeSlot}</p>
+            <p style={{ overflowWrap: 'anywhere' }}><strong>Reason:</strong> {activeModalApt?.reason}</p>
           </div>
 
+          {modalError && (
+            <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 0.9rem', borderRadius: '0.75rem', background: '#fff1f2', border: '1px solid #fecdd3', color: '#be123c', fontSize: '0.82rem', fontWeight: 600 }}>
+              <AlertTriangle size={15} style={{ flexShrink: 0 }} /> {modalError}
+            </div>
+          )}
+
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Diagnosis Assessment & Clinical Notes
-            </label>
+            <label htmlFor="apt-diagnosis" style={modalLabelStyle}>Diagnosis &amp; clinical notes *</label>
             <textarea
-              rows={3}
+              id="apt-diagnosis"
+              rows={4}
+              maxLength={2000}
               value={diagnosisNotes}
               onChange={(e) => setDiagnosisNotes(e.target.value)}
-              placeholder="e.g. Patient presents with acute bronchitis. Lungs show wheezing..."
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="e.g. Acute bronchitis. Wheezing on auscultation, no fever."
               required
+              style={{ resize: 'vertical', lineHeight: 1.6 }}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Digital Medical Prescription (Rx)
-            </label>
+            <label htmlFor="apt-rx" style={modalLabelStyle}>Prescription (optional)</label>
             <textarea
-              rows={3}
+              id="apt-rx"
+              rows={4}
+              maxLength={2000}
               value={prescriptionText}
               onChange={(e) => setPrescriptionText(e.target.value)}
-              placeholder="e.g. 1. Amoxicillin 500mg (1 tablet every 8h for 7 days)&#10;2. Salbutamol Inhaler as needed"
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
-              required
+              placeholder={'e.g. 1. Amoxicillin 500mg, 1 tablet every 8 hours for 7 days\n2. Salbutamol inhaler as needed'}
+              style={{ resize: 'vertical', lineHeight: 1.6 }}
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => setActiveModalApt(null)}
-              className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition"
-            >
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '0.6rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
+            <button type="button" onClick={() => setActiveModalApt(null)} className="btn btn-secondary">
               Cancel
             </button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition flex items-center gap-1.5 shadow-sm"
-            >
-              <CheckCircle2 size={16} />
-              <span>Save Record & Issue Rx</span>
+            <button type="submit" disabled={isSaving} className="btn btn-primary">
+              <CheckCircle2 size={16} /> {isSaving ? 'Saving...' : 'Save record'}
             </button>
           </div>
         </form>
