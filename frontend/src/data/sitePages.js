@@ -147,7 +147,7 @@ export const sitePages = {
           'Send your CV and a short cover letter to our team, saying which role you are interested in.',
           'If your background matches, we will contact you to arrange an interview.',
         ],
-        actions: [{ label: 'Email your application', href: 'mailto:care@healthops.health?subject=Job%20application' }],
+        actions: [{ label: 'Email your application', href: 'mailto:healthops1@gmail.com?subject=Job%20application' }],
       },
       {
         id: 'openings',
@@ -167,10 +167,10 @@ export const sitePages = {
         id: 'contact',
         title: 'Get in touch',
         contacts: [
-          { icon: MapPin, label: 'Visit us', value: '42 Health Street, Boston, MA 02108' },
-          { icon: Phone, label: 'Call us', value: '+1 (555) 234-5678', href: 'tel:+15552345678' },
-          { icon: Mail, label: 'Email us', value: 'care@healthops.health', href: 'mailto:care@healthops.health' },
-          { icon: MessageCircle, label: 'WhatsApp', value: '+1 (555) 234-5678', href: 'https://wa.me/15552345678' },
+          { icon: MapPin, label: 'Visit us', value: 'No: 44, Main Road, Ambalangoda' },
+          { icon: Phone, label: 'Call us', value: '0912525256', href: 'tel:+94912525256' },
+          { icon: Mail, label: 'Email us', value: 'healthops1@gmail.com', href: 'mailto:healthops1@gmail.com' },
+          { icon: MessageCircle, label: 'WhatsApp', value: '0701080429', href: 'https://wa.me/94701080429' },
         ],
       },
       {

@@ -92,19 +92,19 @@ const Footer = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', lineHeight: 1.5 }}>
                   <MapPin size={15} style={{ color: '#a5b4fc', flexShrink: 0, marginTop: '0.1rem' }} />
-                  <span>42 Health Street, Boston, MA 02108</span>
+                  <span>No: 44, Main Road, Ambalangoda</span>
                 </div>
-                <a href="tel:+15552345678" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', textDecoration: 'none' }}>
+                <a href="tel:+94912525256" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', textDecoration: 'none' }}>
                   <Phone size={15} style={{ color: '#a5b4fc', flexShrink: 0 }} />
-                  +1 (555) 234-5678
+                  0912525256
                 </a>
-                <a href="mailto:care@healthops.health" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', textDecoration: 'none' }}>
+                <a href="mailto:healthops1@gmail.com" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', textDecoration: 'none' }}>
                   <Mail size={15} style={{ color: '#a5b4fc', flexShrink: 0 }} />
-                  care@healthops.health
+                  healthops1@gmail.com
                 </a>
-                <a href="https://wa.me/15552345678" target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', textDecoration: 'none' }}>
+                <a href="https://wa.me/94701080429" target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#d1d5db', textDecoration: 'none' }}>
                   <MessageCircle size={15} style={{ color: '#6ee7b7', flexShrink: 0 }} />
-                  WhatsApp: +1 (555) 234-5678
+                  WhatsApp: 0701080429
                 </a>
               </div>
             </div>
