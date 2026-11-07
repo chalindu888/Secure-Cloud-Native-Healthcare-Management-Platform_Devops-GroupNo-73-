@@ -175,6 +175,24 @@ const SitePage = ({ page }) => {
                 </div>
               )}
 
+              {section.map && (
+                <div style={{ ...cardStyle, overflow: 'hidden' }}>
+                  <iframe
+                    title={`Map: ${section.map.address}`}
+                    src={section.map.embed}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    style={{ display: 'block', width: '100%', height: '22rem', border: 0 }}
+                  />
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', padding: '1rem 1.3rem' }}>
+                    <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt-primary)' }}>{section.map.address}</span>
+                    <a href={section.map.link} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                      Open in Google Maps <ArrowRight size={18} />
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {section.news && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {section.news.map((item) => (

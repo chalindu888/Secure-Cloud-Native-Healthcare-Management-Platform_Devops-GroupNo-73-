@@ -174,6 +174,15 @@ export const sitePages = {
         ],
       },
       {
+        id: 'location',
+        title: 'Our location',
+        map: {
+          embed: 'https://maps.google.com/maps?q=6.236682,80.054824&z=16&output=embed',
+          link: 'https://goo.gl/maps/A3SxWN9PzcogqbtS7?g_st=awb',
+          address: 'No: 44, Main Road, Ambalangoda',
+        },
+      },
+      {
         id: 'emergency',
         title: 'In an emergency',
         paragraphs: ['If you or someone else needs urgent medical help, call our emergency line straight away.'],
