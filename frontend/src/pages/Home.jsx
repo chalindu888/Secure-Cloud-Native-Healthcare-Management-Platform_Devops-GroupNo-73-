@@ -323,6 +323,34 @@ const Home = () => {
       </section>
 
       {/* ================================================================
+          LOCATION MAP
+      ================================================================ */}
+      <section id="location" className="page-wrapper" style={{ paddingTop: '0', paddingBottom: '3rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <Reveal as="span" className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>Find Us</Reveal>
+          <Reveal as="h2" delay={120} className="page-title" style={{ marginBottom: '1rem' }}>Our Location</Reveal>
+          <Reveal as="p" delay={240} className="page-subtitle" style={{ maxWidth: '560px', margin: '0 auto' }}>
+            No: 44, Main Road, Ambalangoda
+          </Reveal>
+        </div>
+        <Reveal direction="zoom" style={{ overflow: 'hidden', borderRadius: '1.25rem', background: 'var(--bg-card)', border: '1px solid #ffffff', boxShadow: 'var(--shdw-md)' }}>
+          <iframe
+            title="HealthOps Hospital location map"
+            src="https://maps.google.com/maps?q=6.236682,80.054824&z=16&output=embed"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            style={{ display: 'block', width: '100%', height: '24rem', border: 0 }}
+          />
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', padding: '1rem 1.5rem' }}>
+            <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt-primary)' }}>HealthOps Hospital, Ambalangoda</span>
+            <a href="https://goo.gl/maps/A3SxWN9PzcogqbtS7?g_st=awb" target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+              Get Directions <ArrowRight size={18} />
+            </a>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ================================================================
           CTA SECTION
       ================================================================ */}
       <section className="page-wrapper" style={{ paddingTop: '0' }}>
