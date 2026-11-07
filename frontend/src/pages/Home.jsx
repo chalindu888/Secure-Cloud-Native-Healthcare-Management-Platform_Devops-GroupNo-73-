@@ -3,6 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import careImage from '../assets/hospital-care.png';
+import emergencyIcon from '../assets/service-emergency.png';
+import opdIcon from '../assets/service-opd.png';
+import indoorIcon from '../assets/service-indoor.png';
+import roomsIcon from '../assets/service-rooms.png';
 import { ShieldCheck, Calendar, Users, Activity, CheckCircle2, ArrowRight, Server, Stethoscope, Sparkles, Zap, Globe, Lock, Star, TrendingUp } from 'lucide-react';
 
 const Home = () => {
@@ -15,6 +19,43 @@ const Home = () => {
     { value: '100%', label: 'RBAC Protected', sub: 'JWT zero-trust auth', color: 'var(--c-cyan)' },
     { value: '< 8 min', label: 'MTTR Recovery', sub: 'Automated GitOps healing', color: 'var(--c-emerald)' },
     { value: '0 CVEs', label: 'Security Hardened', sub: 'Trivy container scanning', color: 'var(--c-amber)' },
+  ];
+
+  // Tilt a card toward the pointer (the CSS turns --rx / --ry into a slight 3D rotation)
+  const tiltCard = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    e.currentTarget.style.setProperty('--ry', `${(x * 12).toFixed(2)}deg`);
+    e.currentTarget.style.setProperty('--rx', `${(-y * 12).toFixed(2)}deg`);
+  };
+
+  const resetCardTilt = (e) => {
+    e.currentTarget.style.removeProperty('--rx');
+    e.currentTarget.style.removeProperty('--ry');
+  };
+
+  const hospitalServices = [
+    {
+      image: emergencyIcon,
+      title: 'Emergency Care',
+      desc: 'Experienced doctors, an ICU unit and senior nurses work together as one emergency team, ready to handle any emergency at any hour.',
+    },
+    {
+      image: opdIcon,
+      title: 'OPD Services',
+      desc: 'Our medical team is available around the clock for common ailments and minor injuries, so you receive quality care from the very first visit.',
+    },
+    {
+      image: indoorIcon,
+      title: 'Indoor Care',
+      desc: 'Our patient-centred inpatient care keeps you comfortable and safe throughout your stay, so you can focus on recovering well.',
+    },
+    {
+      image: roomsIcon,
+      title: 'Room Facilities',
+      desc: 'Choose from AC or non-AC private rooms and shared ward rooms, with extras such as satellite TV, hot water and healthy meals.',
+    },
   ];
 
   const features = [
@@ -161,6 +202,52 @@ const Home = () => {
               <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--txt-primary)', marginBottom: '0.25rem' }}>{stat.label}</p>
               <p style={{ fontSize: '0.7rem', color: 'var(--txt-secondary)' }}>{stat.sub}</p>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ================================================================
+          HOSPITAL SERVICES
+      ================================================================ */}
+      <section id="services" className="page-wrapper" style={{ paddingTop: '0', paddingBottom: '3rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <span className="section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>What We Offer</span>
+          <h2 className="page-title" style={{ marginBottom: '1rem' }}>Our Hospital Services</h2>
+          <p className="page-subtitle" style={{ maxWidth: '560px', margin: '0 auto' }}>
+            From urgent care to a comfortable recovery, everything you need is under one roof.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+          {hospitalServices.map((service, i) => (
+              <div key={service.title} className="animate-fade-up" style={{ display: 'flex', animationDelay: `${i * 100}ms` }}>
+              <div
+                className="card service-card"
+                onMouseMove={tiltCard}
+                onMouseLeave={resetCardTilt}
+                style={{
+                  flex: 1,
+                  padding: '2.25rem 1.5rem 2rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ height: '8.5rem', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+                  <img
+                    className="service-icon"
+                    src={service.image}
+                    alt=""
+                    style={{ maxHeight: '100%', maxWidth: '75%', objectFit: 'contain', display: 'block' }}
+                  />
+                </div>
+                <h3 style={{ fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif", fontSize: '1.3rem', fontWeight: 800, color: '#1e3a5f', marginBottom: '0.75rem' }}>
+                  {service.title}
+                </h3>
+                <p style={{ fontSize: '0.92rem', color: 'var(--txt-secondary)', lineHeight: 1.75 }}>{service.desc}</p>
+              </div>
+              </div>
           ))}
         </div>
       </section>

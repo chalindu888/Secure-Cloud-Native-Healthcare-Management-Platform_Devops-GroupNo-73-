@@ -604,3 +604,29 @@ select:focus {
   justify-content: center;
   color: var(--txt-muted);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   HOSPITAL SERVICES: icon spins when the pointer enters its card
+══════════════════════════════════════════════════════════════ */
+.service-icon {
+  transition: transform 800ms cubic-bezier(0.34, 1.2, 0.64, 1), filter 300ms ease;
+  will-change: transform;
+}
+.service-card {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0px));
+  transition: transform 180ms ease-out, box-shadow 300ms ease;
+  will-change: transform;
+}
+.service-card:hover {
+  --lift: -12px;
+  box-shadow: 0 28px 50px rgba(15, 23, 42, 0.18), 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+.service-card:hover .service-icon {
+  transform: rotate(360deg) scale(1.08);
+  filter: drop-shadow(0 10px 18px rgba(15, 23, 42, 0.18));
+}
+@media (prefers-reduced-motion: reduce) {
+  .service-icon { transition: none; }
+  .service-card:hover .service-icon { transform: none; }
+  .service-card, .service-card:hover { transform: none; transition: none; }
+}
