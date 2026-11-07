@@ -48,16 +48,19 @@ const DoctorAppointments = () => {
     setPrescriptionText(apt.prescription || '');
   };
 
-  const handleSaveModal = (e) => {
+  const handleSaveModal = async (e) => {
     e.preventDefault();
     if (activeModalApt) {
-      updateAppointmentStatus(
+      const result = await updateAppointmentStatus(
         activeModalApt.id,
         'completed',
         diagnosisNotes,
-        prescriptionText,
-        user?.email
+        prescriptionText
       );
+      if (!result.success) {
+        window.alert(result.message);
+        return;
+      }
       setActiveModalApt(null);
     }
   };

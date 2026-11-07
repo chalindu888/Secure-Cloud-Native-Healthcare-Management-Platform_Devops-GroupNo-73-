@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Clock, Calendar, Check, Plus, Trash2, Save, CheckCircle2 } from 'lucide-react';
@@ -9,12 +9,22 @@ const DoctorSchedule = () => {
   const { user } = useAuth();
   const { doctors, updateDoctorSchedule } = useData();
 
-  const currentDoc = doctors.find((d) => d.id === user?.id) || doctors[0];
+  // Only ever edit the signed-in doctor's own schedule
+  const currentDoc = doctors.find((d) => String(d.id) === String(user?.id));
 
   const [availableDays, setAvailableDays] = useState(currentDoc?.availableDays || ['Monday', 'Tuesday', 'Wednesday']);
   const [timeSlots, setTimeSlots] = useState(currentDoc?.timeSlots || ['09:00 AM', '10:30 AM', '02:00 PM']);
   const [newSlot, setNewSlot] = useState('');
   const [success, setSuccess] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  // Doctors load from the server after first render; pick up the saved schedule once it arrives
+  useEffect(() => {
+    if (currentDoc) {
+      setAvailableDays(currentDoc.availableDays);
+      setTimeSlots(currentDoc.timeSlots);
+    }
+  }, [currentDoc?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleDay = (day) => {
     if (availableDays.includes(day)) {
@@ -35,13 +45,18 @@ const DoctorSchedule = () => {
     setTimeSlots(timeSlots.filter((s) => s !== slot));
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    if (currentDoc) {
-      updateDoctorSchedule(currentDoc.id, availableDays, timeSlots);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+    if (!currentDoc) return;
+
+    setSaveError('');
+    const result = await updateDoctorSchedule(currentDoc.id, availableDays, timeSlots);
+    if (!result.success) {
+      setSaveError(result.message);
+      return;
     }
+    setSuccess(true);
+    setTimeout(() => setSuccess(false), 3000);
   };
 
   return (
@@ -52,6 +67,12 @@ const DoctorSchedule = () => {
           Configure weekly clinic consultation days and patient appointment time intervals.
         </p>
       </div>
+
+      {saveError && (
+        <div role="alert" style={{ padding: '1rem', borderRadius: '1rem', background: 'var(--c-rose-pale)', border: '1px solid var(--c-rose-border)', color: 'var(--c-rose)', fontSize: '0.8rem', fontWeight: 700 }}>
+          {saveError}
+        </div>
+      )}
 
       {success && (
         <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3 text-xs font-bold">

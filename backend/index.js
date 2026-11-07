@@ -78,6 +78,8 @@ const initDb = async () => {
       ADD COLUMN IF NOT EXISTS photo TEXT,
       ADD COLUMN IF NOT EXISTS years_experience INTEGER,
       ADD COLUMN IF NOT EXISTS max_patients_per_day INTEGER,
+      ADD COLUMN IF NOT EXISTS available_days TEXT[],
+      ADD COLUMN IF NOT EXISTS time_slots TEXT[],
       ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()
   `);
   await pool.query(`
@@ -97,6 +99,12 @@ const initDb = async () => {
   await pool.query(
     'CREATE INDEX IF NOT EXISTS idx_appointments_doctor ON appointments (doctor_id)'
   );
+  // A doctor's time slot can only be held by one active appointment
+  await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS uniq_active_doctor_slot
+    ON appointments (doctor_id, appointment_date, time_slot)
+    WHERE status <> 'cancelled'
+  `);
 };
 
 // --- AUTH MIDDLEWARE ---
@@ -215,6 +223,8 @@ app.get('/api/doctors', async (_req, res) => {
         photo,
         years_experience,
         max_patients_per_day,
+        available_days,
+        time_slots,
         created_at
       FROM users
       WHERE role = 'doctor'
@@ -233,7 +243,8 @@ app.get('/api/doctors', async (_req, res) => {
 
 // Columns a doctor sees on their own profile
 const DOCTOR_PROFILE_COLUMNS = `id, name, email, phone, specialty, department, qualifications,
-  clinic_location, consultation_fee, bio, license, photo, years_experience, max_patients_per_day`;
+  clinic_location, consultation_fee, bio, license, photo, years_experience, max_patients_per_day,
+  available_days, time_slots`;
 
 const textField = (label, max) => (value) => {
   const text = String(value ?? '').trim();
@@ -250,6 +261,18 @@ const numberField = (label, { min, max, integer }) => (value) => {
   return n;
 };
 
+const WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const TIME_SLOT_PATTERN = /^(0[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$/;
+
+const listField = (label, { allowed, pattern, max }) => (value) => {
+  if (!Array.isArray(value)) throw new Error(`${label} must be a list.`);
+  const items = [...new Set(value.map((item) => String(item).trim()))];
+  if (items.length > max) throw new Error(`${label} can have at most ${max} entries.`);
+  const bad = items.find((item) => (allowed ? !allowed.includes(item) : !pattern.test(item)));
+  if (bad !== undefined) throw new Error(`Invalid entry in ${label}: ${bad}`);
+  return items;
+};
+
 // Editable doctor profile fields: request key -> { column, validate }.
 // Only fields present in the request body are updated; '' clears a field.
 const DOCTOR_PROFILE_FIELDS = {
@@ -260,6 +283,8 @@ const DOCTOR_PROFILE_FIELDS = {
   bio: { column: 'bio', validate: textField('Biography', 2000) },
   years_experience: { column: 'years_experience', validate: numberField('Years of experience', { min: 0, max: 70, integer: true }) },
   max_patients_per_day: { column: 'max_patients_per_day', validate: numberField('Max patients per day', { min: 1, max: 200, integer: true }) },
+  available_days: { column: 'available_days', validate: listField('Available days', { allowed: WEEK_DAYS, max: 7 }) },
+  time_slots: { column: 'time_slots', validate: listField('Time slots', { pattern: TIME_SLOT_PATTERN, max: 24 }) },
   license: {
     column: 'license',
     validate: (value) => {
@@ -352,6 +377,139 @@ app.put(
   }
 );
 
+// --- APPOINTMENTS ---
+const APPOINTMENT_SELECT = `
+  SELECT a.id,
+         a.patient_id AS "patientId",
+         p.name  AS "patientName",
+         p.email AS "patientEmail",
+         p.phone AS "patientPhone",
+         a.doctor_id AS "doctorId",
+         d.name AS "doctorName",
+         d.specialty AS "doctorSpecialty",
+         to_char(a.appointment_date, 'YYYY-MM-DD') AS date,
+         a.time_slot AS "timeSlot",
+         a.reason,
+         a.status,
+         COALESCE(a.notes, '') AS notes,
+         COALESCE(a.prescription, '') AS prescription,
+         a.created_at AS "createdAt"
+  FROM appointments a
+  JOIN users p ON p.id = a.patient_id
+  JOIN users d ON d.id = a.doctor_id`;
+
+const APPOINTMENT_ORDER = 'ORDER BY a.appointment_date DESC, a.time_slot ASC, a.id DESC';
+
+const isValidDate = (value) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
+
+// Book an appointment (patients only)
+app.post('/api/appointments', authenticate, requireRole('patient'), async (req, res) => {
+  try {
+    const { doctorId, date, timeSlot, reason } = req.body;
+    const doctorIdNumber = Number(doctorId);
+
+    if (!Number.isInteger(doctorIdNumber) || !isValidDate(date) || !TIME_SLOT_PATTERN.test(timeSlot || '')) {
+      return res.status(400).json({ error: 'A doctor, a valid date and a valid time slot are required.' });
+    }
+    const reasonText = String(reason || '').trim();
+    if (!reasonText || reasonText.length > 1000) {
+      return res.status(400).json({ error: 'Please describe the reason for your visit (up to 1000 characters).' });
+    }
+
+    // Allow yesterday (UTC) so patients in time zones ahead of the server can still book "today"
+    const earliest = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    if (date < earliest) {
+      return res.status(400).json({ error: 'Appointments cannot be booked in the past.' });
+    }
+
+    const doctorResult = await pool.query(
+      "SELECT id, name, available_days, time_slots, max_patients_per_day FROM users WHERE id = $1 AND role = 'doctor'",
+      [doctorIdNumber]
+    );
+    const doctor = doctorResult.rows[0];
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found.' });
+    }
+
+    if (doctor.time_slots?.length && !doctor.time_slots.includes(timeSlot)) {
+      return res.status(400).json({ error: 'That time slot is not offered by this doctor.' });
+    }
+    const weekday = WEEK_DAYS[(new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7];
+    if (doctor.available_days?.length && !doctor.available_days.includes(weekday)) {
+      return res.status(400).json({ error: `This doctor does not see patients on ${weekday}s.` });
+    }
+
+    if (doctor.max_patients_per_day) {
+      const count = await pool.query(
+        "SELECT COUNT(*)::int AS n FROM appointments WHERE doctor_id = $1 AND appointment_date = $2 AND status <> 'cancelled'",
+        [doctorIdNumber, date]
+      );
+      if (count.rows[0].n >= doctor.max_patients_per_day) {
+        return res.status(409).json({ error: 'This doctor is fully booked on that date. Please choose another day.' });
+      }
+    }
+
+    let inserted;
+    try {
+      inserted = await pool.query(
+        `INSERT INTO appointments (patient_id, doctor_id, appointment_date, time_slot, reason)
+         VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+        [req.user.id, doctorIdNumber, date, timeSlot, reasonText]
+      );
+    } catch (insertError) {
+      if (insertError.code === '23505') {
+        return res.status(409).json({ error: 'That time slot has just been booked. Please pick another.' });
+      }
+      throw insertError;
+    }
+
+    const created = await pool.query(`${APPOINTMENT_SELECT} WHERE a.id = $1`, [inserted.rows[0].id]);
+    res.status(201).json({ message: 'Appointment requested.', appointment: created.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'A server error occurred.' });
+  }
+});
+
+// Time slots already taken for a doctor on a date (any signed-in user)
+app.get('/api/doctors/:id/booked-slots', authenticate, async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!isValidDate(String(date || ''))) {
+      return res.status(400).json({ error: 'A valid date is required.' });
+    }
+    const result = await pool.query(
+      "SELECT time_slot FROM appointments WHERE doctor_id = $1 AND appointment_date = $2 AND status <> 'cancelled'",
+      [req.params.id, date]
+    );
+    res.json({ slots: result.rows.map((row) => row.time_slot) });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'A server error occurred.' });
+  }
+});
+
+// A patient's own appointments
+app.get(
+  '/api/patient/appointments/:patientId',
+  authenticate,
+  requireRole('patient'),
+  requireSelf('patientId'),
+  async (req, res) => {
+    try {
+      const result = await pool.query(
+        `${APPOINTMENT_SELECT} WHERE a.patient_id = $1 ${APPOINTMENT_ORDER}`,
+        [req.params.patientId]
+      );
+      res.json({ appointments: result.rows });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: 'A server error occurred.' });
+    }
+  }
+);
+
 // --- DOCTOR: OWN APPOINTMENTS ---
 app.get(
   '/api/doctor/appointments/:doctorId',
@@ -361,25 +519,9 @@ app.get(
   async (req, res) => {
     try {
       const result = await pool.query(
-        `SELECT a.id,
-                a.patient_id,
-                p.name  AS patient_name,
-                p.email AS patient_email,
-                p.phone AS patient_phone,
-                a.appointment_date,
-                a.time_slot,
-                a.reason,
-                a.status,
-                a.notes,
-                a.prescription,
-                a.created_at
-         FROM appointments a
-         JOIN users p ON p.id = a.patient_id
-         WHERE a.doctor_id = $1
-         ORDER BY a.appointment_date DESC, a.time_slot ASC`,
+        `${APPOINTMENT_SELECT} WHERE a.doctor_id = $1 ${APPOINTMENT_ORDER}`,
         [req.params.doctorId]
       );
-
       res.json({ appointments: result.rows });
     } catch (err) {
       console.error(err.message);
@@ -387,6 +529,66 @@ app.get(
     }
   }
 );
+
+// Update an appointment: patients may cancel their own; doctors may confirm,
+// cancel or complete theirs and record notes / a prescription.
+app.patch('/api/appointments/:id', authenticate, requireRole('patient', 'doctor'), async (req, res) => {
+  try {
+    const found = await pool.query('SELECT * FROM appointments WHERE id = $1', [req.params.id]);
+    const appointment = found.rows[0];
+    const ownerId = req.user.role === 'doctor' ? appointment?.doctor_id : appointment?.patient_id;
+
+    // Same response for "missing" and "not yours" so ids can't be probed
+    if (!appointment || String(ownerId) !== String(req.user.id)) {
+      return res.status(404).json({ error: 'Appointment not found.' });
+    }
+
+    const { status, notes, prescription } = req.body;
+    const allowedStatuses = req.user.role === 'doctor' ? ['confirmed', 'cancelled', 'completed'] : ['cancelled'];
+
+    if (status !== undefined && !allowedStatuses.includes(status)) {
+      return res.status(403).json({ error: 'You cannot set that status.' });
+    }
+    if (appointment.status === 'cancelled') {
+      return res.status(409).json({ error: 'This appointment has been cancelled.' });
+    }
+    if (appointment.status === 'completed' && status !== undefined && status !== 'completed') {
+      return res.status(409).json({ error: 'A completed appointment cannot be changed.' });
+    }
+    if (req.user.role === 'patient' && appointment.status === 'completed') {
+      return res.status(409).json({ error: 'A completed appointment cannot be cancelled.' });
+    }
+
+    const clinicalNote = (value) => {
+      const text = String(value ?? '').trim();
+      if (text.length > 2000) throw new Error('Notes and prescriptions must be 2000 characters or fewer.');
+      return text || null;
+    };
+
+    const assignments = [];
+    const values = [];
+    try {
+      if (status !== undefined) { values.push(status); assignments.push(`status = $${values.length}`); }
+      if (req.user.role === 'doctor' && notes !== undefined) { values.push(clinicalNote(notes)); assignments.push(`notes = $${values.length}`); }
+      if (req.user.role === 'doctor' && prescription !== undefined) { values.push(clinicalNote(prescription)); assignments.push(`prescription = $${values.length}`); }
+    } catch (validationError) {
+      return res.status(400).json({ error: validationError.message });
+    }
+
+    if (assignments.length === 0) {
+      return res.status(400).json({ error: 'Nothing to update.' });
+    }
+
+    values.push(req.params.id);
+    await pool.query(`UPDATE appointments SET ${assignments.join(', ')} WHERE id = $${values.length}`, values);
+
+    const updated = await pool.query(`${APPOINTMENT_SELECT} WHERE a.id = $1`, [req.params.id]);
+    res.json({ message: 'Appointment updated.', appointment: updated.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'A server error occurred.' });
+  }
+});
 
 // --- 2. LOGIN ROUTE ---
 app.post('/api/login', async (req, res) => {

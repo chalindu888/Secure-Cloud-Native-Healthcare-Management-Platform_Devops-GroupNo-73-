@@ -1,172 +1,36 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from './AuthContext';
+import api from '../services/api';
 
 const DataContext = createContext(null);
 
-const INITIAL_DOCTORS = [
-  {
-    id: 'usr_doc_1',
-    name: 'Dr. Sarah Alistair',
-    email: 'doctor@healthops.io',
-    specialty: 'Cardiology',
-    department: 'Cardiovascular Institute',
-    qualification: 'MD, FACC - Harvard Medical',
-    experience: '12 Years',
-    rating: 4.9,
-    reviewsCount: 128,
-    consultationFee: 120,
-    availableDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    timeSlots: ['09:00 AM', '10:30 AM', '02:00 PM', '03:30 PM', '04:30 PM'],
-    location: 'Building A, Suite 302',
-    bio: 'Specialist in adult cardiology, heart failure management, and preventive cardiovascular wellness.'
-  },
-  {
-    id: 'usr_doc_2',
-    name: 'Dr. Marcus Vance',
-    email: 'm.vance@healthops.io',
-    specialty: 'Neurology',
-    department: 'Neuroscience Center',
-    qualification: 'MD, PhD - Johns Hopkins',
-    experience: '15 Years',
-    rating: 4.8,
-    reviewsCount: 94,
-    consultationFee: 140,
-    availableDays: ['Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    timeSlots: ['10:00 AM', '11:30 AM', '02:30 PM', '04:00 PM'],
-    location: 'Building B, Suite 104',
-    bio: 'Expertise in clinical neurophysiology, chronic migraines, and stroke rehabilitation.'
-  },
-  {
-    id: 'usr_doc_3',
-    name: 'Dr. Emily Chen',
-    email: 'e.chen@healthops.io',
-    specialty: 'Dermatology',
-    department: 'Dermatology & Skin Care',
-    qualification: 'MD, FAAD - Stanford Health',
-    experience: '9 Years',
-    rating: 4.9,
-    reviewsCount: 182,
-    consultationFee: 95,
-    availableDays: ['Monday', 'Wednesday', 'Friday', 'Saturday'],
-    timeSlots: ['09:30 AM', '11:00 AM', '01:30 PM', '03:00 PM'],
-    location: 'Building C, Suite 210',
-    bio: 'Comprehensive medical and cosmetic dermatology, skin cancer screenings, and laser treatments.'
-  },
-  {
-    id: 'usr_doc_4',
-    name: 'Dr. Rajesh Patel',
-    email: 'r.patel@healthops.io',
-    specialty: 'Pediatrics',
-    department: 'Children’s Health Wing',
-    qualification: 'MD, FAAP - Columbia Univ',
-    experience: '11 Years',
-    rating: 5.0,
-    reviewsCount: 215,
-    consultationFee: 100,
-    availableDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday'],
-    timeSlots: ['08:30 AM', '10:00 AM', '01:00 PM', '03:30 PM'],
-    location: 'Children’s Pavilion, Suite 101',
-    bio: 'Dedicated pediatrician focusing on developmental milestones, vaccinations, and pediatric emergency care.'
-  },
-  {
-    id: 'usr_doc_5',
-    name: 'Dr. Olivia Wilson',
-    email: 'o.wilson@healthops.io',
-    specialty: 'General Medicine',
-    department: 'Primary Care Division',
-    qualification: 'MBBS, MRCGP - Oxford University',
-    experience: '8 Years',
-    rating: 4.7,
-    reviewsCount: 88,
-    consultationFee: 80,
-    availableDays: ['Monday', 'Tuesday', 'Thursday', 'Friday', 'Saturday'],
-    timeSlots: ['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM'],
-    location: 'Main Clinic, Suite 10',
-    bio: 'Holistic primary healthcare, routine annual checkups, diabetes and hypertension management.'
-  }
-];
+const DEFAULT_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const DEFAULT_SLOTS = ['09:00 AM', '10:30 AM', '02:00 PM', '04:00 PM'];
 
-const INITIAL_APPOINTMENTS = [
-  {
-    id: 'apt-101',
-    patientId: 'usr_pat_1',
-    patientName: 'Johnathan Doe',
-    patientEmail: 'patient@healthops.io',
-    doctorId: 'usr_doc_1',
-    doctorName: 'Dr. Sarah Alistair',
-    doctorSpecialty: 'Cardiology',
-    date: '2026-09-28',
-    timeSlot: '10:30 AM',
-    reason: 'Quarterly cardiovascular review and blood pressure check',
-    status: 'confirmed',
-    notes: 'Patient advised to monitor resting pulse and keep log.',
-    prescription: 'Lisinopril 10mg once daily in morning. Low sodium diet.',
-    createdAt: '2026-09-20T10:15:00Z'
-  },
-  {
-    id: 'apt-102',
-    patientId: 'usr_pat_1',
-    patientName: 'Johnathan Doe',
-    patientEmail: 'patient@healthops.io',
-    doctorId: 'usr_doc_3',
-    doctorName: 'Dr. Emily Chen',
-    doctorSpecialty: 'Dermatology',
-    date: '2026-10-05',
-    timeSlot: '01:30 PM',
-    reason: 'Skin rash on forearm after outdoor gardening',
-    status: 'pending',
-    notes: '',
-    prescription: '',
-    createdAt: '2026-09-22T08:00:00Z'
-  },
-  {
-    id: 'apt-103',
-    patientId: 'usr_pat_1',
-    patientName: 'Johnathan Doe',
-    patientEmail: 'patient@healthops.io',
-    doctorId: 'usr_doc_5',
-    doctorName: 'Dr. Olivia Wilson',
-    doctorSpecialty: 'General Medicine',
-    date: '2026-08-15',
-    timeSlot: '09:00 AM',
-    reason: 'Annual comprehensive physical examination',
-    status: 'completed',
-    notes: 'All standard vitals normal. Cholesterol levels optimal.',
-    prescription: 'Multivitamin daily, regular cardio exercise 30m/day.',
-    createdAt: '2026-08-10T14:30:00Z'
-  },
-  {
-    id: 'apt-104',
-    patientId: 'usr_pat_2',
-    patientName: 'Eleanor Vance',
-    patientEmail: 'e.vance@example.com',
-    doctorId: 'usr_doc_1',
-    doctorName: 'Dr. Sarah Alistair',
-    doctorSpecialty: 'Cardiology',
-    date: '2026-09-23',
-    timeSlot: '09:00 AM',
-    reason: 'Arrhythmia consultation and ECG follow-up',
-    status: 'confirmed',
-    notes: 'ECG booked for 8:30 AM before consult.',
-    prescription: 'Metoprolol 25mg twice daily.',
-    createdAt: '2026-09-21T11:00:00Z'
-  },
-  {
-    id: 'apt-105',
-    patientId: 'usr_pat_3',
-    patientName: 'Robert Sterling',
-    patientEmail: 'r.sterling@example.com',
-    doctorId: 'usr_doc_1',
-    doctorName: 'Dr. Sarah Alistair',
-    doctorSpecialty: 'Cardiology',
-    date: '2026-09-24',
-    timeSlot: '02:00 PM',
-    reason: 'Chest tightness following mild exertion',
-    status: 'pending',
-    notes: '',
-    prescription: '',
-    createdAt: '2026-09-22T07:20:00Z'
-  }
-];
+// How often doctors / appointments are re-fetched so new registrations and bookings show up on their own
+const REFRESH_MS = 15000;
+
+// Backend doctor row -> the shape the pages use
+const toDoctor = (doctor) => ({
+  id: doctor.id,
+  name: doctor.name || 'Unnamed doctor',
+  email: doctor.email,
+  specialty: doctor.specialty || 'General Medicine',
+  department: doctor.department || 'Medical Services',
+  qualification: doctor.qualifications || 'Qualifications not provided',
+  location: doctor.clinic_location || 'Clinic location not provided',
+  consultationFee: doctor.consultation_fee !== null && doctor.consultation_fee !== undefined
+    ? Number(doctor.consultation_fee)
+    : null,
+  bio: doctor.bio || '',
+  photo: doctor.photo || '',
+  yearsExperience: doctor.years_experience,
+  maxPatientsPerDay: doctor.max_patients_per_day,
+  availableDays: doctor.available_days?.length ? doctor.available_days : DEFAULT_DAYS,
+  timeSlots: doctor.time_slots?.length ? doctor.time_slots : DEFAULT_SLOTS,
+});
+
+const errorMessage = (error, fallback) => error.response?.data?.error || fallback;
 
 const INITIAL_USERS = [
   {
@@ -311,15 +175,69 @@ const INITIAL_AUDIT_LOGS = [
 ];
 
 export const DataProvider = ({ children }) => {
-  const [doctors, setDoctors] = useState(() => {
-    const saved = localStorage.getItem('healthops_doctors');
-    return saved ? JSON.parse(saved) : INITIAL_DOCTORS;
-  });
+  const { user, role } = useAuth();
 
-  const [appointments, setAppointments] = useState(() => {
-    const saved = localStorage.getItem('healthops_appointments');
-    return saved ? JSON.parse(saved) : INITIAL_APPOINTMENTS;
-  });
+  const [doctors, setDoctors] = useState([]);
+  const [doctorsLoading, setDoctorsLoading] = useState(true);
+  const [appointments, setAppointments] = useState([]);
+
+  // Doctors come from the database, so newly registered doctors appear automatically
+  const loadDoctors = useCallback(async () => {
+    try {
+      const { data } = await api.get('/doctors');
+      setDoctors((data.doctors || []).map(toDoctor));
+    } catch (error) {
+      console.error('Unable to load doctors:', error);
+    } finally {
+      setDoctorsLoading(false);
+    }
+  }, []);
+
+  // Patients and doctors each load only their own appointments
+  const appointmentsPath =
+    user?.id && role === 'doctor' ? `/doctor/appointments/${user.id}`
+    : user?.id && role === 'patient' ? `/patient/appointments/${user.id}`
+    : null;
+
+  const loadAppointments = useCallback(async () => {
+    if (!appointmentsPath) {
+      setAppointments([]);
+      return;
+    }
+    try {
+      const { data } = await api.get(appointmentsPath);
+      setAppointments(data.appointments || []);
+    } catch (error) {
+      console.error('Unable to load appointments:', error);
+    }
+  }, [appointmentsPath]);
+
+  useEffect(() => {
+    // Demo data from earlier versions is no longer used
+    localStorage.removeItem('healthops_doctors');
+    localStorage.removeItem('healthops_appointments');
+  }, []);
+
+  useEffect(() => {
+    loadDoctors();
+    const timer = setInterval(loadDoctors, REFRESH_MS);
+    window.addEventListener('focus', loadDoctors);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', loadDoctors);
+    };
+  }, [loadDoctors]);
+
+  useEffect(() => {
+    loadAppointments();
+    if (!appointmentsPath) return undefined;
+    const timer = setInterval(loadAppointments, REFRESH_MS);
+    window.addEventListener('focus', loadAppointments);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', loadAppointments);
+    };
+  }, [loadAppointments, appointmentsPath]);
 
   const [users, setUsers] = useState(() => {
     const saved = localStorage.getItem('healthops_users');
@@ -332,14 +250,6 @@ export const DataProvider = ({ children }) => {
   });
 
   // Sync state to local storage
-  useEffect(() => {
-    localStorage.setItem('healthops_doctors', JSON.stringify(doctors));
-  }, [doctors]);
-
-  useEffect(() => {
-    localStorage.setItem('healthops_appointments', JSON.stringify(appointments));
-  }, [appointments]);
-
   useEffect(() => {
     localStorage.setItem('healthops_users', JSON.stringify(users));
   }, [users]);
@@ -364,86 +274,65 @@ export const DataProvider = ({ children }) => {
     setAuditLogs(prev => [newLog, ...prev]);
   };
 
-  const bookAppointment = ({ patient, doctorId, date, timeSlot, reason }) => {
-    const doctor = doctors.find(d => d.id === doctorId);
-    const newAppointment = {
-      id: `apt-${Date.now().toString().slice(-4)}`,
-      patientId: patient.id,
-      patientName: patient.name,
-      patientEmail: patient.email,
-      doctorId,
-      doctorName: doctor ? doctor.name : 'Attending Physician',
-      doctorSpecialty: doctor ? doctor.specialty : 'General',
-      date,
-      timeSlot,
-      reason,
-      status: 'pending',
-      notes: '',
-      prescription: '',
-      createdAt: new Date().toISOString()
-    };
+  const replaceAppointment = (updated) =>
+    setAppointments(prev => prev.map(apt => (apt.id === updated.id ? updated : apt)));
 
-    setAppointments(prev => [newAppointment, ...prev]);
-    addAuditLog(
-      'APPOINTMENT_CREATED',
-      `${doctor?.name} on ${date} (${timeSlot})`,
-      'SUCCESS',
-      'info',
-      patient.email
-    );
-    return newAppointment;
+  // Every action returns { success, message?, appointment? } so pages can show failures
+  const bookAppointment = async ({ doctorId, date, timeSlot, reason }) => {
+    try {
+      const { data } = await api.post('/appointments', { doctorId, date, timeSlot, reason });
+      setAppointments(prev => [data.appointment, ...prev]);
+      addAuditLog(
+        'APPOINTMENT_CREATED',
+        `${data.appointment.doctorName} on ${date} (${timeSlot})`,
+        'SUCCESS',
+        'info',
+        user?.email
+      );
+      return { success: true, appointment: data.appointment };
+    } catch (error) {
+      return { success: false, message: errorMessage(error, 'Unable to book the appointment. Please try again.') };
+    }
   };
 
-  const cancelAppointment = (appointmentId, userEmail = 'patient@healthops.io') => {
-    setAppointments(prev =>
-      prev.map(apt => (apt.id === appointmentId ? { ...apt, status: 'cancelled' } : apt))
-    );
-    addAuditLog(
-      'APPOINTMENT_CANCELLED',
-      `Appointment ${appointmentId}`,
-      'SUCCESS',
-      'warning',
-      userEmail
-    );
+  const updateAppointment = async (appointmentId, changes, auditAction, severity) => {
+    try {
+      const { data } = await api.patch(`/appointments/${appointmentId}`, changes);
+      replaceAppointment(data.appointment);
+      addAuditLog(auditAction, `Appointment ${appointmentId}`, 'SUCCESS', severity, user?.email);
+      return { success: true, appointment: data.appointment };
+    } catch (error) {
+      loadAppointments();
+      return { success: false, message: errorMessage(error, 'Unable to update the appointment.') };
+    }
   };
 
-  const updateAppointmentStatus = (appointmentId, status, notes = '', prescription = '', doctorEmail = 'doctor@healthops.io') => {
-    setAppointments(prev =>
-      prev.map(apt => {
-        if (apt.id === appointmentId) {
-          return {
-            ...apt,
-            status,
-            notes: notes || apt.notes,
-            prescription: prescription || apt.prescription
-          };
-        }
-        return apt;
-      })
-    );
-    addAuditLog(
+  const cancelAppointment = (appointmentId) =>
+    updateAppointment(appointmentId, { status: 'cancelled' }, 'APPOINTMENT_CANCELLED', 'warning');
+
+  const updateAppointmentStatus = (appointmentId, status, notes = '', prescription = '') =>
+    updateAppointment(
+      appointmentId,
+      { status, ...(notes ? { notes } : {}), ...(prescription ? { prescription } : {}) },
       `APPOINTMENT_${status.toUpperCase()}`,
-      `Appointment ${appointmentId}`,
-      'SUCCESS',
-      status === 'completed' ? 'success' : 'info',
-      doctorEmail
+      status === 'completed' ? 'success' : 'info'
     );
-  };
 
-  const updateDoctorSchedule = (doctorId, newDays, newSlots) => {
-    setDoctors(prev =>
-      prev.map(doc => {
-        if (doc.id === doctorId) {
-          return {
-            ...doc,
-            availableDays: newDays,
-            timeSlots: newSlots
-          };
-        }
-        return doc;
-      })
-    );
-    addAuditLog('SCHEDULE_UPDATED', `Doctor ${doctorId} schedule updated`, 'SUCCESS', 'info', 'doctor@healthops.io');
+  const updateDoctorSchedule = async (doctorId, newDays, newSlots) => {
+    try {
+      await api.put(`/doctor/profile/${doctorId}`, { available_days: newDays, time_slots: newSlots });
+      setDoctors(prev =>
+        prev.map(doc =>
+          doc.id === doctorId
+            ? { ...doc, availableDays: newDays.length ? newDays : DEFAULT_DAYS, timeSlots: newSlots.length ? newSlots : DEFAULT_SLOTS }
+            : doc
+        )
+      );
+      addAuditLog('SCHEDULE_UPDATED', `Doctor ${doctorId} schedule updated`, 'SUCCESS', 'info', user?.email);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: errorMessage(error, 'Unable to save your schedule.') };
+    }
   };
 
   const toggleUserStatus = (userId) => {
@@ -487,7 +376,9 @@ export const DataProvider = ({ children }) => {
     <DataContext.Provider
       value={{
         doctors,
+        doctorsLoading,
         appointments,
+        refreshAppointments: loadAppointments,
         users,
         auditLogs,
         bookAppointment,

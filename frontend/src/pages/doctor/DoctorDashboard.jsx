@@ -28,10 +28,14 @@ const DoctorDashboard = () => {
     setPrescriptionText(apt.prescription || '');
   };
 
-  const handleSaveConsultation = (e) => {
+  const handleSaveConsultation = async (e) => {
     e.preventDefault();
     if (activeConsultation) {
-      updateAppointmentStatus(activeConsultation.id, 'completed', diagnosisNotes, prescriptionText, user?.email);
+      const result = await updateAppointmentStatus(activeConsultation.id, 'completed', diagnosisNotes, prescriptionText);
+      if (!result.success) {
+        window.alert(result.message);
+        return;
+      }
       setActiveConsultation(null);
     }
   };

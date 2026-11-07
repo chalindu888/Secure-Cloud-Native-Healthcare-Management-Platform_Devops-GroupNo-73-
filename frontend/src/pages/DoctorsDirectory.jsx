@@ -39,10 +39,10 @@ const DoctorsDirectory = () => {
           department: doctor.department || 'Medical Services',
           qualification: doctor.qualifications || 'Qualifications not provided',
           location: doctor.clinic_location || 'Clinic location not provided',
-          consultationFee: doctor.consultation_fee ?? 'Not provided',
+          consultationFee: doctor.consultation_fee ?? null,
           bio: doctor.bio || 'Doctor profile details will be updated soon.',
           yearsExperience: doctor.years_experience,
-          availableDays: doctor.available_days || [],
+          availableDays: doctor.available_days?.length ? doctor.available_days : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
           rating: doctor.rating ?? 'New',
           reviewsCount: doctor.reviews_count ?? 0,
         })));
@@ -289,7 +289,7 @@ const DoctorsDirectory = () => {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
                   <div>
                     <p style={{ fontSize: '0.65rem', color: '#475569', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Consultation Fee</p>
-                    <p style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a' }}>${doc.consultationFee}</p>
+                    <p style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a' }}>{doc.consultationFee !== null ? `$${Number(doc.consultationFee)}` : 'Not provided'}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', justifyContent: 'flex-end' }}>
