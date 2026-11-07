@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+import { prepareProfilePhoto } from '../../utils/image';
 import {
   Stethoscope,
   Award,
@@ -40,8 +41,6 @@ const EMPTY_FORM = {
 
 const BIO_MAX = 2000;
 
-const PHOTO_SIZE = 320;
-const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 
 const toForm = (doctor) => ({
   specialty: doctor.specialty || '',
@@ -55,30 +54,6 @@ const toForm = (doctor) => ({
   photo: doctor.photo || '',
 });
 
-// Center-crop to a square and shrink, so the saved photo stays small (~20-40 KB)
-const resizeImage = (file) =>
-  new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      const side = Math.min(img.width, img.height);
-      const canvas = document.createElement('canvas');
-      canvas.width = PHOTO_SIZE;
-      canvas.height = PHOTO_SIZE;
-      canvas.getContext('2d').drawImage(
-        img,
-        (img.width - side) / 2, (img.height - side) / 2, side, side,
-        0, 0, PHOTO_SIZE, PHOTO_SIZE
-      );
-      URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('Could not read that image.'));
-    };
-    img.src = url;
-  });
 
 const initials = (name = '') =>
   name.replace(/^dr\.?\s*/i, '').split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase() || 'DR';
@@ -181,17 +156,8 @@ const DoctorProfile = () => {
     e.target.value = '';
     if (!file) return;
 
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
-      setError('Please choose a JPEG, PNG or WebP image.');
-      return;
-    }
-    if (file.size > MAX_UPLOAD_BYTES) {
-      setError('That image is too large. Please choose one under 8 MB.');
-      return;
-    }
-
     try {
-      const photo = await resizeImage(file);
+      const photo = await prepareProfilePhoto(file);
       setSaved(false);
       setError('');
       setForm((prev) => ({ ...prev, photo }));

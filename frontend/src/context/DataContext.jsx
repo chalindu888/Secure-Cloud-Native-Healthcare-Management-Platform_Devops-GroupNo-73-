@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import api from '../services/api';
 
@@ -180,6 +180,8 @@ export const DataProvider = ({ children }) => {
   const [doctors, setDoctors] = useState([]);
   const [doctorsLoading, setDoctorsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
+  const [patientPhotos, setPatientPhotos] = useState({});
+  const requestedPhotoIds = useRef(new Set());
 
   // Doctors come from the database, so newly registered doctors appear automatically
   const loadDoctors = useCallback(async () => {
@@ -211,6 +213,36 @@ export const DataProvider = ({ children }) => {
       console.error('Unable to load appointments:', error);
     }
   }, [appointmentsPath]);
+
+  // Doctors see their patients' photos. They are fetched once per patient (and again when the
+  // tab regains focus) rather than with every appointment refresh, since they are large.
+  const loadPatientPhotos = useCallback(async (ids) => {
+    if (ids.length === 0) return;
+    try {
+      const { data } = await api.get('/doctor/patient-photos', { params: { ids: ids.join(',') } });
+      setPatientPhotos(prev => ({ ...prev, ...data.photos }));
+    } catch (error) {
+      console.error('Unable to load patient photos:', error);
+    }
+  }, []);
+
+  const photoPatientIds = role === 'doctor'
+    ? [...new Set(appointments.filter(apt => apt.patientHasPhoto).map(apt => apt.patientId))]
+    : [];
+  const photoPatientKey = photoPatientIds.join(',');
+
+  useEffect(() => {
+    const missing = photoPatientIds.filter(id => !requestedPhotoIds.current.has(id));
+    missing.forEach(id => requestedPhotoIds.current.add(id));
+    loadPatientPhotos(missing);
+  }, [photoPatientKey, loadPatientPhotos]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (role !== 'doctor') return undefined;
+    const refreshPhotos = () => loadPatientPhotos(photoPatientKey ? photoPatientKey.split(',').map(Number) : []);
+    window.addEventListener('focus', refreshPhotos);
+    return () => window.removeEventListener('focus', refreshPhotos);
+  }, [role, photoPatientKey, loadPatientPhotos]);
 
   useEffect(() => {
     // Demo data from earlier versions is no longer used
@@ -378,6 +410,7 @@ export const DataProvider = ({ children }) => {
         doctors,
         doctorsLoading,
         appointments,
+        patientPhotos,
         refreshAppointments: loadAppointments,
         users,
         auditLogs,

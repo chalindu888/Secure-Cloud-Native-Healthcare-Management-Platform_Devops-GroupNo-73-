@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import StatusBadge from '../../components/StatusBadge';
 import Modal from '../../components/Modal';
+import Avatar from '../../components/Avatar';
 import {
   Search,
   Users,
@@ -27,9 +28,6 @@ const SORTS = [
   { key: 'name', label: 'Name A–Z' },
   { key: 'visits', label: 'Most visits' },
 ];
-
-const initials = (name = '') =>
-  name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase() || '?';
 
 const todayString = () => {
   const now = new Date();
@@ -68,7 +66,7 @@ const Stat = ({ value, label }) => (
 
 const DoctorPatients = () => {
   const { user } = useAuth();
-  const { appointments } = useData();
+  const { appointments, patientPhotos } = useData();
 
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('recent');
@@ -85,7 +83,7 @@ const DoctorPatients = () => {
     mine.forEach((apt) => {
       const key = apt.patientId || apt.patientEmail;
       if (!byPatient.has(key)) {
-        byPatient.set(key, { id: key, name: apt.patientName, email: apt.patientEmail, phone: apt.patientPhone, visits: [] });
+        byPatient.set(key, { id: key, name: apt.patientName, email: apt.patientEmail, phone: apt.patientPhone, hasPhoto: apt.patientHasPhoto, visits: [] });
       }
       byPatient.get(key).visits.push(apt);
     });
@@ -197,15 +195,7 @@ const DoctorPatients = () => {
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--shdw-md)'; }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
-                <div
-                  style={{
-                    width: '3.25rem', height: '3.25rem', borderRadius: '50%', flexShrink: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontWeight: 800, fontSize: '1rem',
-                  }}
-                >
-                  {initials(p.name)}
-                </div>
+                <Avatar name={p.name} src={p.hasPhoto ? patientPhotos[p.id] : ''} size="3.5rem" />
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <p style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--txt-primary)', overflowWrap: 'anywhere' }}>{p.name}</p>
                   <p style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.15rem', fontSize: '0.8rem', color: 'var(--txt-secondary)' }}>
@@ -278,9 +268,12 @@ const DoctorPatients = () => {
       >
         {selected && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1.5rem', fontSize: '0.88rem', color: '#334155' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Mail size={14} /> {selected.email}</span>
-              {selected.phone && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Phone size={14} /> {selected.phone}</span>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Avatar name={selected.name} src={selected.hasPhoto ? patientPhotos[selected.id] : ''} size="4.5rem" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.88rem', color: '#334155', minWidth: 0 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', overflowWrap: 'anywhere' }}><Mail size={14} /> {selected.email}</span>
+                {selected.phone && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Phone size={14} /> {selected.phone}</span>}
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '0.6rem' }}>

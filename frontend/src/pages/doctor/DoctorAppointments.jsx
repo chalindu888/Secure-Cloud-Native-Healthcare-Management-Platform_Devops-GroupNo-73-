@@ -3,6 +3,7 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import StatusBadge from '../../components/StatusBadge';
 import Modal from '../../components/Modal';
+import Avatar from '../../components/Avatar';
 import {
   Calendar,
   Clock,
@@ -68,9 +69,6 @@ const RELATIVE_COLORS = {
   past: { color: 'var(--txt-muted)', background: 'rgba(0,0,0,0.05)' },
 };
 
-const initials = (name = '') =>
-  name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase() || '?';
-
 const cardStyle = {
   background: 'var(--bg-card)',
   border: '1px solid #ffffff',
@@ -103,7 +101,7 @@ const Detail = ({ icon: Icon, label, children }) => (
 
 const DoctorAppointments = () => {
   const { user } = useAuth();
-  const { appointments, updateAppointmentStatus } = useData();
+  const { appointments, patientPhotos, updateAppointmentStatus } = useData();
 
   const [activeFilter, setActiveFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -282,15 +280,7 @@ const DoctorAppointments = () => {
                 {/* Patient + status */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', minWidth: 0 }}>
-                    <div
-                      style={{
-                        width: '3rem', height: '3rem', borderRadius: '50%', flexShrink: 0,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontWeight: 800, fontSize: '0.95rem',
-                      }}
-                    >
-                      {initials(apt.patientName)}
-                    </div>
+                    <Avatar name={apt.patientName} src={apt.patientHasPhoto ? patientPhotos[apt.patientId] : ''} size="3.25rem" />
                     <div style={{ minWidth: 0 }}>
                       <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--txt-primary)', overflowWrap: 'anywhere' }}>{apt.patientName}</h3>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem 1rem', marginTop: '0.2rem', fontSize: '0.8rem', color: 'var(--txt-secondary)' }}>

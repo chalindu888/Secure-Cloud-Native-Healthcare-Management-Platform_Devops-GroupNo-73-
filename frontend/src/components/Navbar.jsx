@@ -19,6 +19,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import hospitalIcon from '../assets/hospital-icon.png';
+import Avatar from './Avatar';
 
 // Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
 // so spacing here uses flex `gap` and inline padding instead.
@@ -93,15 +94,6 @@ const ROLE_LINKS = {
 
 // "Alex Rivera (DevSecOps Lead)" -> "Alex Rivera"
 const displayName = (name = '') => name.replace(/\s*\(.*\)\s*$/, '').trim() || 'Account';
-
-const initials = (name = '') =>
-  displayName(name)
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase();
 
 const Navbar = () => {
   const { user, isAuthenticated, role, logout } = useAuth();
@@ -257,12 +249,7 @@ const Navbar = () => {
                   border: '1px solid rgba(255,255,255,0.12)',
                 }}
               >
-                <span
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                  style={{ background: currentRole?.solid }}
-                >
-                  {initials(user?.name)}
-                </span>
+                <Avatar name={displayName(user?.name)} src={user?.photo} size="2rem" gradient={currentRole?.solid} />
                 <span className="text-left leading-tight">
                   <span className="block text-sm font-semibold text-white truncate" style={{ maxWidth: 140 }}>
                     {displayName(user?.name)}
@@ -293,23 +280,18 @@ const Navbar = () => {
                 {isAuthenticated && (
                   <>
                     <div className="flex items-center gap-3" style={{ padding: '0.25rem 0.5rem' }}>
-                      <span
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                        style={{ background: currentRole?.solid }}
-                      >
-                        {initials(user?.name)}
-                      </span>
+                      <Avatar name={displayName(user?.name)} src={user?.photo} size="2.5rem" gradient={currentRole?.solid} />
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-900 truncate">{displayName(user?.name)}</p>
-                        <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                        <p className="text-sm font-semibold truncate" style={{ color: '#0f172a' }}>{displayName(user?.name)}</p>
+                        <p className="text-xs truncate" style={{ color: '#64748b' }}>{user?.email}</p>
                       </div>
                     </div>
                     <div className="h-px bg-slate-100" />
                     <div className="flex flex-col gap-1">
                       <Link
                         to={currentRole?.home || '/'}
-                        className="flex items-center gap-3 rounded-lg text-sm text-slate-700 hover:bg-slate-50"
-                        style={{ padding: '0.5rem 0.65rem' }}
+                        className="flex items-center gap-3 rounded-lg text-sm font-semibold hover:bg-slate-50"
+                        style={{ padding: '0.5rem 0.65rem', color: '#334155' }}
                       >
                         <LayoutDashboard size={16} className="text-slate-400" />
                         My Dashboard
@@ -317,8 +299,8 @@ const Navbar = () => {
                       {role === 'doctor' && (
                         <Link
                           to="/doctor/profile"
-                          className="flex items-center gap-3 rounded-lg text-sm text-slate-700 hover:bg-slate-50"
-                          style={{ padding: '0.5rem 0.65rem' }}
+                          className="flex items-center gap-3 rounded-lg text-sm font-semibold hover:bg-slate-50"
+                          style={{ padding: '0.5rem 0.65rem', color: '#334155' }}
                         >
                           <User size={16} className="text-slate-400" />
                           My Profile
@@ -327,8 +309,8 @@ const Navbar = () => {
                       {role === 'patient' && (
                         <Link
                           to="/patient/profile"
-                          className="flex items-center gap-3 rounded-lg text-sm text-slate-700 hover:bg-slate-50"
-                          style={{ padding: '0.5rem 0.65rem' }}
+                          className="flex items-center gap-3 rounded-lg text-sm font-semibold hover:bg-slate-50"
+                          style={{ padding: '0.5rem 0.65rem', color: '#334155' }}
                         >
                           <User size={16} className="text-slate-400" />
                           Medical Profile
@@ -431,12 +413,7 @@ const Navbar = () => {
               className="flex items-center gap-3 rounded-xl"
               style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
             >
-              <span
-                className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                style={{ background: currentRole?.solid }}
-              >
-                {initials(user?.name)}
-              </span>
+              <Avatar name={displayName(user?.name)} src={user?.photo} size="2.5rem" gradient={currentRole?.solid} />
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-white truncate">{displayName(user?.name)}</p>
                 <p className="text-xs" style={{ color: currentRole?.color }}>{currentRole?.label}</p>

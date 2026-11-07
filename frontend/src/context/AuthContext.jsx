@@ -64,6 +64,27 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
 
+  // Keep the profile photo in step with the server (it may have been changed on another device)
+  useEffect(() => {
+    if (!user?.id || !token) return undefined;
+    const path =
+      user.role === 'doctor' ? `/doctor/profile/${user.id}`
+      : user.role === 'patient' ? `/patient/profile/${user.id}`
+      : null;
+    if (!path) return undefined;
+
+    let isMounted = true;
+    api.get(path)
+      .then(({ data }) => {
+        const photo = (data.doctor || data.patient)?.photo || '';
+        if (isMounted) {
+          setUser((prev) => (prev && (prev.photo || '') !== photo ? { ...prev, photo } : prev));
+        }
+      })
+      .catch(() => {});
+    return () => { isMounted = false; };
+  }, [user?.id, user?.role, token]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // REAL LOGIN
   const login = async (email, password) => {
     try {

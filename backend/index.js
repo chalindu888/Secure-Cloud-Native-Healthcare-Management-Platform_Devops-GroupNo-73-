@@ -381,6 +381,66 @@ app.put(
   }
 );
 
+// --- PATIENT: OWN PROFILE ---
+const PATIENT_PROFILE_COLUMNS = 'id, name, email, phone, blood_group, photo';
+
+app.get(
+  '/api/patient/profile/:id',
+  authenticate,
+  requireRole('patient'),
+  requireSelf('id'),
+  async (req, res) => {
+    try {
+      const result = await pool.query(
+        `SELECT ${PATIENT_PROFILE_COLUMNS} FROM users WHERE id = $1 AND role = 'patient'`,
+        [req.params.id]
+      );
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Patient not found.' });
+      }
+      res.json({ patient: result.rows[0] });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: 'A server error occurred.' });
+    }
+  }
+);
+
+// Currently only the profile photo is stored server-side for patients
+app.put(
+  '/api/patient/profile/:id',
+  authenticate,
+  requireRole('patient'),
+  requireSelf('id'),
+  async (req, res) => {
+    try {
+      if (req.body.photo === undefined) {
+        return res.status(400).json({ error: 'No profile fields were provided.' });
+      }
+
+      let photo;
+      try {
+        photo = DOCTOR_PROFILE_FIELDS.photo.validate(req.body.photo);
+      } catch (validationError) {
+        return res.status(400).json({ error: validationError.message });
+      }
+
+      const result = await pool.query(
+        `UPDATE users SET photo = $1 WHERE id = $2 AND role = 'patient'
+         RETURNING ${PATIENT_PROFILE_COLUMNS}`,
+        [photo, req.params.id]
+      );
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Patient not found.' });
+      }
+      res.json({ message: 'Profile updated.', patient: result.rows[0] });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: 'A server error occurred.' });
+    }
+  }
+);
+
 // --- APPOINTMENTS ---
 const APPOINTMENT_SELECT = `
   SELECT a.id,
@@ -388,6 +448,7 @@ const APPOINTMENT_SELECT = `
          p.name  AS "patientName",
          p.email AS "patientEmail",
          p.phone AS "patientPhone",
+         (p.photo IS NOT NULL) AS "patientHasPhoto",
          a.doctor_id AS "doctorId",
          d.name AS "doctorName",
          d.specialty AS "doctorSpecialty",
@@ -547,6 +608,35 @@ app.get(
   }
 );
 
+// Photos of this doctor's own patients, fetched separately so the appointment list stays small.
+// Only patients who have an appointment with the signed-in doctor are returned.
+app.get('/api/doctor/patient-photos', authenticate, requireRole('doctor'), async (req, res) => {
+  try {
+    const ids = [...new Set(String(req.query.ids || '').split(',').map(Number))]
+      .filter((id) => Number.isInteger(id) && id > 0)
+      .slice(0, 100);
+
+    if (ids.length === 0) {
+      return res.json({ photos: {} });
+    }
+
+    const result = await pool.query(
+      `SELECT u.id, u.photo
+       FROM users u
+       WHERE u.id = ANY($1::int[])
+         AND u.role = 'patient'
+         AND u.photo IS NOT NULL
+         AND EXISTS (SELECT 1 FROM appointments a WHERE a.patient_id = u.id AND a.doctor_id = $2)`,
+      [ids, req.user.id]
+    );
+
+    res.json({ photos: Object.fromEntries(result.rows.map((row) => [row.id, row.photo])) });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'A server error occurred.' });
+  }
+});
+
 // Update an appointment: patients may cancel their own; doctors may confirm,
 // cancel or complete theirs and record notes / a prescription.
 app.patch('/api/appointments/:id', authenticate, requireRole('patient', 'doctor'), async (req, res) => {
@@ -644,6 +734,7 @@ app.post('/api/login', async (req, res) => {
         blood_group: user.blood_group,
         specialty: user.specialty,
         license: user.license,
+        photo: user.photo,
       },
     });
   } catch (err) {

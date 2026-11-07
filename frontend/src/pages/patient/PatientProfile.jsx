@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
+import { prepareProfilePhoto } from '../../utils/image';
 import {
   User,
   Heart,
@@ -11,7 +13,9 @@ import {
   Plus,
   AlertCircle,
   RotateCcw,
-  ShieldAlert
+  ShieldAlert,
+  Camera,
+  Trash2
 } from 'lucide-react';
 
 // Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
@@ -60,6 +64,7 @@ const initials = (name = '') =>
 const buildInitialForm = (user) => {
   const contact = parseEmergencyContact(user?.emergencyContact);
   return {
+    photo: user?.photo || '',
     name: user?.name || '',
     phone: user?.phone || '',
     dateOfBirth: user?.dateOfBirth || '',
@@ -97,6 +102,24 @@ const PatientProfile = () => {
   const [allergyInput, setAllergyInput] = useState('');
   const [error, setError] = useState('');
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isSavingPhoto, setIsSavingPhoto] = useState(false);
+  const [photoMessage, setPhotoMessage] = useState('');
+  const fileInputRef = useRef(null);
+
+  // Pick up the latest saved photo from the server (e.g. one uploaded in another session)
+  useEffect(() => {
+    if (!user?.id) return undefined;
+    let isMounted = true;
+    api.get(`/patient/profile/${user.id}`)
+      .then(({ data }) => {
+        if (!isMounted) return;
+        const photo = data.patient.photo || '';
+        setForm((prev) => (prev.photo === initialForm.photo ? { ...prev, photo } : prev));
+        setInitialForm((prev) => ({ ...prev, photo }));
+      })
+      .catch(() => {});
+    return () => { isMounted = false; };
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const hasChanges = JSON.stringify(form) !== JSON.stringify(initialForm);
   const age = calculateAge(form.dateOfBirth);
@@ -123,6 +146,38 @@ const PatientProfile = () => {
 
   const handleChange = (e) => setField(e.target.name, e.target.value);
 
+  // The photo is saved straight away (no need to press "Save profile"), without touching
+  // any other details the patient is still editing.
+  const savePhoto = async (photo) => {
+    setError('');
+    setPhotoMessage('');
+    setIsSavingPhoto(true);
+    try {
+      await api.put(`/patient/profile/${user.id}`, { photo });
+      setForm((prev) => ({ ...prev, photo }));
+      setInitialForm((prev) => ({ ...prev, photo }));
+      updateProfile({ photo });
+      setPhotoMessage(photo ? 'Your profile photo has been saved.' : 'Your profile photo has been removed.');
+      setTimeout(() => setPhotoMessage(''), 4000);
+    } catch (requestError) {
+      setError(requestError.response?.data?.error || 'Unable to save your photo. Please check your connection and try again.');
+    } finally {
+      setIsSavingPhoto(false);
+    }
+  };
+
+  const handlePhotoSelected = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    try {
+      await savePhoto(await prepareProfilePhoto(file));
+    } catch (imageError) {
+      setError(imageError.message);
+    }
+  };
+
   const addAllergy = (value) => {
     const allergy = value.trim();
     if (!allergy) return;
@@ -140,7 +195,7 @@ const PatientProfile = () => {
     setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.name.trim()) {
@@ -184,8 +239,61 @@ const PatientProfile = () => {
     <div className="page-wrapper flex flex-col gap-8" style={{ maxWidth: '56rem' }}>
       {/* Profile header */}
       <div className="card-strong flex flex-col sm:flex-row sm:items-center gap-5" style={{ padding: '1.5rem' }}>
-        <div className="w-16 h-16 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-bold shrink-0">
-          {initials(form.name)}
+        <div className="flex flex-col items-center gap-2 shrink-0">
+          <div style={{ position: 'relative' }}>
+            <div
+              className="rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold overflow-hidden"
+              style={{ width: '6rem', height: '6rem', fontSize: '1.75rem', border: '4px solid #ffffff', boxShadow: '0 8px 22px rgba(79,70,229,0.3)' }}
+            >
+              {form.photo ? (
+                <img src={form.photo} alt={`${form.name || 'Patient'} profile`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              ) : (
+                initials(form.name)
+              )}
+            </div>
+            <button
+              type="button"
+              disabled={isSavingPhoto}
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Change profile photo"
+              title="Change profile photo"
+              className="rounded-full flex items-center justify-center text-white"
+              style={{
+                position: 'absolute', right: '0.05rem', bottom: '0.05rem', width: '2rem', height: '2rem',
+                background: 'var(--c-primary)', border: '3px solid #ffffff', cursor: 'pointer',
+              }}
+            >
+              <Camera size={14} />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handlePhotoSelected}
+              style={{ display: 'none' }}
+            />
+          </div>
+          {form.photo ? (
+            <button
+              type="button"
+              disabled={isSavingPhoto}
+              onClick={() => savePhoto('')}
+              className="flex items-center gap-1 text-xs font-semibold"
+              style={{ color: 'var(--c-rose)', cursor: 'pointer', background: 'none', border: 'none' }}
+            >
+              <Trash2 size={12} /> Remove photo
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={isSavingPhoto}
+              onClick={() => fileInputRef.current?.click()}
+              className="text-xs font-semibold"
+              style={{ color: 'var(--c-primary)', cursor: 'pointer', background: 'none', border: 'none' }}
+            >
+              {isSavingPhoto ? 'Saving...' : 'Add photo'}
+            </button>
+          )}
         </div>
         <div className="flex-1 min-w-0 flex flex-col gap-1">
           <h1 className="text-2xl text-slate-900 truncate">
@@ -220,6 +328,13 @@ const PatientProfile = () => {
           )}
         </div>
       </div>
+
+      {photoMessage && (
+        <div className="alert alert-success flex items-center gap-3" role="status" style={{ padding: '0.9rem 1.1rem' }}>
+          <CheckCircle2 size={18} />
+          <span className="text-sm font-semibold">{photoMessage}</span>
+        </div>
+      )}
 
       {savedSuccess && (
         <div className="alert alert-success flex items-center gap-3" role="status" style={{ padding: '0.9rem 1.1rem' }}>
