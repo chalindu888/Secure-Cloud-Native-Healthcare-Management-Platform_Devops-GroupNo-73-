@@ -7,6 +7,7 @@ import { DataProvider } from './context/DataContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
+import AiDoc from './components/AiDoc';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Public Pages
@@ -250,6 +251,7 @@ function App() {
 
           <Footer />
           <WhatsAppButton />
+          <AiDoc />
         </div>
       </DataProvider>
     </AuthProvider>
