@@ -4,7 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import StatusBadge from '../../components/StatusBadge';
 import Modal from '../../components/Modal';
-import { Stethoscope, Calendar, Clock, CheckCircle, FileText, CheckCircle2, CalendarCheck } from 'lucide-react';
+import Avatar from '../../components/Avatar';
+import { BedDouble, Stethoscope, Calendar, Clock, CheckCircle, FileText, CheckCircle2, CalendarCheck } from 'lucide-react';
 import { PendingFoldersIcon, ConfirmedQueueIcon, TreatedPatientsIcon, FeeGrowthIcon } from '../../components/StatIcons';
 
 const DoctorDashboard = () => {
@@ -22,6 +23,13 @@ const DoctorDashboard = () => {
   const pendingRequests = docAppointments.filter((apt) => apt.status === 'pending');
   const confirmedQueue = docAppointments.filter((apt) => apt.status === 'confirmed');
   const completedVisits = docAppointments.filter((apt) => apt.status === 'completed');
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const doctorName = (user?.name || '').replace(/^dr\.?\s*/i, '').trim();
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todaysQueue = confirmedQueue.filter((apt) => apt.date === todayKey);
 
   const handleOpenCompleteModal = (apt) => {
     setActiveConsultation(apt);
@@ -44,36 +52,52 @@ const DoctorDashboard = () => {
   return (
     <div className="page-wrapper">
       {/* ── Welcome Banner ── */}
-      <div className="hero-banner hero-doctor animate-fade-up" style={{ marginBottom: '2rem' }}>
-        <div style={{
-          position: 'absolute', top: '-60px', right: '-60px',
-          width: '250px', height: '250px',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)',
-          borderRadius: '50%', pointerEvents: 'none',
-        }} />
-
-        <div style={{ position: 'relative' }}>
-          <div className="badge" style={{ background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', borderColor: 'rgba(99,102,241,0.3)', marginBottom: '0.75rem', display: 'inline-flex' }}>
-            <Stethoscope size={13} style={{ marginRight: '0.35rem' }} />
-            Physician Clinical Portal
+      <div className="hero-banner hero-doctor animate-fade-up" style={{ marginBottom: '2rem', background: '#ffffff', border: '1px solid #e2e8f0', boxShadow: '0 4px 18px rgba(15,23,42,0.06)' }}>
+        <div style={{ position: 'relative', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1.5rem', minWidth: 0 }}>
+          {/* The doctor's own profile photo (initials until one is added) */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{ padding: '4px', borderRadius: '50%', background: 'linear-gradient(135deg, #14b8a6, #6366f1)', boxShadow: '0 10px 28px rgba(20,184,166,0.3)' }}>
+              <div style={{ padding: '3px', borderRadius: '50%', background: '#ffffff' }}>
+                <Avatar name={user?.name} src={user?.photo} size="6.5rem" gradient="linear-gradient(135deg, #14b8a6, #6366f1)" />
+              </div>
+            </div>
+            <span title="Online" style={{ position: 'absolute', right: '0.6rem', bottom: '0.6rem', width: '1.05rem', height: '1.05rem', borderRadius: '50%', background: '#22c55e', border: '3px solid #ffffff' }} />
           </div>
-          <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 900, color: '#fff', marginBottom: '0.5rem' }}>
-            Welcome, {user?.name}!
-          </h1>
-          <p style={{ color: 'rgba(199,210,254,0.8)', fontSize: '0.9rem', maxWidth: '480px' }}>
-            Specialist in {user?.specialty || 'Clinical Medicine'}. You have{' '}
-            <strong style={{ color: '#fff', textDecoration: 'underline' }}>{pendingRequests.length} pending appointment request(s)</strong> awaiting review today.
-          </p>
+
+          <div style={{ minWidth: 0, flex: '1 1 16rem' }}>
+            <div className="badge" style={{ marginBottom: '0.6rem', display: 'inline-flex', background: '#f1f5f9', borderColor: '#e2e8f0' }}>
+              <Stethoscope size={13} style={{ marginRight: '0.35rem' }} />
+              {user?.specialty || 'Physician'} · Clinical Portal
+            </div>
+            <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 900, marginBottom: '0.4rem', overflowWrap: 'anywhere' }}>
+              {greeting}, Dr. {doctorName}!
+            </h1>
+            <p style={{ fontSize: '0.95rem', maxWidth: '34rem' }}>
+              {pendingRequests.length > 0
+                ? <>You have <strong>{pendingRequests.length} new appointment {pendingRequests.length === 1 ? 'request' : 'requests'}</strong> waiting for your reply.</>
+                : 'You are all caught up. There are no new appointment requests.'}
+              {todaysQueue.length > 0 && <> <strong>{todaysQueue.length} {todaysQueue.length === 1 ? 'patient is' : 'patients are'}</strong> booked in for today.</>}
+            </p>
+            {!user?.photo && (
+              <p style={{ marginTop: '0.5rem', fontSize: '0.82rem' }}>
+                <Link to="/doctor/profile" style={{ fontWeight: 700, color: '#4338ca' }}>Add your photo</Link> so patients can recognise you.
+              </p>
+            )}
+          </div>
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', position: 'relative' }}>
-          <Link to="/doctor/appointments" className="btn" style={{ background: '#fff', color: '#4338ca', border: 'none', boxShadow: '0 4px 16px rgba(255,255,255,0.1)' }}>
+          <Link to="/doctor/appointments" className="btn" style={{ background: '#4f46e5', color: '#fff', border: 'none', boxShadow: '0 6px 18px rgba(79,70,229,0.3)' }}>
             <CalendarCheck size={18} />
-            Manage All Appointments
+            {pendingRequests.length > 0 ? `Review ${pendingRequests.length} ${pendingRequests.length === 1 ? 'request' : 'requests'}` : 'View appointments'}
           </Link>
-          <Link to="/doctor/schedule" className="btn btn-secondary" style={{ borderColor: 'rgba(255,255,255,0.2)' }}>
+          <Link to="/doctor/admissions" className="btn" style={{ background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1' }}>
+            <BedDouble size={18} />
+            Admitted patients
+          </Link>
+          <Link to="/doctor/schedule" className="btn" style={{ background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1' }}>
             <Clock size={17} />
-            Set Schedule Slots
+            My schedule
           </Link>
         </div>
       </div>
