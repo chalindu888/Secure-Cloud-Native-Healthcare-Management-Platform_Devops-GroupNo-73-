@@ -33,6 +33,8 @@ import DoctorPatients from './pages/doctor/DoctorPatients';
 import DoctorProfile from './pages/doctor/DoctorProfile';
 import DoctorPatientHistory from './pages/doctor/DoctorPatientHistory';
 import DoctorAmbulanceRequests from './pages/doctor/DoctorAmbulanceRequests';
+import DoctorAdmissions from './pages/doctor/DoctorAdmissions';
+import PatientAdmission from './pages/patient/PatientAdmission';
 
 // Ambulance Pages
 import Ambulances from './pages/Ambulances';
@@ -133,6 +135,22 @@ function App() {
                 }
               />
 
+              <Route
+                path="/patient/admission"
+                element={
+                  <ProtectedRoute allowedRoles={['patient']}>
+                    <PatientAdmission />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor/admissions"
+                element={
+                  <ProtectedRoute allowedRoles={['doctor']}>
+                    <DoctorAdmissions />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/patient/ambulance"
                 element={

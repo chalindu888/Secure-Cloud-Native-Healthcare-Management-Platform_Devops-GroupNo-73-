@@ -18,6 +18,7 @@ import {
   ClipboardList,
   History,
   Ambulance,
+  BedDouble,
   ChevronDown
 } from 'lucide-react';
 import hospitalIcon from '../assets/hospital-icon.png';
@@ -87,6 +88,7 @@ const ROLE_LINKS = {
     { to: '/patient', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/patient/book', label: 'Book Visit', icon: CalendarPlus },
     { to: '/patient/appointments', label: 'My Appointments', icon: ClipboardList },
+    { to: '/patient/admission', label: 'My Admission', icon: BedDouble },
     { to: '/patient/ambulance', label: 'My Ambulance', icon: Ambulance },
   ],
   doctor: [
@@ -94,6 +96,7 @@ const ROLE_LINKS = {
     { to: '/doctor/appointments', label: 'Appointments', icon: ClipboardList, badge: 'pending' },
     { to: '/doctor/patients', label: 'My Patients', icon: Users },
     { to: '/doctor/patient-history', label: 'Patient History', icon: History },
+    { to: '/doctor/admissions', label: 'Admitted Patients', icon: BedDouble },
     { to: '/doctor/ambulance-requests', label: 'Ambulance Requests', icon: Ambulance },
     { to: '/doctor/schedule', label: 'Schedule', icon: Calendar },
     { to: '/doctor/profile', label: 'My Profile', icon: User },

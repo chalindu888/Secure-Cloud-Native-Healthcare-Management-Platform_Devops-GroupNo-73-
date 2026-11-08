@@ -5,6 +5,7 @@ import pkg from 'pg';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { registerChatRoutes } from './chat.js';
+import { initAdmissionTables, registerAdmissionRoutes } from './admissions.js';
 
 dotenv.config();
 const { Pool } = pkg;
@@ -144,6 +145,9 @@ const initDb = async () => {
   await pool.query('CREATE INDEX IF NOT EXISTS idx_amb_req_ambulance ON ambulance_requests (ambulance_id)');
   await pool.query('CREATE INDEX IF NOT EXISTS idx_amb_req_patient ON ambulance_requests (patient_id)');
   await pool.query('CREATE INDEX IF NOT EXISTS idx_amb_req_doctor ON ambulance_requests (doctor_id)');
+
+  // Hospital building (rooms + beds) and patient admissions
+  await initAdmissionTables(pool);
 };
 
 // --- AUTH MIDDLEWARE ---
@@ -1087,6 +1091,9 @@ app.patch('/api/ambulance-requests/:id', authenticate, requireRole('patient', 'd
     res.status(500).json({ error: 'A server error occurred.' });
   }
 });
+
+// --- ADMISSIONS, ROOMS AND BEDS ---
+registerAdmissionRoutes(app, pool, { authenticate, requireRole, textField, requiredText });
 
 // --- AI ASSISTANT CHAT ---
 registerChatRoutes(app, pool);
