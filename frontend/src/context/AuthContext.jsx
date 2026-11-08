@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }) => {
   };
 
 
-  // Create an account; the chosen role ('patient' | 'doctor') is saved by the backend
+  // Create an account; the chosen role ('patient' | 'doctor' | 'ambulance') is saved by the backend
   const register = async (data) => {
     try {
       const { data: result } = await api.post('/signup', {
@@ -147,7 +147,10 @@ export const AuthProvider = ({ children }) => {
         qualifications: data.qualifications,
         clinic_location: data.clinicLocation,
         consultation_fee: data.consultationFee,
-        bio: data.bio
+        bio: data.bio,
+        vehicle_number: data.vehicleNumber,
+        vehicle_type: data.vehicleType,
+        base_location: data.baseLocation
       });
 
       return {

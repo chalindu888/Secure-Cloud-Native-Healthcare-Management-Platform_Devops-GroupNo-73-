@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
           </p>
           <div className="pt-2 flex justify-center gap-3">
             <Link
-              to={role === 'doctor' ? '/doctor' : role === 'admin' ? '/admin' : '/patient'}
+              to={role === 'doctor' ? '/doctor' : role === 'admin' ? '/admin' : role === 'ambulance' ? '/ambulance' : '/patient'}
               className="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition"
             >
               Go to My Portal

@@ -23,6 +23,7 @@ const Login = () => {
     if (from && from !== '/login') { navigate(from, { replace: true }); return; }
     if (role === 'doctor') navigate('/doctor');
     else if (role === 'admin') navigate('/admin');
+    else if (role === 'ambulance') navigate('/ambulance');
     else navigate('/patient');
   };
 

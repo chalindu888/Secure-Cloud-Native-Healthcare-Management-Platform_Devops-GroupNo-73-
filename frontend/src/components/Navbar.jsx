@@ -17,6 +17,7 @@ import {
   CalendarPlus,
   ClipboardList,
   History,
+  Ambulance,
   ChevronDown
 } from 'lucide-react';
 import hospitalIcon from '../assets/hospital-icon.png';
@@ -31,11 +32,13 @@ const ROLE_CONFIG = {
   patient: { label: 'Patient', icon: User, color: '#a5b4fc', solid: '#6366f1', home: '/patient' },
   doctor:  { label: 'Doctor', icon: Stethoscope, color: '#67e8f9', solid: '#0891b2', home: '/doctor' },
   admin:   { label: 'Admin', icon: Shield, color: '#6ee7b7', solid: '#059669', home: '/admin' },
+  ambulance: { label: 'Ambulance', icon: Ambulance, color: '#fca5a5', solid: '#dc2626', home: '/ambulance' },
 };
 
 const PUBLIC_LINKS = [
   { to: '/', label: 'Home', icon: Home },
   { to: '/doctors', label: 'Find Doctors', icon: Stethoscope },
+  { to: '/ambulances', label: 'Ambulances', icon: Ambulance },
 ];
 
 // Every item (including the ones with a dropdown) opens a real page or a section of one
@@ -64,6 +67,7 @@ const SITE_NAV_ITEMS = [
       { to: '/doctors', label: 'Find a Specialist' },
     ],
   },
+  { to: '/ambulances', label: 'Ambulances' },
   { to: '/international', label: 'International' },
   {
     label: 'News',
@@ -82,13 +86,19 @@ const ROLE_LINKS = {
     { to: '/patient', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/patient/book', label: 'Book Visit', icon: CalendarPlus },
     { to: '/patient/appointments', label: 'My Appointments', icon: ClipboardList },
+    { to: '/patient/ambulance', label: 'My Ambulance', icon: Ambulance },
   ],
   doctor: [
     { to: '/doctor', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/doctor/appointments', label: 'Appointments', icon: ClipboardList, badge: 'pending' },
+    { to: '/doctor/patients', label: 'My Patients', icon: Users },
     { to: '/doctor/patient-history', label: 'Patient History', icon: History },
+    { to: '/doctor/ambulance-requests', label: 'Ambulance Requests', icon: Ambulance },
     { to: '/doctor/schedule', label: 'Schedule', icon: Calendar },
     { to: '/doctor/profile', label: 'My Profile', icon: User },
+  ],
+  ambulance: [
+    { to: '/ambulance', label: 'Dashboard', icon: LayoutDashboard },
   ],
   admin: [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },

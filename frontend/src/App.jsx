@@ -30,6 +30,13 @@ import DoctorAppointments from './pages/doctor/DoctorAppointments';
 import DoctorSchedule from './pages/doctor/DoctorSchedule';
 import DoctorPatients from './pages/doctor/DoctorPatients';
 import DoctorProfile from './pages/doctor/DoctorProfile';
+import DoctorPatientHistory from './pages/doctor/DoctorPatientHistory';
+import DoctorAmbulanceRequests from './pages/doctor/DoctorAmbulanceRequests';
+
+// Ambulance Pages
+import Ambulances from './pages/Ambulances';
+import AmbulanceDashboard from './pages/ambulance/AmbulanceDashboard';
+import PatientAmbulance from './pages/patient/PatientAmbulance';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -89,6 +96,7 @@ function App() {
               <Route path="/news" element={<SitePage page="news" />} />
               <Route path="/careers" element={<SitePage page="careers" />} />
               <Route path="/contact" element={<SitePage page="contact" />} />
+              <Route path="/ambulances" element={<Ambulances />} />
 
               {/* Patient Protected Routes */}
               <Route
@@ -124,6 +132,25 @@ function App() {
                 }
               />
 
+              <Route
+                path="/patient/ambulance"
+                element={
+                  <ProtectedRoute allowedRoles={['patient']}>
+                    <PatientAmbulance />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Ambulance Protected Routes */}
+              <Route
+                path="/ambulance"
+                element={
+                  <ProtectedRoute allowedRoles={['ambulance']}>
+                    <AmbulanceDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Doctor Protected Routes */}
               <Route
                 path="/doctor"
@@ -153,7 +180,15 @@ function App() {
                 path="/doctor/patient-history"
                 element={
                   <ProtectedRoute allowedRoles={['doctor']}>
-                    <DoctorPatients />
+                    <DoctorPatientHistory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor/ambulance-requests"
+                element={
+                  <ProtectedRoute allowedRoles={['doctor']}>
+                    <DoctorAmbulanceRequests />
                   </ProtectedRoute>
                 }
               />

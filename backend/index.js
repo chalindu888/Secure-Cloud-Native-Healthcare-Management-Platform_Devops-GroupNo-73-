@@ -42,7 +42,7 @@ const pool = new Pool({
 
 // Roles that may be chosen on the public sign-up form. 'admin' accounts can
 // never be self-registered.
-const SIGNUP_ROLES = ['patient', 'doctor'];
+const SIGNUP_ROLES = ['patient', 'doctor', 'ambulance'];
 
 // Profile photo: a base64 image data URL, max ~500 KB
 const PHOTO_PATTERN = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
@@ -109,6 +109,40 @@ const initDb = async () => {
     ON appointments (doctor_id, appointment_date, time_slot)
     WHERE status <> 'cancelled'
   `);
+
+  // Ambulances: each one has its own record and an ID number (AMB-0001...), and signs in
+  // through a users row with role 'ambulance'.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ambulances (
+      id SERIAL PRIMARY KEY,
+      ambulance_number VARCHAR(20) UNIQUE,
+      user_id INTEGER UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      vehicle_number VARCHAR(30) UNIQUE NOT NULL,
+      vehicle_type VARCHAR(50),
+      base_location VARCHAR(255),
+      status VARCHAR(20) NOT NULL DEFAULT 'available',
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+  // Links an ambulance to the patient who needs it and (optionally) the doctor involved
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ambulance_requests (
+      id SERIAL PRIMARY KEY,
+      ambulance_id INTEGER NOT NULL REFERENCES ambulances(id) ON DELETE CASCADE,
+      patient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      doctor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      requested_by VARCHAR(20) NOT NULL,
+      pickup_location VARCHAR(255) NOT NULL,
+      destination VARCHAR(255) NOT NULL,
+      reason TEXT,
+      status VARCHAR(20) NOT NULL DEFAULT 'requested',
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_amb_req_ambulance ON ambulance_requests (ambulance_id)');
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_amb_req_patient ON ambulance_requests (patient_id)');
+  await pool.query('CREATE INDEX IF NOT EXISTS idx_amb_req_doctor ON ambulance_requests (doctor_id)');
 };
 
 // --- AUTH MIDDLEWARE ---
@@ -168,7 +202,27 @@ app.post('/api/signup', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
     if (!SIGNUP_ROLES.includes(role)) {
-      return res.status(400).json({ error: "Role must be 'patient' or 'doctor'." });
+      return res.status(400).json({ error: "Role must be 'patient', 'doctor' or 'ambulance'." });
+    }
+
+    // Ambulance sign-up also needs the vehicle details
+    let ambulanceDetails = null;
+    if (role === 'ambulance') {
+      try {
+        ambulanceDetails = {
+          vehicleNumber: requiredText('Vehicle number', 30)(req.body.vehicle_number).toUpperCase(),
+          vehicleType: textField('Vehicle type', 50)(req.body.vehicle_type),
+          baseLocation: textField('Base location', 255)(req.body.base_location),
+        };
+      } catch (validationError) {
+        return res.status(400).json({ error: validationError.message });
+      }
+      if (!name || !String(name).trim()) {
+        return res.status(400).json({ error: 'Driver / service name is required.' });
+      }
+      if (!phone || !String(phone).trim()) {
+        return res.status(400).json({ error: 'A contact phone number is required for ambulances.' });
+      }
     }
 
     const userExists = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
@@ -177,6 +231,46 @@ app.post('/api/signup', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    if (ambulanceDetails) {
+      const taken = await pool.query('SELECT id FROM ambulances WHERE vehicle_number = $1', [ambulanceDetails.vehicleNumber]);
+      if (taken.rows.length > 0) {
+        return res.status(400).json({ error: 'An ambulance with this vehicle number is already registered.' });
+      }
+    }
+
+    if (ambulanceDetails) {
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        const userRow = await client.query(
+          `INSERT INTO users (name, email, password, phone, role)
+           VALUES ($1, $2, $3, $4, 'ambulance')
+           RETURNING id, name, email, phone, role`,
+          [String(name).trim(), email, hashedPassword, String(phone).trim()]
+        );
+        const ambulance = await client.query(
+          `INSERT INTO ambulances (user_id, vehicle_number, vehicle_type, base_location)
+           VALUES ($1, $2, $3, $4) RETURNING id`,
+          [userRow.rows[0].id, ambulanceDetails.vehicleNumber, ambulanceDetails.vehicleType, ambulanceDetails.baseLocation]
+        );
+        const ambulanceNumber = `AMB-${String(ambulance.rows[0].id).padStart(4, '0')}`;
+        await client.query('UPDATE ambulances SET ambulance_number = $1 WHERE id = $2', [ambulanceNumber, ambulance.rows[0].id]);
+        await client.query('COMMIT');
+        return res.status(201).json({
+          message: 'Registration successful!',
+          user: { ...userRow.rows[0], ambulance_number: ambulanceNumber },
+        });
+      } catch (txError) {
+        await client.query('ROLLBACK').catch(() => {});
+        if (txError.code === '23505') {
+          return res.status(400).json({ error: 'This email or vehicle number is already registered.' });
+        }
+        throw txError;
+      } finally {
+        client.release();
+      }
+    }
 
     const newUser = await pool.query(
       `INSERT INTO users
@@ -254,6 +348,12 @@ const textField = (label, max) => (value) => {
   const text = String(value ?? '').trim();
   if (text.length > max) throw new Error(`${label} must be ${max} characters or fewer.`);
   return text || null;
+};
+
+const requiredText = (label, max) => (value) => {
+  const text = textField(label, max)(value);
+  if (!text) throw new Error(`${label} is required.`);
+  return text;
 };
 
 const numberField = (label, { min, max, integer }) => (value) => {
@@ -691,6 +791,296 @@ app.patch('/api/appointments/:id', authenticate, requireRole('patient', 'doctor'
 
     const updated = await pool.query(`${APPOINTMENT_SELECT} WHERE a.id = $1`, [req.params.id]);
     res.json({ message: 'Appointment updated.', appointment: updated.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'A server error occurred.' });
+  }
+});
+
+// --- AMBULANCES ---
+// 'busy' is worked out from active jobs, so it can never get out of sync with the requests table.
+const AMBULANCE_SELECT = `
+  SELECT a.id,
+         a.ambulance_number AS "ambulanceNumber",
+         a.vehicle_number AS "vehicleNumber",
+         a.vehicle_type AS "vehicleType",
+         a.base_location AS "baseLocation",
+         CASE
+           WHEN a.status = 'offline' THEN 'offline'
+           WHEN EXISTS (SELECT 1 FROM ambulance_requests r WHERE r.ambulance_id = a.id AND r.status IN ('accepted', 'on_the_way')) THEN 'busy'
+           ELSE 'available'
+         END AS status,
+         a.status AS "manualStatus",
+         u.name AS "driverName",
+         u.phone AS phone
+  FROM ambulances a
+  JOIN users u ON u.id = a.user_id`;
+
+// Every registered ambulance, visible to everyone (no sign-in needed). Contact e-mails are not exposed.
+app.get('/api/ambulances', async (_req, res) => {
+  try {
+    const result = await pool.query(`${AMBULANCE_SELECT} ORDER BY a.id ASC`);
+    res.json({ ambulances: result.rows });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Unable to load ambulances.' });
+  }
+});
+
+// An ambulance's own record
+app.get('/api/ambulance/me', authenticate, requireRole('ambulance'), async (req, res) => {
+  try {
+    const result = await pool.query(`${AMBULANCE_SELECT} WHERE a.user_id = $1`, [req.user.id]);
+    if (!result.rows[0]) return res.status(404).json({ error: 'Ambulance record not found.' });
+    res.json({ ambulance: result.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'A server error occurred.' });
+  }
+});
+
+app.put('/api/ambulance/me', authenticate, requireRole('ambulance'), async (req, res) => {
+  try {
+    const { driverName, phone, vehicleType, baseLocation, status } = req.body;
+    let values;
+    try {
+      values = {
+        driverName: requiredText('Driver / service name', 255)(driverName),
+        phone: requiredText('Phone number', 50)(phone),
+        vehicleType: textField('Vehicle type', 50)(vehicleType),
+        baseLocation: textField('Base location', 255)(baseLocation),
+      };
+    } catch (validationError) {
+      return res.status(400).json({ error: validationError.message });
+    }
+    if (!['available', 'offline'].includes(status)) {
+      return res.status(400).json({ error: "Status must be 'available' or 'offline'." });
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('UPDATE users SET name = $1, phone = $2 WHERE id = $3', [values.driverName, values.phone, req.user.id]);
+      await client.query(
+        'UPDATE ambulances SET vehicle_type = $1, base_location = $2, status = $3 WHERE user_id = $4',
+        [values.vehicleType, values.baseLocation, status, req.user.id]
+      );
+      await client.query('COMMIT');
+    } catch (txError) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw txError;
+    } finally {
+      client.release();
+    }
+
+    const result = await pool.query(`${AMBULANCE_SELECT} WHERE a.user_id = $1`, [req.user.id]);
+    res.json({ message: 'Ambulance details saved.', ambulance: result.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'A server error occurred.' });
+  }
+});
+
+// --- AMBULANCE REQUESTS (links an ambulance, a patient and, optionally, a doctor) ---
+const AMBULANCE_REQUEST_SELECT = `
+  SELECT r.id,
+         r.ambulance_id AS "ambulanceId",
+         a.ambulance_number AS "ambulanceNumber",
+         a.vehicle_number AS "vehicleNumber",
+         au.name AS "driverName",
+         au.phone AS "ambulancePhone",
+         r.patient_id AS "patientId",
+         p.name AS "patientName",
+         p.phone AS "patientPhone",
+         r.doctor_id AS "doctorId",
+         d.name AS "doctorName",
+         r.requested_by AS "requestedBy",
+         r.pickup_location AS "pickupLocation",
+         r.destination,
+         COALESCE(r.reason, '') AS reason,
+         r.status,
+         r.created_at AS "createdAt"
+  FROM ambulance_requests r
+  JOIN ambulances a ON a.id = r.ambulance_id
+  JOIN users au ON au.id = a.user_id
+  JOIN users p ON p.id = r.patient_id
+  LEFT JOIN users d ON d.id = r.doctor_id`;
+
+const ACTIVE_REQUEST_STATUSES = ['requested', 'accepted', 'on_the_way'];
+
+app.get('/api/ambulance-requests', authenticate, requireRole('patient', 'doctor', 'ambulance', 'admin'), async (req, res) => {
+  try {
+    let where = '';
+    let params = [];
+    if (req.user.role === 'patient') { where = 'WHERE r.patient_id = $1'; params = [req.user.id]; }
+    else if (req.user.role === 'doctor') { where = 'WHERE r.doctor_id = $1'; params = [req.user.id]; }
+    else if (req.user.role === 'ambulance') { where = 'WHERE a.user_id = $1'; params = [req.user.id]; }
+
+    const result = await pool.query(`${AMBULANCE_REQUEST_SELECT} ${where} ORDER BY r.created_at DESC, r.id DESC`, params);
+    res.json({ requests: result.rows });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'A server error occurred.' });
+  }
+});
+
+// Patients request an ambulance for themselves; doctors request one for one of their patients.
+app.post('/api/ambulance-requests', authenticate, requireRole('patient', 'doctor'), async (req, res) => {
+  try {
+    const ambulanceId = Number(req.body.ambulanceId);
+    if (!Number.isInteger(ambulanceId)) {
+      return res.status(400).json({ error: 'Please choose an ambulance.' });
+    }
+
+    let pickup; let destination; let reason;
+    try {
+      pickup = requiredText('Pickup location', 255)(req.body.pickupLocation);
+      destination = requiredText('Destination', 255)(req.body.destination);
+      reason = textField('Reason', 1000)(req.body.reason);
+    } catch (validationError) {
+      return res.status(400).json({ error: validationError.message });
+    }
+
+    let patientId;
+    let doctorId = null;
+    if (req.user.role === 'patient') {
+      patientId = req.user.id;
+      if (req.body.doctorId) {
+        doctorId = Number(req.body.doctorId);
+        const doctor = Number.isInteger(doctorId)
+          ? await pool.query("SELECT id FROM users WHERE id = $1 AND role = 'doctor'", [doctorId])
+          : { rows: [] };
+        if (!doctor.rows[0]) return res.status(400).json({ error: 'That doctor could not be found.' });
+      }
+    } else {
+      patientId = Number(req.body.patientId);
+      doctorId = req.user.id;
+      // A doctor can only request an ambulance for a patient they have an appointment with
+      const link = Number.isInteger(patientId)
+        ? await pool.query('SELECT 1 FROM appointments WHERE doctor_id = $1 AND patient_id = $2 LIMIT 1', [doctorId, patientId])
+        : { rows: [] };
+      if (!link.rows[0]) {
+        return res.status(403).json({ error: 'You can only request an ambulance for one of your own patients.' });
+      }
+    }
+
+    const client = await pool.connect();
+    let insertedId;
+    try {
+      await client.query('BEGIN');
+      // Lock the ambulance so two simultaneous requests can't both take it
+      const found = await client.query('SELECT id, status FROM ambulances WHERE id = $1 FOR UPDATE', [ambulanceId]);
+      if (!found.rows[0]) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Ambulance not found.' });
+      }
+      if (found.rows[0].status === 'offline') {
+        await client.query('ROLLBACK');
+        return res.status(409).json({ error: 'This ambulance is offline right now. Please choose another.' });
+      }
+      const busy = await client.query(
+        "SELECT 1 FROM ambulance_requests WHERE ambulance_id = $1 AND status IN ('accepted', 'on_the_way') LIMIT 1",
+        [ambulanceId]
+      );
+      if (busy.rows[0]) {
+        await client.query('ROLLBACK');
+        return res.status(409).json({ error: 'This ambulance is busy on another trip. Please choose another.' });
+      }
+      const open = await client.query(
+        'SELECT 1 FROM ambulance_requests WHERE patient_id = $1 AND status = ANY($2::text[]) LIMIT 1',
+        [patientId, ACTIVE_REQUEST_STATUSES]
+      );
+      if (open.rows[0]) {
+        await client.query('ROLLBACK');
+        return res.status(409).json({ error: 'This patient already has an ambulance request in progress.' });
+      }
+
+      const inserted = await client.query(
+        `INSERT INTO ambulance_requests (ambulance_id, patient_id, doctor_id, requested_by, pickup_location, destination, reason)
+         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+        [ambulanceId, patientId, doctorId, req.user.role, pickup, destination, reason]
+      );
+      insertedId = inserted.rows[0].id;
+      await client.query('COMMIT');
+    } catch (txError) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw txError;
+    } finally {
+      client.release();
+    }
+
+    const created = await pool.query(`${AMBULANCE_REQUEST_SELECT} WHERE r.id = $1`, [insertedId]);
+    res.status(201).json({ message: 'Ambulance requested.', request: created.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'A server error occurred.' });
+  }
+});
+
+// Ambulances move a job forward (accept -> on the way -> completed, or decline);
+// patients and doctors can cancel a request that has not finished yet.
+const AMBULANCE_TRANSITIONS = {
+  requested: ['accepted', 'declined'],
+  accepted: ['on_the_way', 'completed'],
+  on_the_way: ['completed'],
+};
+
+app.patch('/api/ambulance-requests/:id', authenticate, requireRole('patient', 'doctor', 'ambulance'), async (req, res) => {
+  try {
+    const { status } = req.body;
+    const requestId = Number(req.params.id);
+    if (!Number.isInteger(requestId)) return res.status(404).json({ error: 'Request not found.' });
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const found = await client.query(
+        `SELECT r.*, a.user_id AS ambulance_user_id
+         FROM ambulance_requests r JOIN ambulances a ON a.id = r.ambulance_id
+         WHERE r.id = $1 FOR UPDATE OF r`,
+        [requestId]
+      );
+      const request = found.rows[0];
+      const ownerId = req.user.role === 'ambulance' ? request?.ambulance_user_id
+        : req.user.role === 'doctor' ? request?.doctor_id : request?.patient_id;
+
+      // Same response for "missing" and "not yours" so ids can't be probed
+      if (!request || String(ownerId) !== String(req.user.id)) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Request not found.' });
+      }
+
+      const allowed = req.user.role === 'ambulance'
+        ? (AMBULANCE_TRANSITIONS[request.status] || [])
+        : (['requested', 'accepted'].includes(request.status) ? ['cancelled'] : []);
+      if (!allowed.includes(status)) {
+        await client.query('ROLLBACK');
+        return res.status(409).json({ error: `This request cannot be changed to "${status}" from "${request.status}".` });
+      }
+
+      if (status === 'accepted') {
+        // One active trip at a time
+        const busy = await client.query(
+          "SELECT 1 FROM ambulance_requests WHERE ambulance_id = $1 AND id <> $2 AND status IN ('accepted', 'on_the_way') LIMIT 1",
+          [request.ambulance_id, request.id]
+        );
+        if (busy.rows[0]) {
+          await client.query('ROLLBACK');
+          return res.status(409).json({ error: 'Finish your current trip before accepting another.' });
+        }
+      }
+
+      await client.query('UPDATE ambulance_requests SET status = $1, updated_at = NOW() WHERE id = $2', [status, request.id]);
+      await client.query('COMMIT');
+    } catch (txError) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw txError;
+    } finally {
+      client.release();
+    }
+
+    const updated = await pool.query(`${AMBULANCE_REQUEST_SELECT} WHERE r.id = $1`, [requestId]);
+    res.json({ message: 'Request updated.', request: updated.rows[0] });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: 'A server error occurred.' });

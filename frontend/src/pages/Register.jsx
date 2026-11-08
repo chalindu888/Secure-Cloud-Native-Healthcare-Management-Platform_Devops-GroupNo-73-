@@ -11,7 +11,10 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  Droplets
+  Droplets,
+  Ambulance,
+  Truck,
+  MapPin
 } from 'lucide-react';
 
 const Register = () => {
@@ -29,7 +32,10 @@ const Register = () => {
     bloodGroup: 'O+',
     specialty: 'Cardiology',
     department: 'Cardiovascular Institute',
-    license: ''
+    license: '',
+    vehicleNumber: '',
+    vehicleType: 'Basic Life Support',
+    baseLocation: ''
   });
 
   const [error, setError] = useState('');
@@ -48,6 +54,11 @@ const Register = () => {
 
     if (!formData.name || !formData.email || !formData.password) {
       setError('Please fill in all required fields.');
+      return;
+    }
+
+    if (role === 'ambulance' && (!formData.vehicleNumber.trim() || !formData.phone.trim())) {
+      setError('Vehicle number and a contact phone number are required for ambulances.');
       return;
     }
 
@@ -194,7 +205,7 @@ const Register = () => {
           className="animate-fade-up-1"
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '0.5rem',
             padding: '0.375rem',
             borderRadius: '1rem',
@@ -219,6 +230,14 @@ const Register = () => {
               color: '#67e8f9',
               activeBg: 'rgba(6,182,212,0.25)',
               activeBorder: 'rgba(6,182,212,0.5)'
+            },
+            {
+              r: 'ambulance',
+              label: 'Ambulance',
+              icon: Ambulance,
+              color: '#fca5a5',
+              activeBg: 'rgba(239,68,68,0.22)',
+              activeBorder: 'rgba(239,68,68,0.5)'
             },
           ].map(({ r, label, icon: Icon, color, activeBg, activeBorder }) => (
             <button
@@ -309,7 +328,9 @@ const Register = () => {
                     placeholder={
                       role === 'doctor'
                         ? 'Dr. Jane Smith'
-                        : 'John Doe'
+                        : role === 'ambulance'
+                          ? 'Driver / service name'
+                          : 'John Doe'
                     }
                     style={inputStyle}
                     onFocus={e => {
@@ -458,7 +479,54 @@ const Register = () => {
             </div>
 
             {/* Role-Specific Fields */}
-            {role === 'patient' ? (
+            {role === 'ambulance' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <label style={labelStyle}>Vehicle Number *</label>
+                  <div style={{ position: 'relative' }}>
+                    <Truck size={15} style={iconWrapStyle} />
+                    <input
+                      type="text"
+                      name="vehicleNumber"
+                      id="reg-vehicleNumber"
+                      value={formData.vehicleNumber}
+                      onChange={handleChange}
+                      placeholder="WP CAB-1234"
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label style={labelStyle}>Ambulance Type</label>
+                  <select
+                    name="vehicleType"
+                    id="reg-vehicleType"
+                    value={formData.vehicleType}
+                    onChange={handleChange}
+                    style={{ ...inputStyle, paddingLeft: '1rem', appearance: 'none', cursor: 'pointer' }}
+                  >
+                    {['Basic Life Support', 'Advanced Life Support', 'Patient Transport', 'Neonatal'].map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={labelStyle}>Base Location</label>
+                  <div style={{ position: 'relative' }}>
+                    <MapPin size={15} style={iconWrapStyle} />
+                    <input
+                      type="text"
+                      name="baseLocation"
+                      id="reg-baseLocation"
+                      value={formData.baseLocation}
+                      onChange={handleChange}
+                      placeholder="Where the ambulance is stationed"
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : role === 'patient' ? (
               <div>
                 <label style={labelStyle}>Blood Group</label>
 
@@ -630,7 +698,9 @@ const Register = () => {
                 background:
                   role === 'doctor'
                     ? 'linear-gradient(135deg, #0891b2, #06b6d4)'
-                    : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                    : role === 'ambulance'
+                      ? 'linear-gradient(135deg, #dc2626, #ef4444)'
+                      : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                 color: 'white',
                 border: 'none',
                 fontSize: '0.95rem',
@@ -638,7 +708,9 @@ const Register = () => {
                 boxShadow:
                   role === 'doctor'
                     ? '0 4px 20px rgba(6,182,212,0.4)'
-                    : '0 4px 20px rgba(99,102,241,0.4)',
+                    : role === 'ambulance'
+                      ? '0 4px 20px rgba(239,68,68,0.4)'
+                      : '0 4px 20px rgba(99,102,241,0.4)',
                 width: '100%',
               }}
             >
@@ -671,12 +743,14 @@ const Register = () => {
                 <>
                   {role === 'doctor' ? (
                     <Stethoscope size={17} />
+                  ) : role === 'ambulance' ? (
+                    <Ambulance size={17} />
                   ) : (
                     <User size={17} />
                   )}
 
                   Register as{' '}
-                  {role === 'doctor' ? 'Doctor' : 'Patient'}
+                  {role === 'doctor' ? 'Doctor' : role === 'ambulance' ? 'Ambulance' : 'Patient'}
 
                   <ArrowRight size={17} />
                 </>
