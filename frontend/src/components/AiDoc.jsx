@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import ChatPanel from './ChatPanel';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import {
@@ -7,7 +8,7 @@ import {
 } from '../data/aiDoc';
 import {
   Bot, X, Check, Activity, User, Stethoscope, FlaskConical, ClipboardList, Crosshair, RotateCcw, ArrowLeft, ArrowRight,
-  AlertTriangle, Phone, Siren, CalendarPlus, ShieldCheck,
+  AlertTriangle, Phone, Siren, CalendarPlus, ShieldCheck, MessageCircle,
 } from 'lucide-react';
 
 // Floating "AI DOC" button (above the WhatsApp button) that opens a step-by-step symptom assistant.
@@ -99,6 +100,7 @@ const AiDoc = () => {
   const { doctors } = useData();
 
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState('chat');
   const [step, setStep] = useState(0);
   const [a, setA] = useState(emptyAnswers);
   const [activeSymptom, setActiveSymptom] = useState(null);
@@ -188,7 +190,7 @@ const AiDoc = () => {
           background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
         }}
       >
-        <span style={{ width: '3.75rem', height: '3.75rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff', border: `2px solid ${TEAL}`, color: TEAL, boxShadow: '0 8px 22px rgba(31,147,168,0.35)' }}>
+        <span style={{ width: '3.75rem', height: '3.75rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff', border: `2px solid ${TEAL}`, color: TEAL, boxShadow: '0 0 0 5px rgba(251,191,36,0.35), 0 0 26px rgba(251,146,60,0.55)' }}>
           <Bot size={30} />
         </span>
         <span style={{ padding: '0.15rem 0.6rem', borderRadius: '999px', background: '#ffffff', color: INK, fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.03em', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>AI DOC</span>
@@ -201,18 +203,29 @@ const AiDoc = () => {
             role="dialog"
             aria-modal="true"
             aria-label="AI DOC symptom assistant"
-            style={{ position: 'relative', width: '100%', maxWidth: '58rem', maxHeight: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f8fafb', borderRadius: '1.25rem', boxShadow: '0 30px 80px rgba(15,23,42,0.4)', color: INK }}
+            style={{ position: 'relative', width: '100%', maxWidth: '58rem', maxHeight: '100%', height: mode === 'chat' ? 'min(46rem, 100%)' : undefined, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f8fafb', borderRadius: '1.25rem', boxShadow: '0 30px 80px rgba(15,23,42,0.4)', color: INK }}
           >
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', padding: '0.9rem 1.25rem', background: '#ffffff', borderBottom: `1px solid ${LINE}` }}>
               <span style={{ width: '2.8rem', height: '2.8rem', borderRadius: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: TEAL, color: '#fff' }}><Stethoscope size={22} /></span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: '1.1rem', fontWeight: 800, color: INK }}>AI-DOC | HealthOps Hospital</p>
-                <p style={{ fontSize: '0.8rem', color: MUTED }}>Symptom guidance | Lab test suggestions</p>
+                <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: MUTED }}>Smart hospital assistant</p>
+                <p style={{ fontSize: '1.15rem', fontWeight: 800, color: INK }}>HealthOps AI</p>
               </div>
               <button type="button" onClick={() => setOpen(false)} aria-label="Close" style={{ width: '2.3rem', height: '2.3rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: `1px solid ${LINE}`, background: '#fff', color: INK }}><X size={18} /></button>
             </div>
 
+            {/* Tabs */}
+            <div role="tablist" aria-label="Assistant mode" style={{ display: 'flex', gap: '0.4rem', padding: '0.55rem 1.25rem', background: '#ffffff', borderBottom: `1px solid ${LINE}` }}>
+              {[['chat', 'Ask a question', MessageCircle], ['checker', 'Symptom Checker', Activity]].map(([id, label, Icon]) => (
+                <button key={id} type="button" role="tab" aria-selected={mode === id} onClick={() => setMode(id)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '999px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 800, border: 'none', background: mode === id ? TEAL : '#eef2f5', color: mode === id ? '#fff' : INK }}>
+                  <Icon size={15} /> {label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: mode === 'checker' ? 'contents' : 'none' }}>
             {/* Body */}
             <div style={{ overflowY: 'auto', padding: '1.25rem clamp(1rem, 3vw, 2rem) 1.5rem' }}>
               {/* Stepper */}
@@ -434,6 +447,11 @@ const AiDoc = () => {
               {step < STEPS.length - 1 && (
                 <button type="button" onClick={next} className="btn btn-primary" style={{ background: TEAL }}>{step === 3 ? 'See suggestions' : 'Next'} <ArrowRight size={17} /></button>
               )}
+            </div>
+            </div>
+
+            <div style={{ display: mode === 'chat' ? 'flex' : 'none', flex: 1, minHeight: 0, flexDirection: 'column' }}>
+              <ChatPanel onNavigate={() => setOpen(false)} onOpenChecker={() => setMode('checker')} />
             </div>
           </div>
         </div>

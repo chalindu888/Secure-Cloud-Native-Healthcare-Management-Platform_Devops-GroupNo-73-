@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import pkg from 'pg';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { registerChatRoutes } from './chat.js';
 
 dotenv.config();
 const { Pool } = pkg;
@@ -1086,6 +1087,9 @@ app.patch('/api/ambulance-requests/:id', authenticate, requireRole('patient', 'd
     res.status(500).json({ error: 'A server error occurred.' });
   }
 });
+
+// --- AI ASSISTANT CHAT ---
+registerChatRoutes(app, pool);
 
 // --- 2. LOGIN ROUTE ---
 app.post('/api/login', async (req, res) => {
