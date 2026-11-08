@@ -717,3 +717,12 @@ select:focus {
 
 /* Anchors (#centres, #values...) should stop below the sticky navbar, not under it */
 [id] { scroll-margin-top: 8.5rem; }
+
+/* Google website translator: hide its banner and tooltips (the navbar language button replaces them) */
+body { top: 0 !important; }
+body > .skiptranslate, .goog-te-banner-frame, iframe.goog-te-banner-frame { display: none !important; }
+#goog-gt-tt, .goog-tooltip, .goog-tooltip:hover, .goog-te-balloon-frame { display: none !important; }
+.goog-text-highlight { background: none !important; box-shadow: none !important; }
+
+/* Letter-spacing splits up Sinhala, Tamil, Hindi and Arabic letters, so turn it off when translated */
+html:not([lang="en"]) * { letter-spacing: normal !important; }

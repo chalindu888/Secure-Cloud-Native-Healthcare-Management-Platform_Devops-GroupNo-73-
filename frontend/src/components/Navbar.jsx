@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import hospitalIcon from '../assets/hospital-icon.png';
 import Avatar from './Avatar';
+import LanguageSwitcher from './LanguageSwitcher';
 
 // Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
 // so spacing here uses flex `gap` and inline padding instead.
@@ -241,6 +242,7 @@ const Navbar = () => {
 
         {/* Right side */}
         <div className="flex items-center gap-2 shrink-0">
+          <LanguageSwitcher />
           <div className="relative hidden xl:block" ref={menuRef}>
             {isAuthenticated ? (
               <button
