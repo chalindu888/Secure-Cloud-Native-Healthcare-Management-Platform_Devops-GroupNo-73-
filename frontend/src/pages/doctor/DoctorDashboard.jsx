@@ -4,7 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import StatusBadge from '../../components/StatusBadge';
 import Modal from '../../components/Modal';
-import { Stethoscope, Calendar, Clock, CheckCircle, FileText, CheckCircle2, CalendarCheck, Activity } from 'lucide-react';
+import { Stethoscope, Calendar, Clock, CheckCircle, FileText, CheckCircle2, CalendarCheck } from 'lucide-react';
+import { PendingFoldersIcon, ConfirmedQueueIcon, TreatedPatientsIcon, FeeGrowthIcon } from '../../components/StatIcons';
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
@@ -88,8 +89,8 @@ const DoctorDashboard = () => {
         }}
       >
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.25)' }}>
-            <Clock size={22} style={{ color: '#fbbf24' }} />
+          <div className="stat-icon" style={{ width: '64px', height: '64px', background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.25)' }}>
+            <PendingFoldersIcon color="#e6a21a" />
           </div>
           <div>
             <p className="stat-label">Pending Requests</p>
@@ -98,8 +99,8 @@ const DoctorDashboard = () => {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)' }}>
-            <Calendar size={22} style={{ color: '#818cf8' }} />
+          <div className="stat-icon" style={{ width: '64px', height: '64px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)' }}>
+            <ConfirmedQueueIcon color="#6366f1" />
           </div>
           <div>
             <p className="stat-label">Confirmed Queue</p>
@@ -108,8 +109,8 @@ const DoctorDashboard = () => {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.25)' }}>
-            <CheckCircle2 size={22} style={{ color: '#34d399' }} />
+          <div className="stat-icon" style={{ width: '64px', height: '64px', background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.25)' }}>
+            <TreatedPatientsIcon color="#10b981" />
           </div>
           <div>
             <p className="stat-label">Treated Patients</p>
@@ -118,8 +119,8 @@ const DoctorDashboard = () => {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(34,211,238,0.15)', border: '1px solid rgba(34,211,238,0.25)' }}>
-            <Activity size={22} style={{ color: '#67e8f9' }} />
+          <div className="stat-icon" style={{ width: '64px', height: '64px', background: 'rgba(34,211,238,0.15)', border: '1px solid rgba(34,211,238,0.25)' }}>
+            <FeeGrowthIcon color="#0ea5c6" />
           </div>
           <div>
             <p className="stat-label">Consultation Fee</p>
