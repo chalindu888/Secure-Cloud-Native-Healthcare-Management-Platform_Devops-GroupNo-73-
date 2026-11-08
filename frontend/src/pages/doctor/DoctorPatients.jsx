@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   ChevronRight
 } from 'lucide-react';
+import PrescriptionFiles from '../../components/PrescriptionFiles';
 
 // Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
 // so spacing here uses inline styles.
@@ -313,6 +314,7 @@ const DoctorPatients = () => {
                       <span><strong>Prescription:</strong> {v.prescription}</span>
                     </p>
                   )}
+                  {v.prescriptionFileCount > 0 && <PrescriptionFiles appointmentId={v.id} />}
                 </div>
               ))}
             </div>

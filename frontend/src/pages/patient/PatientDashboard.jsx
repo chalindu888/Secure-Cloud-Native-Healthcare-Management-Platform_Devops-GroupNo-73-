@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import StatusBadge from '../../components/StatusBadge';
+import PrescriptionFiles from '../../components/PrescriptionFiles';
 import { 
   Calendar, Clock, User, PlusCircle, AlertCircle,
   CheckCircle2, ArrowRight, Activity, Heart, ChevronRight
@@ -22,12 +23,16 @@ const PatientDashboard = () => {
     (apt) => apt.status === 'completed'
   );
 
+  const withPrescription = patientAppointments.filter(
+    (apt) => apt.status !== 'cancelled' && (apt.prescription || apt.prescriptionFileCount > 0)
+  );
+
   const stats = [
     {
       label: 'Total Appointments',
       value: patientAppointments.length,
       icon: Calendar,
-      color: '#818cf8',
+      color: '#4f46e5',
       bg: 'rgba(99,102,241,0.15)',
       border: 'rgba(99,102,241,0.25)',
     },
@@ -137,12 +142,12 @@ const PatientDashboard = () => {
         <div style={{ gridColumn: 'span 2', minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <div>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f0f6fc', marginBottom: '0.2rem' }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.2rem' }}>
                 Upcoming Appointments
               </h2>
               <p style={{ fontSize: '0.78rem', color: 'var(--txt-muted)' }}>Your scheduled and pending consultations</p>
             </div>
-            <Link to="/patient/appointments" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: 700, color: '#818cf8' }}>
+            <Link to="/patient/appointments" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: 700, color: '#4f46e5' }}>
               View All <ChevronRight size={14} />
             </Link>
           </div>
@@ -161,13 +166,13 @@ const PatientDashboard = () => {
                         width: '44px', height: '44px', borderRadius: '0.75rem',
                         background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontWeight: 800, fontSize: '0.75rem', color: '#818cf8',
+                        fontWeight: 800, fontSize: '0.75rem', color: '#4f46e5',
                       }}>
                         {apt.doctorSpecialty?.slice(0, 2).toUpperCase() || 'DR'}
                       </div>
                       <div>
-                        <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f0f6fc' }}>{apt.doctorName}</h4>
-                        <p style={{ fontSize: '0.75rem', color: '#818cf8', fontWeight: 600 }}>{apt.doctorSpecialty}</p>
+                        <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a' }}>{apt.doctorName}</h4>
+                        <p style={{ fontSize: '0.75rem', color: '#4f46e5', fontWeight: 600 }}>{apt.doctorSpecialty}</p>
                       </div>
                     </div>
                     <StatusBadge status={apt.status} />
@@ -176,21 +181,21 @@ const PatientDashboard = () => {
                   <div style={{
                     display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem',
                     padding: '0.75rem', borderRadius: '0.625rem',
-                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+                    background: '#f8fafc', border: '1px solid #f8fafc',
                     marginBottom: '0.875rem',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--txt-secondary)' }}>
                       <Calendar size={14} style={{ color: 'var(--txt-muted)' }} />
-                      <span><strong style={{ color: '#f0f6fc' }}>{apt.date}</strong></span>
+                      <span><strong style={{ color: '#0f172a' }}>{apt.date}</strong></span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--txt-secondary)' }}>
                       <Clock size={14} style={{ color: 'var(--txt-muted)' }} />
-                      <span><strong style={{ color: '#f0f6fc' }}>{apt.timeSlot}</strong></span>
+                      <span><strong style={{ color: '#0f172a' }}>{apt.timeSlot}</strong></span>
                     </div>
                   </div>
 
                   <p style={{ fontSize: '0.78rem', color: 'var(--txt-secondary)', marginBottom: '0.875rem' }}>
-                    <span style={{ fontWeight: 600, color: '#8b949e' }}>Reason:</span> {apt.reason}
+                    <span style={{ fontWeight: 600, color: '#64748b' }}>Reason:</span> {apt.reason}
                   </p>
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid var(--bdr-subtle)' }}>
@@ -214,7 +219,7 @@ const PatientDashboard = () => {
                 <div className="empty-state-icon">
                   <Calendar size={24} />
                 </div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#f0f6fc' }}>No upcoming appointments</h3>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>No upcoming appointments</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--txt-muted)', maxWidth: '300px' }}>
                   You don't have any consultations scheduled. Book one now!
                 </p>
@@ -225,6 +230,36 @@ const PatientDashboard = () => {
               </div>
             )}
           </div>
+
+          {/* Prescriptions from the doctor: typed notes and uploaded papers (PDF / picture) */}
+          <section aria-label="My prescriptions" style={{ marginTop: '2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.2rem' }}>My Prescriptions</h2>
+                <p style={{ fontSize: '0.78rem', color: '#64748b' }}>Prescriptions your doctors have given you</p>
+              </div>
+              <Link to="/patient/appointments" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: 700, color: '#4f46e5' }}>
+                All records <ChevronRight size={14} />
+              </Link>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+              {withPrescription.length > 0 ? withPrescription.map((apt) => (
+                <div key={apt.id} style={{ padding: '1.1rem 1.25rem', borderRadius: '1rem', background: '#ffffff', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+                  <p style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                    {apt.doctorName} <span style={{ fontWeight: 500, color: '#64748b' }}>· {apt.doctorSpecialty} · {apt.date}</span>
+                  </p>
+                  {apt.prescription && (
+                    <p style={{ fontSize: '0.86rem', color: '#334155', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{apt.prescription}</p>
+                  )}
+                  {apt.prescriptionFileCount > 0 && <PrescriptionFiles appointmentId={apt.id} />}
+                </div>
+              )) : (
+                <div style={{ padding: '1.5rem', borderRadius: '1rem', background: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.88rem', color: '#64748b', textAlign: 'center' }}>
+                  No prescriptions yet. When your doctor writes or uploads one, it will appear here.
+                </div>
+              )}
+            </div>
+          </section>
         </div>
 
         {/* Right: Profile Sidebar */}
@@ -232,8 +267,8 @@ const PatientDashboard = () => {
           {/* Medical Profile Card */}
           <div className="card" style={{ padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--bdr-subtle)' }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#f0f6fc' }}>Medical Profile</h3>
-              <Link to="/patient/profile" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#818cf8' }}>Edit →</Link>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>Medical Profile</h3>
+              <Link to="/patient/profile" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Edit →</Link>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
@@ -245,7 +280,7 @@ const PatientDashboard = () => {
               ].map(({ label, value }) => (
                 <div key={label}>
                   <p style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--txt-muted)', marginBottom: '0.25rem' }}>{label}</p>
-                  <p style={{ fontSize: '0.82rem', fontWeight: 600, color: '#e6edf3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</p>
+                  <p style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</p>
                 </div>
               ))}
             </div>
@@ -257,7 +292,7 @@ const PatientDashboard = () => {
               <AlertCircle size={15} />
               Privacy Protected
             </div>
-            <p style={{ fontSize: '0.75rem', lineHeight: 1.6, color: 'rgba(165,180,252,0.8)' }}>
+            <p style={{ fontSize: '0.75rem', lineHeight: 1.6, color: '#475569' }}>
               All PHI is transmitted over TLS with JWT RBAC isolation — your health data is safe.
             </p>
           </div>

@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { registerChatRoutes } from './chat.js';
 import { initAdmissionTables, registerAdmissionRoutes } from './admissions.js';
+import { initPrescriptionTables, registerPrescriptionRoutes } from './prescriptionFiles.js';
 
 dotenv.config();
 const { Pool } = pkg;
@@ -148,6 +149,7 @@ const initDb = async () => {
 
   // Hospital building (rooms + beds) and patient admissions
   await initAdmissionTables(pool);
+  await initPrescriptionTables(pool);
 };
 
 // --- AUTH MIDDLEWARE ---
@@ -563,6 +565,7 @@ const APPOINTMENT_SELECT = `
          a.status,
          COALESCE(a.notes, '') AS notes,
          COALESCE(a.prescription, '') AS prescription,
+         (SELECT COUNT(*)::int FROM prescription_files pf WHERE pf.appointment_id = a.id) AS "prescriptionFileCount",
          a.created_at AS "createdAt"
   FROM appointments a
   JOIN users p ON p.id = a.patient_id
@@ -1094,6 +1097,9 @@ app.patch('/api/ambulance-requests/:id', authenticate, requireRole('patient', 'd
 
 // --- ADMISSIONS, ROOMS AND BEDS ---
 registerAdmissionRoutes(app, pool, { authenticate, requireRole, textField, requiredText });
+
+// --- PRESCRIPTION FILES (PDF / picture) ---
+registerPrescriptionRoutes(app, pool, { authenticate, requireRole });
 
 // --- AI ASSISTANT CHAT ---
 registerChatRoutes(app, pool);

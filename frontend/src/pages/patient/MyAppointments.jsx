@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PrescriptionFiles from '../../components/PrescriptionFiles';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
@@ -53,7 +54,7 @@ const MyAppointments = () => {
       <div className="card animate-fade-up-1" style={{ padding: '1rem 1.25rem', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.04)', padding: '0.35rem', borderRadius: 'var(--r-md)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc', padding: '0.35rem', borderRadius: 'var(--r-md)' }}>
             {['all', 'upcoming', 'pending', 'completed', 'cancelled'].map((tab) => (
               <button
                 key={tab}
@@ -61,7 +62,7 @@ const MyAppointments = () => {
                 style={{
                   padding: '0.4rem 0.875rem', borderRadius: 'var(--r-sm)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'capitalize',
                   background: activeFilter === tab ? 'var(--c-primary-pale)' : 'transparent',
-                  color: activeFilter === tab ? 'var(--c-primary-light)' : 'var(--txt-secondary)',
+                  color: activeFilter === tab ? '#4f46e5' : 'var(--txt-secondary)',
                   border: `1px solid ${activeFilter === tab ? 'var(--c-primary-border)' : 'transparent'}`,
                   transition: 'all 200ms ease',
                 }}
@@ -95,13 +96,13 @@ const MyAppointments = () => {
                   <div style={{
                     width: '48px', height: '48px', borderRadius: 'var(--r-md)',
                     background: 'var(--c-primary-pale)', border: '1px solid var(--c-primary-border)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--c-primary-light)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4f46e5',
                   }}>
                     <Stethoscope size={24} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f0f6fc' }}>{apt.doctorName}</h3>
-                    <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--c-primary-light)' }}>{apt.doctorSpecialty}</p>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>{apt.doctorName}</h3>
+                    <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#4f46e5' }}>{apt.doctorSpecialty}</p>
                   </div>
                 </div>
 
@@ -113,19 +114,19 @@ const MyAppointments = () => {
 
               <div style={{
                 display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem',
-                background: 'rgba(255,255,255,0.03)', border: '1px solid var(--bdr-subtle)', borderRadius: 'var(--r-md)', padding: '1rem', marginBottom: '1.25rem'
+                background: '#f8fafc', border: '1px solid var(--bdr-subtle)', borderRadius: 'var(--r-md)', padding: '1rem', marginBottom: '1.25rem'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--txt-secondary)' }}>
                   <Calendar size={15} style={{ color: 'var(--txt-muted)' }} />
-                  <span>Date: <strong style={{ color: '#f0f6fc' }}>{apt.date}</strong></span>
+                  <span>Date: <strong style={{ color: '#0f172a' }}>{apt.date}</strong></span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--txt-secondary)' }}>
                   <Clock size={15} style={{ color: 'var(--txt-muted)' }} />
-                  <span>Time: <strong style={{ color: '#f0f6fc' }}>{apt.timeSlot}</strong></span>
+                  <span>Time: <strong style={{ color: '#0f172a' }}>{apt.timeSlot}</strong></span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--txt-secondary)' }}>
                   <FileText size={15} style={{ color: 'var(--txt-muted)' }} />
-                  <span>Booked: <strong style={{ color: '#f0f6fc' }}>{new Date(apt.createdAt).toLocaleDateString()}</strong></span>
+                  <span>Booked: <strong style={{ color: '#0f172a' }}>{new Date(apt.createdAt).toLocaleDateString()}</strong></span>
                 </div>
               </div>
 
@@ -135,7 +136,7 @@ const MyAppointments = () => {
                 </p>
               </div>
 
-              {(apt.notes || apt.prescription) && (
+              {(apt.notes || apt.prescription || apt.prescriptionFileCount > 0) && (
                 <div style={{
                   padding: '1rem', borderRadius: 'var(--r-md)', background: 'var(--c-cyan-pale)', border: '1px solid rgba(34,211,238,0.2)',
                   display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.25rem'
@@ -144,7 +145,7 @@ const MyAppointments = () => {
                     <FileCheck size={18} style={{ marginTop: '0.1rem' }} />
                     <div>
                       <span style={{ fontWeight: 700, fontSize: '0.85rem', display: 'block', marginBottom: '0.2rem' }}>Medical Notes & Prescription Available</span>
-                      <p style={{ fontSize: '0.75rem', color: 'rgba(34,211,238,0.7)' }}>{apt.prescription || apt.notes}</p>
+                      <p style={{ fontSize: '0.75rem', color: '#0e7490' }}>{apt.prescription || apt.notes || `${apt.prescriptionFileCount} prescription ${apt.prescriptionFileCount === 1 ? 'paper' : 'papers'} attached (PDF / picture)`}</p>
                     </div>
                   </div>
                   <button onClick={() => setActiveModalAppointment(apt)} className="btn btn-sm btn-accent" style={{ flexShrink: 0 }}>
@@ -153,13 +154,17 @@ const MyAppointments = () => {
                 </div>
               )}
 
+              {apt.status !== 'pending' && apt.status !== 'cancelled' && (
+                <div style={{ marginBottom: '1.25rem' }}><PrescriptionFiles appointmentId={apt.id} /></div>
+              )}
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingTop: '1rem', borderTop: '1px solid var(--bdr-subtle)' }}>
                 {(apt.status === 'pending' || apt.status === 'confirmed') && (
                   <button onClick={() => cancelAppointment(apt.id, user?.email)} className="btn btn-sm btn-danger">
                     Cancel Appointment
                   </button>
                 )}
-                {(apt.notes || apt.prescription) && (
+                {(apt.notes || apt.prescription || apt.prescriptionFileCount > 0) && (
                   <button onClick={() => setActiveModalAppointment(apt)} className="btn btn-sm btn-primary">
                     Medical Report
                   </button>
@@ -170,7 +175,7 @@ const MyAppointments = () => {
         ) : (
           <div className="card empty-state">
             <div className="empty-state-icon"><Calendar size={32} /></div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f0f6fc' }}>No appointments found</h3>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a' }}>No appointments found</h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--txt-muted)', maxWidth: '400px' }}>
               No appointments match the selected filter. Schedule a new consultation with one of our certified specialists.
             </p>
@@ -186,14 +191,14 @@ const MyAppointments = () => {
         {activeModalAppointment && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: 'var(--txt-primary)' }}>
             
-            <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--r-md)', border: '1px solid var(--bdr-subtle)', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem' }}>
+            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: 'var(--r-md)', border: '1px solid var(--bdr-subtle)', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--txt-secondary)' }}>Doctor:</span>
                 <span style={{ fontWeight: 700 }}>{activeModalAppointment.doctorName}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--txt-secondary)' }}>Specialty:</span>
-                <span style={{ fontWeight: 700, color: 'var(--c-primary-light)' }}>{activeModalAppointment.doctorSpecialty}</span>
+                <span style={{ fontWeight: 700, color: '#4f46e5' }}>{activeModalAppointment.doctorSpecialty}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--txt-secondary)' }}>Date & Time:</span>
@@ -207,7 +212,7 @@ const MyAppointments = () => {
 
             <div>
               <h4 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--txt-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Physician Clinical Notes</h4>
-              <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--bdr-subtle)', borderRadius: 'var(--r-md)', fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>
+              <div style={{ padding: '1rem', background: '#f8fafc', border: '1px solid var(--bdr-subtle)', borderRadius: 'var(--r-md)', fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>
                 {activeModalAppointment.notes || 'No doctor clinical notes recorded.'}
               </div>
             </div>
@@ -218,6 +223,8 @@ const MyAppointments = () => {
                 {activeModalAppointment.prescription || 'No medications prescribed.'}
               </div>
             </div>
+
+            <PrescriptionFiles appointmentId={activeModalAppointment.id} />
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '1rem', borderTop: '1px solid var(--bdr-subtle)' }}>
               <button onClick={() => setActiveModalAppointment(null)} className="btn btn-secondary">

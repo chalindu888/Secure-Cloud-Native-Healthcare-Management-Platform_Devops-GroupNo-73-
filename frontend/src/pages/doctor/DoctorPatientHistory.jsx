@@ -9,6 +9,7 @@ import Avatar from '../../components/Avatar';
 import {
   Search, Users, Mail, Phone, Calendar, Clock, FileText, Pill, ClipboardList, Ambulance, MapPin, Navigation, History,
 } from 'lucide-react';
+import PrescriptionFiles from '../../components/PrescriptionFiles';
 
 // Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
 // so spacing here uses inline styles.
@@ -183,7 +184,8 @@ const DoctorPatientHistory = () => {
                             <Note icon={ClipboardList} color="#94a3b8" label="Reason">{item.data.reason}</Note>
                             {item.data.notes && <Note icon={FileText} color="#4f46e5" label="Diagnosis">{item.data.notes}</Note>}
                             {item.data.prescription && <Note icon={Pill} color="#059669" label="Prescription">{item.data.prescription}</Note>}
-                            {!item.data.notes && !item.data.prescription && item.data.status !== 'cancelled' && (
+                            {item.data.prescriptionFileCount > 0 && <PrescriptionFiles appointmentId={item.data.id} />}
+                            {!item.data.notes && !item.data.prescription && !item.data.prescriptionFileCount && item.data.status !== 'cancelled' && (
                               <p style={{ fontSize: '0.8rem', color: 'var(--txt-muted)' }}>No diagnosis or prescription recorded yet. <Link to="/doctor/appointments" style={{ fontWeight: 700, color: 'var(--c-primary)' }}>Add one</Link></p>
                             )}
                           </div>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import PrescriptionFiles from '../../components/PrescriptionFiles';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import StatusBadge from '../../components/StatusBadge';
@@ -112,6 +113,9 @@ const DoctorAppointments = () => {
   const [activeModalApt, setActiveModalApt] = useState(null);
   const [diagnosisNotes, setDiagnosisNotes] = useState('');
   const [prescriptionText, setPrescriptionText] = useState('');
+  const [filesVersion, setFilesVersion] = useState(0);
+  // Re-read the file lists on the cards after the clinical-record dialog closes
+  useEffect(() => { if (!activeModalApt) setFilesVersion((v) => v + 1); }, [activeModalApt]);
   const [isSaving, setIsSaving] = useState(false);
   const [modalError, setModalError] = useState('');
 
@@ -335,6 +339,10 @@ const DoctorAppointments = () => {
                   </div>
                 )}
 
+                {apt.status !== 'pending' && apt.status !== 'cancelled' && (
+                  <PrescriptionFiles key={`${apt.id}-${filesVersion}`} appointmentId={apt.id} />
+                )}
+
                 {/* Actions */}
                 {apt.status !== 'cancelled' && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '0.6rem', paddingTop: '1rem', borderTop: '1px solid var(--bdr-default)' }}>
@@ -465,6 +473,10 @@ const DoctorAppointments = () => {
               style={{ resize: 'vertical', lineHeight: 1.6 }}
             />
           </div>
+
+          {activeModalApt && (
+            <PrescriptionFiles appointmentId={activeModalApt.id} canEdit />
+          )}
 
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '0.6rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
             <button type="button" onClick={() => setActiveModalApt(null)} className="btn btn-secondary">
