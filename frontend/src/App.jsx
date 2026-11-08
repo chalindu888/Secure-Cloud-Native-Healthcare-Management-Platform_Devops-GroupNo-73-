@@ -150,6 +150,14 @@ function App() {
                 }
               />
               <Route
+                path="/doctor/patient-history"
+                element={
+                  <ProtectedRoute allowedRoles={['doctor']}>
+                    <DoctorPatients />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/doctor/profile"
                 element={
                   <ProtectedRoute allowedRoles={['doctor']}>

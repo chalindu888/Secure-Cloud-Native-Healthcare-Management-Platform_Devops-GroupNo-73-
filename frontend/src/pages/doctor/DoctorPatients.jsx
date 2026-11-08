@@ -127,9 +127,9 @@ const DoctorPatients = () => {
         <span style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--c-cyan)' }}>
           Doctor Portal
         </span>
-        <h1 className="page-title">My Patients</h1>
+        <h1 className="page-title">Patient History</h1>
         <p className="page-subtitle">
-          Everyone you have appointments with, including their visit history, diagnoses and prescriptions.
+          Review each patient you have treated, including appointment history, diagnoses and prescriptions.
         </p>
       </div>
 

@@ -16,6 +16,7 @@ import {
   Calendar,
   CalendarPlus,
   ClipboardList,
+  History,
   ChevronDown
 } from 'lucide-react';
 import hospitalIcon from '../assets/hospital-icon.png';
@@ -85,7 +86,7 @@ const ROLE_LINKS = {
   doctor: [
     { to: '/doctor', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/doctor/appointments', label: 'Appointments', icon: ClipboardList, badge: 'pending' },
-    { to: '/doctor/patients', label: 'My Patients', icon: Users },
+    { to: '/doctor/patient-history', label: 'Patient History', icon: History },
     { to: '/doctor/schedule', label: 'Schedule', icon: Calendar },
     { to: '/doctor/profile', label: 'My Profile', icon: User },
   ],
