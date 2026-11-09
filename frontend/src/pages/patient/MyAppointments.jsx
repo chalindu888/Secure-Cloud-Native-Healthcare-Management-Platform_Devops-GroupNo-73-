@@ -159,6 +159,11 @@ const MyAppointments = () => {
               )}
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingTop: '1rem', borderTop: '1px solid var(--bdr-subtle)' }}>
+                {apt.status !== 'cancelled' && apt.doctorId && (
+                  <Link to={`/patient/messages?with=${apt.doctorId}`} className="btn btn-sm btn-secondary">
+                    Message doctor
+                  </Link>
+                )}
                 {(apt.status === 'pending' || apt.status === 'confirmed') && (
                   <button onClick={() => cancelAppointment(apt.id, user?.email)} className="btn btn-sm btn-danger">
                     Cancel Appointment

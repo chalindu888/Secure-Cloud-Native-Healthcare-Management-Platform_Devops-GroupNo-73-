@@ -8,6 +8,7 @@ import { registerChatRoutes } from './chat.js';
 import { initAdmissionTables, registerAdmissionRoutes } from './admissions.js';
 import { initPrescriptionTables, registerPrescriptionRoutes } from './prescriptionFiles.js';
 import { initAdminTables, registerAdminRoutes, suspendedUserIds } from './admin.js';
+import { initMessageTables, registerMessageRoutes } from './messages.js';
 
 dotenv.config();
 const { Pool } = pkg;
@@ -152,6 +153,7 @@ const initDb = async () => {
   await initAdmissionTables(pool);
   await initPrescriptionTables(pool);
   await initAdminTables(pool);
+  await initMessageTables(pool);
 };
 
 // --- AUTH MIDDLEWARE ---
@@ -1103,6 +1105,9 @@ app.patch('/api/ambulance-requests/:id', authenticate, requireRole('patient', 'd
 
 // --- ADMISSIONS, ROOMS AND BEDS ---
 registerAdmissionRoutes(app, pool, { authenticate, requireRole, textField, requiredText });
+
+// --- PATIENT <-> DOCTOR MESSAGES ---
+registerMessageRoutes(app, pool, { authenticate, requireRole });
 
 // --- ADMIN PANEL ---
 registerAdminRoutes(app, pool, { authenticate, requireRole });

@@ -35,6 +35,7 @@ import DoctorPatientHistory from './pages/doctor/DoctorPatientHistory';
 import DoctorAmbulanceRequests from './pages/doctor/DoctorAmbulanceRequests';
 import DoctorAdmissions from './pages/doctor/DoctorAdmissions';
 import PatientAdmission from './pages/patient/PatientAdmission';
+import Messages from './pages/Messages';
 
 // Ambulance Pages
 import Ambulances from './pages/Ambulances';
@@ -135,6 +136,22 @@ function App() {
                 }
               />
 
+              <Route
+                path="/patient/messages"
+                element={
+                  <ProtectedRoute allowedRoles={['patient']}>
+                    <Messages />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor/messages"
+                element={
+                  <ProtectedRoute allowedRoles={['doctor']}>
+                    <Messages />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/patient/admission"
                 element={

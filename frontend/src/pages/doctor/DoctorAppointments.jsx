@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import PrescriptionFiles from '../../components/PrescriptionFiles';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -17,7 +18,8 @@ import {
   Check,
   X,
   AlertTriangle,
-  ClipboardList
+  ClipboardList,
+  MessageCircle
 } from 'lucide-react';
 
 // Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
@@ -346,6 +348,9 @@ const DoctorAppointments = () => {
                 {/* Actions */}
                 {apt.status !== 'cancelled' && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '0.6rem', paddingTop: '1rem', borderTop: '1px solid var(--bdr-default)' }}>
+                    <Link to={`/doctor/messages?with=${apt.patientId}`} className="btn btn-secondary btn-sm">
+                      <MessageCircle size={15} /> Message patient
+                    </Link>
                     {apt.status === 'pending' && (
                       <>
                         <button

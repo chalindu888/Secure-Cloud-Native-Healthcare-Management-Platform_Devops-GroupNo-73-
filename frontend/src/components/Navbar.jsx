@@ -19,11 +19,13 @@ import {
   History,
   Ambulance,
   BedDouble,
+  MessageCircle,
   ChevronDown
 } from 'lucide-react';
 import hospitalIcon from '../assets/hospital-icon.png';
 import Avatar from './Avatar';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useUnreadMessages } from '../hooks/useUnreadMessages';
 
 // Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
 // so spacing here uses flex `gap` and inline padding instead.
@@ -88,6 +90,7 @@ const ROLE_LINKS = {
     { to: '/patient', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/patient/book', label: 'Book Visit', icon: CalendarPlus },
     { to: '/patient/appointments', label: 'My Appointments', icon: ClipboardList },
+    { to: '/patient/messages', label: 'Messages', icon: MessageCircle, badge: 'unread' },
     { to: '/patient/admission', label: 'My Admission', icon: BedDouble },
     { to: '/patient/ambulance', label: 'My Ambulance', icon: Ambulance },
   ],
@@ -96,6 +99,7 @@ const ROLE_LINKS = {
     { to: '/doctor/appointments', label: 'Appointments', icon: ClipboardList, badge: 'pending' },
     { to: '/doctor/patients', label: 'My Patients', icon: Users },
     { to: '/doctor/patient-history', label: 'Patient History', icon: History },
+    { to: '/doctor/messages', label: 'Messages', icon: MessageCircle, badge: 'unread' },
     { to: '/doctor/admissions', label: 'Admitted Patients', icon: BedDouble },
     { to: '/doctor/ambulance-requests', label: 'Ambulance Requests', icon: Ambulance },
     { to: '/doctor/schedule', label: 'Schedule', icon: Calendar },
@@ -132,6 +136,7 @@ const Navbar = () => {
   const publicLinks = role === 'doctor' ? PUBLIC_LINKS.filter((l) => l.to !== '/doctors') : PUBLIC_LINKS;
   const links = [...publicLinks, ...roleLinks];
 
+  const unreadMessages = useUnreadMessages(isAuthenticated && (role === 'patient' || role === 'doctor'));
   const pendingCount = role === 'doctor'
     ? appointments.filter(
         (apt) => apt.status === 'pending' && (apt.doctorId === user?.id || apt.doctorName === user?.name)
@@ -178,7 +183,15 @@ const Navbar = () => {
   };
 
   const renderBadge = (link) =>
-    link.badge === 'pending' && pendingCount > 0 ? (
+    link.badge === 'unread' && unreadMessages > 0 ? (
+      <span
+        className="inline-flex items-center justify-center rounded-full text-[11px] font-bold text-white"
+        style={{ background: '#ef4444', minWidth: 18, height: 18, padding: '0 5px' }}
+        aria-label={`${unreadMessages} unread messages`}
+      >
+        {unreadMessages}
+      </span>
+    ) : link.badge === 'pending' && pendingCount > 0 ? (
       <span
         className="inline-flex items-center justify-center rounded-full text-[11px] font-bold text-white"
         style={{ background: '#f59e0b', minWidth: 18, height: 18, padding: '0 5px' }}
