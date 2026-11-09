@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import { registerChatRoutes } from './chat.js';
 import { initAdmissionTables, registerAdmissionRoutes } from './admissions.js';
 import { initPrescriptionTables, registerPrescriptionRoutes } from './prescriptionFiles.js';
+import { initAdminTables, registerAdminRoutes, suspendedUserIds } from './admin.js';
 
 dotenv.config();
 const { Pool } = pkg;
@@ -150,6 +151,7 @@ const initDb = async () => {
   // Hospital building (rooms + beds) and patient admissions
   await initAdmissionTables(pool);
   await initPrescriptionTables(pool);
+  await initAdminTables(pool);
 };
 
 // --- AUTH MIDDLEWARE ---
@@ -164,10 +166,14 @@ const authenticate = (req, res, next) => {
 
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
   } catch {
-    res.status(401).json({ error: 'Invalid or expired token.' });
+    return res.status(401).json({ error: 'Invalid or expired token.' });
   }
+  // A suspended account is refused even if its sign-in token has not expired yet
+  if (suspendedUserIds.has(req.user.id)) {
+    return res.status(403).json({ error: 'This account has been suspended. Please contact the hospital.' });
+  }
+  next();
 };
 
 // Allows only the listed roles through (use after authenticate).
@@ -1098,6 +1104,9 @@ app.patch('/api/ambulance-requests/:id', authenticate, requireRole('patient', 'd
 // --- ADMISSIONS, ROOMS AND BEDS ---
 registerAdmissionRoutes(app, pool, { authenticate, requireRole, textField, requiredText });
 
+// --- ADMIN PANEL ---
+registerAdminRoutes(app, pool, { authenticate, requireRole });
+
 // --- PRESCRIPTION FILES (PDF / picture) ---
 registerPrescriptionRoutes(app, pool, { authenticate, requireRole });
 
@@ -1120,6 +1129,9 @@ app.post('/api/login', async (req, res) => {
     const validPassword = user && (await bcrypt.compare(password, user.password));
     if (!validPassword) {
       return res.status(400).json({ error: 'Invalid email or password!' });
+    }
+    if (user.is_active === false) {
+      return res.status(403).json({ error: 'This account has been suspended. Please contact the hospital.' });
     }
 
     const token = jwt.sign(

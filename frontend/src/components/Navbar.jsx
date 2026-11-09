@@ -107,7 +107,7 @@ const ROLE_LINKS = {
   admin: [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/admin/users', label: 'Users', icon: Users },
-    { to: '/admin/audit-logs', label: 'Audit Logs', icon: Shield },
+    { to: '/admin/audit-logs', label: 'Activity Log', icon: Shield },
     { to: '/admin/devops', label: 'System Health', icon: Server },
   ],
 };

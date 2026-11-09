@@ -1,227 +1,154 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useData } from '../../context/DataContext';
-import { Users, Stethoscope, Calendar, ShieldCheck, Server, ArrowRight, Cpu, Activity } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useAdminFetch, timeAgo, ROLE_STYLE } from '../../hooks/useAdminData';
+import Avatar from '../../components/Avatar';
+import {
+  Users, Stethoscope, Ambulance, BedDouble, Calendar, ClipboardList, ShieldCheck, Server, ArrowRight, UserPlus, AlertTriangle,
+} from 'lucide-react';
+
+// Note: the global reset in index.css zeroes Tailwind padding/margin utilities,
+// so spacing here uses inline styles.
+
+const card = { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '1.25rem', boxShadow: '0 4px 18px rgba(15,23,42,0.05)' };
+
+const StatCard = ({ icon: Icon, color, bg, label, value, hint, to }) => {
+  const body = (
+    <div style={{ ...card, padding: '1.1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', height: '100%' }}>
+      <span style={{ width: '3.4rem', height: '3.4rem', borderRadius: '50%', background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon size={26} />
+      </span>
+      <div style={{ minWidth: 0 }}>
+        <p style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569' }}>{label}</p>
+        <p style={{ fontSize: '1.9rem', fontWeight: 800, lineHeight: 1.15, color }}>{value}</p>
+        {hint && <p style={{ fontSize: '0.76rem', color: '#64748b' }}>{hint}</p>}
+      </div>
+    </div>
+  );
+  return to ? <Link to={to} style={{ display: 'block', textDecoration: 'none' }}>{body}</Link> : body;
+};
+
+const PIPELINE = [
+  ['pending', 'Waiting for the doctor', '#f59e0b'],
+  ['confirmed', 'Confirmed', '#3b82f6'],
+  ['completed', 'Completed', '#10b981'],
+  ['cancelled', 'Cancelled', '#94a3b8'],
+];
 
 const AdminDashboard = () => {
-  const { users, appointments, auditLogs } = useData();
+  const { user } = useAuth();
+  const { data, loading, error } = useAdminFetch('/admin/overview');
 
-  const totalPatients = users.filter((u) => u.role === 'patient').length;
-  const totalDoctors = users.filter((u) => u.role === 'doctor').length;
-  const totalAdmins = users.filter((u) => u.role === 'admin').length;
-
-  const pendingAppointments = appointments.filter((a) => a.status === 'pending').length;
-  const confirmedAppointments = appointments.filter((a) => a.status === 'confirmed').length;
-  const completedAppointments = appointments.filter((a) => a.status === 'completed').length;
+  const roles = data?.users.byRole || {};
+  const count = (role) => roles[role]?.total || 0;
+  const fresh = (role) => roles[role]?.newThisWeek || 0;
+  const newThisWeek = fresh('patient') + fresh('doctor') + fresh('ambulance');
+  const apt = data?.appointments;
 
   return (
     <div className="page-wrapper">
-      {/* ── Welcome Banner ── */}
-      <div className="hero-banner hero-admin animate-fade-up" style={{ marginBottom: '2rem' }}>
-        {/* Decorative glow */}
-        <div style={{
-          position: 'absolute', top: '-60px', right: '-60px',
-          width: '250px', height: '250px',
-          background: 'radial-gradient(circle, rgba(52,211,153,0.2) 0%, transparent 70%)',
-          borderRadius: '50%', pointerEvents: 'none',
-        }} />
-
-        <div style={{ position: 'relative' }}>
-          <div className="badge badge-success" style={{ marginBottom: '0.75rem', display: 'inline-flex' }}>
-            <span className="badge-dot animate-pulse"></span>
-            Cloud Infrastructure & Security Admin
-          </div>
-          <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 900, color: '#fff', marginBottom: '0.5rem' }}>
-            HealthOps Operations Command
+      {/* Welcome */}
+      <div className="animate-fade-up" style={{ ...card, padding: '1.75rem 2rem', marginBottom: '1.75rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.25rem' }}>
+        <div style={{ minWidth: 0 }}>
+          <span style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#0e7490' }}>Hospital administration</span>
+          <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 900, color: '#0f172a', marginBottom: '0.35rem' }}>
+            Hello{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
           </h1>
-          <p style={{ color: 'rgba(209,250,229,0.8)', fontSize: '0.9rem', maxWidth: '480px' }}>
-            Real-time control plane for user access governance, healthcare appointment metrics, and DevSecOps observability.
+          <p style={{ fontSize: '0.95rem', color: '#475569', maxWidth: '34rem' }}>
+            {loading ? 'Loading the latest numbers...' : newThisWeek > 0
+              ? <><strong style={{ color: '#0f172a' }}>{newThisWeek} new {newThisWeek === 1 ? 'person has' : 'people have'} registered</strong> in the last 7 days.</>
+              : 'No new registrations in the last 7 days.'}
           </p>
         </div>
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', position: 'relative' }}>
-          <Link to="/admin/devops" className="btn btn-primary btn-lg" style={{ background: '#10b981', color: '#022c22', border: 'none', boxShadow: '0 4px 16px rgba(16,185,129,0.3)' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#34d399'}
-            onMouseLeave={e => e.currentTarget.style.background = '#10b981'}
-          >
-            <Server size={18} />
-            DevSecOps Telemetry
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.7rem' }}>
+          <Link to="/admin/users" className="btn" style={{ background: '#4f46e5', color: '#ffffff', border: 'none', boxShadow: '0 6px 18px rgba(79,70,229,0.28)' }}>
+            <Users size={18} /> Manage users
           </Link>
-          <Link to="/admin/users" className="btn btn-secondary">
-            <Users size={17} />
-            Manage Users
+          <Link to="/admin/audit-logs" className="btn" style={{ background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1' }}>
+            <ClipboardList size={18} /> Activity log
           </Link>
         </div>
       </div>
 
-      {/* ── KPI Cards ── */}
-      <div
-        className="animate-fade-up-1"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem',
-          marginBottom: '2rem',
-        }}
-      >
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)' }}>
-            <Users size={22} style={{ color: '#818cf8' }} />
-          </div>
-          <div>
-            <p className="stat-label">Total Users</p>
-            <p className="stat-value" style={{ color: '#818cf8' }}>{users.length}</p>
-            <p className="stat-sub">{totalPatients} Patients • {totalAdmins} Admin</p>
-          </div>
-        </div>
+      {error && <p role="alert" style={{ marginBottom: '1rem', padding: '0.85rem 1rem', borderRadius: '0.75rem', fontSize: '0.88rem', fontWeight: 600, color: '#b91c1c', background: '#fee2e2' }}>{error}</p>}
 
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(34,211,238,0.15)', border: '1px solid rgba(34,211,238,0.25)' }}>
-            <Stethoscope size={22} style={{ color: '#67e8f9' }} />
-          </div>
-          <div>
-            <p className="stat-label">Active Doctors</p>
-            <p className="stat-value" style={{ color: '#67e8f9' }}>{totalDoctors}</p>
-          </div>
-        </div>
+      {data && data.users.suspended > 0 && (
+        <Link to="/admin/users" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem', padding: '0.8rem 1rem', borderRadius: '0.9rem', background: '#fef3c7', color: '#92400e', fontSize: '0.88rem', fontWeight: 700, textDecoration: 'none' }}>
+          <AlertTriangle size={18} /> {data.users.suspended} {data.users.suspended === 1 ? 'account is' : 'accounts are'} suspended. Review them <ArrowRight size={15} />
+        </Link>
+      )}
 
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.25)' }}>
-            <Calendar size={22} style={{ color: '#fbbf24' }} />
-          </div>
-          <div>
-            <p className="stat-label">Total Appointments</p>
-            <p className="stat-value" style={{ color: '#fbbf24' }}>{appointments.length}</p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.25)' }}>
-            <Cpu size={22} style={{ color: '#34d399' }} />
-          </div>
-          <div>
-            <p className="stat-label">System Uptime</p>
-            <p className="stat-value" style={{ color: '#34d399' }}>99.98%</p>
-          </div>
-        </div>
+      {/* Live numbers */}
+      <div className="animate-fade-up-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(13.5rem, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
+        <StatCard icon={Users} color="#4f46e5" bg="#eef2ff" label="Registered patients" value={count('patient')} hint={`${fresh('patient')} new this week`} to="/admin/users?role=patient" />
+        <StatCard icon={Stethoscope} color="#0f766e" bg="#ccfbf1" label="Registered doctors" value={count('doctor')} hint={`${fresh('doctor')} new this week`} to="/admin/users?role=doctor" />
+        <StatCard icon={Ambulance} color="#b91c1c" bg="#fee2e2" label="Ambulances" value={data?.ambulances.total ?? 0} hint={`${data?.ambulances.activeTrips ?? 0} on a trip or requested`} to="/admin/users?role=ambulance" />
+        <StatCard icon={BedDouble} color="#7c3aed" bg="#ede9fe" label="Patients in hospital" value={data?.hospital.admitted ?? 0} hint={`of ${data?.hospital.totalBeds ?? 0} beds`} />
+        <StatCard icon={Calendar} color="#b45309" bg="#fef3c7" label="Appointments today" value={apt?.today ?? 0} hint={`${apt?.total ?? 0} booked in total`} />
       </div>
 
-      {/* ── Main Content Grid ── */}
-      <div
-        className="animate-fade-up-2"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '1.5rem',
-        }}
-      >
-        {/* Left Col: Pipeline & DevSecOps */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          <div className="card" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--bdr-subtle)', paddingBottom: '0.75rem' }}>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f0f6fc' }}>Appointment Pipeline</h3>
-              <span className="badge badge-muted">{appointments.length} Total</span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, color: '#c7d2fe', marginBottom: '0.4rem' }}>
-                  <span>Completed Consultations</span>
-                  <span>{completedAppointments}</span>
-                </div>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${(completedAppointments / (appointments.length || 1)) * 100}%`, background: '#818cf8' }} />
-                </div>
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, color: '#6ee7b7', marginBottom: '0.4rem' }}>
-                  <span>Confirmed & Scheduled</span>
-                  <span>{confirmedAppointments}</span>
-                </div>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${(confirmedAppointments / (appointments.length || 1)) * 100}%`, background: '#34d399' }} />
-                </div>
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, color: '#fcd34d', marginBottom: '0.4rem' }}>
-                  <span>Pending Triage Review</span>
-                  <span>{pendingAppointments}</span>
-                </div>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${(pendingAppointments / (appointments.length || 1)) * 100}%`, background: '#fbbf24' }} />
-                </div>
-              </div>
-            </div>
-
-            <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--bdr-subtle)', textAlign: 'right' }}>
-              <Link to="/admin/users" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 700, color: '#818cf8' }}>
-                View All Records <ArrowRight size={14} />
-              </Link>
-            </div>
+      <div className="animate-fade-up-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(20rem, 1fr))', gap: '1.5rem' }}>
+        {/* Recently registered */}
+        <section aria-label="Recently registered" style={{ ...card, padding: '1.4rem 1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}><UserPlus size={19} style={{ color: '#4f46e5' }} /> Recently registered</h2>
+            <Link to="/admin/users" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: 700, color: '#4f46e5' }}>See everyone <ArrowRight size={14} /></Link>
           </div>
-
-          <div className="card-strong" style={{ padding: '1.5rem' }}>
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f0f6fc', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
-              <ShieldCheck size={18} style={{ color: '#34d399' }} />
-              DevSecOps Compliance Baseline
-            </h4>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--bdr-subtle)' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--txt-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Vulnerability Scan</span>
-                <strong style={{ fontSize: '0.85rem', color: '#34d399' }}>0 Critical (Trivy)</strong>
-              </div>
-              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--bdr-subtle)' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--txt-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>SonarQube Gate</span>
-                <strong style={{ fontSize: '0.85rem', color: '#34d399' }}>Passed (A)</strong>
-              </div>
-              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--bdr-subtle)' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--txt-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Deployment Engine</span>
-                <strong style={{ fontSize: '0.85rem', color: '#818cf8' }}>Argo CD GitOps</strong>
-              </div>
-              <div style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--bdr-subtle)' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--txt-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Cluster Resilience</span>
-                <strong style={{ fontSize: '0.85rem', color: '#67e8f9' }}>Multi-Replica Pods</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Col: Audit Logs */}
-        <div className="card" style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--bdr-subtle)', paddingBottom: '0.75rem' }}>
-            <div>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f0f6fc' }}>Recent Security Logs</h3>
-              <p style={{ fontSize: '0.75rem', color: 'var(--txt-muted)' }}>Audit trail of critical mutations</p>
-            </div>
-            <Link to="/admin/audit-logs" style={{ fontSize: '0.8rem', fontWeight: 700, color: '#818cf8' }}>Full Trail →</Link>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {auditLogs.slice(0, 5).map((log) => (
-              <div key={log.id} style={{ padding: '0.875rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--bdr-subtle)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 700, fontFamily: 'monospace', padding: '0.15rem 0.4rem', borderRadius: '0.25rem', background: 'rgba(255,255,255,0.08)', color: '#f0f6fc' }}>
-                    {log.action}
+          {data && data.recentUsers.length === 0 && <p style={{ fontSize: '0.88rem', color: '#64748b' }}>Nobody has registered yet.</p>}
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', margin: 0, padding: 0, listStyle: 'none' }}>
+            {(data?.recentUsers || []).map((u) => {
+              const r = ROLE_STYLE[u.role] || ROLE_STYLE.patient;
+              return (
+                <li key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.6rem 0.2rem', borderBottom: '1px solid #f1f5f9' }}>
+                  <Avatar name={u.name || u.email} size="2.5rem" gradient={r.gradient} />
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: 'block', fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.name || u.email}</span>
+                    <span style={{ display: 'block', fontSize: '0.76rem', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.email}</span>
                   </span>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--txt-muted)' }}>
-                    {new Date(log.timestamp).toLocaleTimeString()}
+                  <span style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <span style={{ display: 'inline-block', padding: '0.15rem 0.6rem', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 800, color: r.color, background: r.bg }}>{r.label}</span>
+                    <span style={{ display: 'block', marginTop: '0.2rem', fontSize: '0.72rem', color: '#64748b' }}>{timeAgo(u.createdAt)}</span>
                   </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        {/* Appointments */}
+        <section aria-label="Appointments" style={{ ...card, padding: '1.4rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}><Calendar size={19} style={{ color: '#4f46e5' }} /> Appointments</h2>
+          {PIPELINE.map(([status, label, color]) => {
+            const n = apt?.byStatus[status] || 0;
+            const pct = apt?.total ? (n / apt.total) * 100 : 0;
+            return (
+              <div key={status}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.86rem', fontWeight: 700, color: '#334155', marginBottom: '0.35rem' }}>
+                  <span>{label}</span><span>{n}</span>
                 </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--txt-secondary)', marginBottom: '0.5rem' }}>{log.target}</p>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.7rem' }}>
-                  <span style={{ color: 'var(--txt-muted)' }}>Actor: {log.actor}</span>
-                  <span style={{ fontWeight: 700, color: log.status === 'SUCCESS' ? '#34d399' : log.status === 'SYNCED' ? '#67e8f9' : '#fb7185' }}>
-                    {log.status}
-                  </span>
+                <div style={{ height: '0.6rem', borderRadius: '999px', background: '#f1f5f9', overflow: 'hidden' }}>
+                  <div style={{ width: `${pct}%`, height: '100%', borderRadius: '999px', background: color }} />
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            );
+          })}
+          <p style={{ fontSize: '0.8rem', color: '#64748b' }}>{apt?.total ?? 0} {apt?.total === 1 ? 'appointment' : 'appointments'} booked in total.</p>
+        </section>
+      </div>
+
+      {/* Shortcuts */}
+      <div className="animate-fade-up-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(14rem, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
+        {[
+          { to: '/admin/users', icon: Users, title: 'Users', text: 'Patients, doctors and ambulances' },
+          { to: '/ambulances', icon: Ambulance, title: 'Ambulance directory', text: 'What patients see' },
+          { to: '/admin/audit-logs', icon: ShieldCheck, title: 'Activity log', text: 'Registrations and admin actions' },
+          { to: '/admin/devops', icon: Server, title: 'System health', text: 'Servers and deployments' },
+        ].map(({ to, icon: Icon, title, text }) => (
+          <Link key={to} to={to} style={{ ...card, display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.95rem 1.1rem', textDecoration: 'none' }}>
+            <span style={{ display: 'flex', padding: '0.6rem', borderRadius: '0.8rem', background: '#f1f5f9', color: '#334155' }}><Icon size={20} /></span>
+            <span><span style={{ display: 'block', fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>{title}</span><span style={{ fontSize: '0.76rem', color: '#64748b' }}>{text}</span></span>
+          </Link>
+        ))}
       </div>
     </div>
   );
