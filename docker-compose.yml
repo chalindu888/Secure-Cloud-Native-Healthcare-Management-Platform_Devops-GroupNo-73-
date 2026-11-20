@@ -1,0 +1,36 @@
+services:
+  frontend:
+    build: 
+      context: ./frontend
+    container_name: frontend-container
+    ports:
+      - "3000:80"
+    restart: always
+
+  backend:
+    build: 
+      context: ./backend
+    container_name: backend-container
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=healthcare
+      - JWT_SECRET=mySuperSecretKey123
+    depends_on:
+      - postgres-db
+    restart: always
+
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: postgres-container
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=healthcare
+    ports:
+      - "5432:5432"
+    restart: always
