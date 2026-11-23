@@ -1,0 +1,25 @@
+---
+- name: Verify Healthcare Platform Host & Docker Setup
+  hosts: app_nodes
+  gather_facts: false
+
+  tasks:
+    - name: Check docker-compose.yml exists
+      stat:
+        path: "{{ playbook_dir }}/../docker-compose.yml"
+      register: compose_file
+
+    - name: Assert docker-compose.yml is present
+      assert:
+        that:
+          - compose_file.stat.exists
+        fail_msg: "docker-compose.yml not found in project root"
+
+    - name: Check running Docker containers
+      command: docker ps --format "{{ '{{.Names}}' }} -> {{ '{{.Status}}' }}"
+      register: docker_ps_out
+      changed_when: false
+
+    - name: Display running containers
+      debug:
+        msg: "{{ docker_ps_out.stdout_lines }}"
