@@ -29,9 +29,11 @@ pipeline {
 
                         docker tag healthcare-platform-cicd-frontend:latest "$DH_USER/healthops-frontend:latest"
                         docker tag healthcare-platform-cicd-backend:latest "$DH_USER/healthops-backend:latest"
+                        docker tag postgres:15-alpine "$DH_USER/healthops-postgres:latest"
 
                         docker push "$DH_USER/healthops-frontend:latest"
                         docker push "$DH_USER/healthops-backend:latest"
+                        docker push "$DH_USER/healthops-postgres:latest"
 
                         docker logout
                     '''
@@ -40,4 +42,3 @@ pipeline {
         }
     }
 }
-   
